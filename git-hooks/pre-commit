@@ -1,0 +1,30 @@
+#!/bin/bash
+set -e
+
+echo "==> Running pre-commit checks..."
+
+# Go format check
+echo "  Checking gofmt..."
+unformatted=$(gofmt -l . 2>/dev/null || true)
+if [ -n "$unformatted" ]; then
+    echo "ERROR: Files not formatted with gofmt:"
+    echo "$unformatted"
+    echo "Run 'gofmt -w .' to fix."
+    exit 1
+fi
+
+# Go vet
+echo "  Running go vet..."
+go vet ./...
+
+# Secret scanning (check for common patterns)
+echo "  Scanning for secrets..."
+if git diff --cached --diff-filter=ACM -z --name-only | xargs -0 grep -lE \
+    '(PRIVATE KEY|password\s*=\s*["\x27][^\x27"]+|api[_-]?key\s*=\s*["\x27][^\x27"]+|secret\s*=\s*["\x27][^\x27"]+)' \
+    2>/dev/null; then
+    echo "ERROR: Potential secrets detected in staged files."
+    echo "Review the files above and remove any secrets."
+    exit 1
+fi
+
+echo "  Pre-commit checks passed."

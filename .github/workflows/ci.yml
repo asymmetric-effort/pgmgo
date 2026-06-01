@@ -34,6 +34,14 @@ jobs:
         with:
           node-version: 24
 
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+
+      - name: Install pgmpy
+        run: pip install -r tests/python/requirements.txt
+
       - name: Go vet
         run: go vet ./...
 
@@ -47,7 +55,7 @@ jobs:
           fi
 
       - name: Go unit tests
-        run: go test -v -race -coverprofile=coverage.out ./...
+        run: go test -tags unit -v -race -coverprofile=coverage.out ./...
 
       - name: Go coverage check
         run: |

@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+
+echo "==> Running pre-push checks..."
+
+# Run unit tests
+echo "  Running unit tests..."
+go test -tags unit -race -count=1 ./...
+
+echo "  Pre-push checks passed."
