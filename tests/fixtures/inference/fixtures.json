@@ -1,0 +1,181 @@
+{
+  "generator": "inference",
+  "pgmpy_version": "1.1.2",
+  "generated_at": "2026-06-01T22:01:38.739604+00:00",
+  "test_cases": [
+    {
+      "name": "variable_elimination_query",
+      "description": "Query P(G | D=0, I=1) on student network",
+      "input": {
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "cpds": {
+          "D": {
+            "variable_card": 2,
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ]
+          },
+          "I": {
+            "variable_card": 2,
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ]
+          },
+          "G": {
+            "variable_card": 3,
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ]
+          },
+          "L": {
+            "variable_card": 2,
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ]
+          },
+          "S": {
+            "variable_card": 2,
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ]
+          }
+        },
+        "query_variables": [
+          "G"
+        ],
+        "evidence": {
+          "D": 0,
+          "I": 1
+        }
+      },
+      "expected": {
+        "variables": [
+          "G"
+        ],
+        "values": [
+          0.05,
+          0.25,
+          0.7
+        ]
+      }
+    },
+    {
+      "name": "variable_elimination_map",
+      "description": "MAP query for G, L given D=0, I=0 on student network",
+      "input": {
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "query_variables": [
+          "G",
+          "L"
+        ],
+        "evidence": {
+          "D": 0,
+          "I": 0
+        }
+      },
+      "expected": {
+        "map_assignment": {
+          "L": 0,
+          "G": 2
+        }
+      }
+    }
+  ]
+}

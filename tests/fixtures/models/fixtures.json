@@ -1,0 +1,220 @@
+{
+  "generator": "models",
+  "pgmpy_version": "1.1.2",
+  "generated_at": "2026-06-01T22:01:40.561733+00:00",
+  "test_cases": [
+    {
+      "name": "bayesian_network_structure",
+      "description": "Create BN with edges and verify structure",
+      "input": {
+        "edges": [
+          [
+            "Rain",
+            "WetGrass"
+          ],
+          [
+            "Sprinkler",
+            "WetGrass"
+          ]
+        ]
+      },
+      "expected": {
+        "nodes": [
+          "Rain",
+          "Sprinkler",
+          "WetGrass"
+        ],
+        "edges": [
+          [
+            "Rain",
+            "WetGrass"
+          ],
+          [
+            "Sprinkler",
+            "WetGrass"
+          ]
+        ],
+        "num_nodes": 3,
+        "num_edges": 2,
+        "parents": {
+          "Rain": [],
+          "Sprinkler": [],
+          "WetGrass": [
+            "Rain",
+            "Sprinkler"
+          ]
+        },
+        "children": {
+          "Rain": [
+            "WetGrass"
+          ],
+          "Sprinkler": [
+            "WetGrass"
+          ],
+          "WetGrass": []
+        }
+      }
+    },
+    {
+      "name": "bayesian_network_cpds",
+      "description": "Create student BN with CPDs and validate",
+      "input": {
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "cpds": {
+          "D": {
+            "variable_card": 2,
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ]
+          },
+          "I": {
+            "variable_card": 2,
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ]
+          },
+          "G": {
+            "variable_card": 3,
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ]
+          },
+          "L": {
+            "variable_card": 2,
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ]
+          },
+          "S": {
+            "variable_card": 2,
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ]
+          }
+        }
+      },
+      "expected": {
+        "is_valid": true,
+        "nodes": [
+          "D",
+          "G",
+          "I",
+          "L",
+          "S"
+        ],
+        "num_cpds": 5
+      }
+    },
+    {
+      "name": "bayesian_network_independencies",
+      "description": "Get independencies from a chain X->Y->Z",
+      "input": {
+        "edges": [
+          [
+            "X",
+            "Y"
+          ],
+          [
+            "Y",
+            "Z"
+          ]
+        ]
+      },
+      "expected": {
+        "independencies": [
+          {
+            "event1": [
+              "X"
+            ],
+            "event2": [
+              "Z"
+            ],
+            "event3": [
+              "Y"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

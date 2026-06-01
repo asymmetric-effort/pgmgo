@@ -1,0 +1,281 @@
+{
+  "generator": "factors",
+  "pgmpy_version": "1.1.2",
+  "generated_at": "2026-06-01T22:01:36.689549+00:00",
+  "test_cases": [
+    {
+      "name": "discrete_factor_creation",
+      "description": "Create a DiscreteFactor and verify properties",
+      "input": {
+        "variables": [
+          "x1",
+          "x2"
+        ],
+        "cardinality": [
+          2,
+          3
+        ],
+        "values": [
+          0.5,
+          0.8,
+          0.1,
+          0.0,
+          0.3,
+          0.9
+        ]
+      },
+      "expected": {
+        "variables": [
+          "x1",
+          "x2"
+        ],
+        "cardinality": [
+          "2",
+          "3"
+        ],
+        "values": [
+          0.5,
+          0.8,
+          0.1,
+          0.0,
+          0.3,
+          0.9
+        ]
+      }
+    },
+    {
+      "name": "discrete_factor_marginalize",
+      "description": "Marginalize x3 out of a 3-variable factor",
+      "input": {
+        "variables": [
+          "x1",
+          "x2",
+          "x3"
+        ],
+        "cardinality": [
+          2,
+          3,
+          2
+        ],
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "marginalize": [
+          "x3"
+        ]
+      },
+      "expected": {
+        "variables": [
+          "x1",
+          "x2"
+        ],
+        "cardinality": [
+          "2",
+          "3"
+        ],
+        "values": [
+          1.0,
+          5.0,
+          9.0,
+          13.0,
+          17.0,
+          21.0
+        ]
+      }
+    },
+    {
+      "name": "discrete_factor_reduce",
+      "description": "Reduce factor by fixing x1=0",
+      "input": {
+        "variables": [
+          "x1",
+          "x2",
+          "x3"
+        ],
+        "cardinality": [
+          2,
+          3,
+          2
+        ],
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "reduce": [
+          [
+            "x1",
+            0
+          ]
+        ]
+      },
+      "expected": {
+        "variables": [
+          "x2",
+          "x3"
+        ],
+        "cardinality": [
+          "3",
+          "2"
+        ],
+        "values": [
+          0.0,
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0
+        ]
+      }
+    },
+    {
+      "name": "discrete_factor_product",
+      "description": "Multiply two factors with shared variable x2",
+      "input": {
+        "factor1": {
+          "variables": [
+            "x1",
+            "x2"
+          ],
+          "cardinality": [
+            2,
+            2
+          ],
+          "values": [
+            0.5,
+            0.8,
+            0.1,
+            0.0
+          ]
+        },
+        "factor2": {
+          "variables": [
+            "x2",
+            "x3"
+          ],
+          "cardinality": [
+            2,
+            2
+          ],
+          "values": [
+            0.5,
+            0.8,
+            0.1,
+            0.0
+          ]
+        }
+      },
+      "expected": {
+        "variables": [
+          "x2",
+          "x1",
+          "x3"
+        ],
+        "cardinality": [
+          "2",
+          "2",
+          "2"
+        ],
+        "values": [
+          0.25,
+          0.4,
+          0.05,
+          0.08000000000000002,
+          0.08000000000000002,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "name": "tabular_cpd_creation",
+      "description": "Create TabularCPD with evidence and verify",
+      "input": {
+        "variable": "G",
+        "variable_card": 3,
+        "values": [
+          [
+            0.3,
+            0.05,
+            0.9,
+            0.5
+          ],
+          [
+            0.4,
+            0.25,
+            0.08,
+            0.3
+          ],
+          [
+            0.3,
+            0.7,
+            0.02,
+            0.2
+          ]
+        ],
+        "evidence": [
+          "D",
+          "I"
+        ],
+        "evidence_card": [
+          2,
+          2
+        ]
+      },
+      "expected": {
+        "variable": "G",
+        "variables": [
+          "G",
+          "D",
+          "I"
+        ],
+        "cardinality": [
+          "3",
+          "2",
+          "2"
+        ],
+        "values": [
+          [
+            0.3,
+            0.05,
+            0.9,
+            0.5
+          ],
+          [
+            0.4,
+            0.25,
+            0.08,
+            0.3
+          ],
+          [
+            0.3,
+            0.7,
+            0.02,
+            0.2
+          ]
+        ]
+      }
+    }
+  ]
+}

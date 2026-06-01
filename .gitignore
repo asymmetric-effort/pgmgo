@@ -40,3 +40,7 @@ dist/
 # Website
 website/node_modules/
 website/dist/
+
+# Python
+__pycache__/
+*.pyc

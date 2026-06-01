@@ -57,10 +57,24 @@ jobs:
       - name: Go unit tests
         run: go test -tags unit -v -race -coverprofile=coverage.out ./...
 
-      - name: Go coverage check
+      - name: Go coverage enforcement
         run: |
           total=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
           echo "Total coverage: ${total}%"
+          threshold=50
+          if [ "$(echo "$total < $threshold" | bc -l)" -eq 1 ]; then
+            echo "ERROR: Coverage ${total}% is below threshold ${threshold}%"
+            exit 1
+          fi
+
+      - name: Verify fixtures are up to date
+        run: |
+          go generate ./...
+          if ! git diff --quiet tests/fixtures/; then
+            echo "ERROR: Fixtures are out of date. Run 'go generate ./...' and commit."
+            git diff tests/fixtures/
+            exit 1
+          fi
 
       - name: Install website dependencies
         working-directory: website

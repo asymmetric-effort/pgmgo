@@ -5,7 +5,7 @@ Generates test cases by exercising pgmpy's inference algorithms,
 capturing inputs and expected outputs as fixture data.
 """
 
-from pgmpy.models import BayesianNetwork
+from pgmpy.models import DiscreteBayesianNetwork as BayesianNetwork
 from pgmpy.factors.discrete import TabularCPD
 from pgmpy.inference import VariableElimination
 
