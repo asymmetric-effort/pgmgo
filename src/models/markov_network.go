@@ -8,6 +8,7 @@ import (
 	"github.com/asymmetric-effort/pgmgo/lib/graphgo"
 	"github.com/asymmetric-effort/pgmgo/src/base"
 	"github.com/asymmetric-effort/pgmgo/src/factors"
+	"github.com/asymmetric-effort/pgmgo/src/independencies"
 )
 
 // MarkovNetwork represents a Markov random field (MRF) — an undirected
@@ -244,6 +245,399 @@ func (mn *MarkovNetwork) ToJunctionTree() (*JunctionTree, error) {
 		separators:    separators,
 		cliqueFactors: cliqueFactors,
 	}, nil
+}
+
+// GetCardinality returns the cardinality of a node as determined from its
+// factors. Returns an error if no factor covers the node.
+func (mn *MarkovNetwork) GetCardinality(node string) (int, error) {
+	if !mn.graph.HasNode(node) {
+		return 0, fmt.Errorf("models: node %q not in network", node)
+	}
+	fs := mn.varToFactors[node]
+	if len(fs) == 0 {
+		return 0, fmt.Errorf("models: node %q has no factors to determine cardinality", node)
+	}
+	for _, f := range fs {
+		vars := f.Variables()
+		card := f.Cardinality()
+		for i, v := range vars {
+			if v == node {
+				return card[i], nil
+			}
+		}
+	}
+	return 0, fmt.Errorf("models: node %q not found in any factor scope", node)
+}
+
+// Triangulate returns a triangulated copy of the Markov network. The
+// heuristic parameter selects the elimination ordering heuristic:
+// "min_degree" (default), "min_fill".
+func (mn *MarkovNetwork) Triangulate(heuristic string) (*MarkovNetwork, error) {
+	if heuristic == "" {
+		heuristic = "min_degree"
+	}
+
+	// Build a graphgo.Graph from the undirected graph.
+	g := graphgo.NewGraph()
+	for _, node := range mn.graph.Nodes() {
+		g.AddNode(node)
+	}
+	for _, e := range mn.graph.Edges() {
+		g.AddEdge(e.A, e.B)
+	}
+
+	// Get elimination order.
+	var order []string
+	switch heuristic {
+	case "min_degree":
+		order = minDegreeOrder(g)
+	case "min_fill":
+		order = minFillOrder(g)
+	default:
+		return nil, fmt.Errorf("models: unsupported triangulation heuristic %q", heuristic)
+	}
+
+	// Triangulate.
+	triangulated := graphgo.Triangulate(g, order)
+
+	// Build a new MarkovNetwork with the triangulated graph.
+	result := NewMarkovNetwork()
+	for _, node := range triangulated.Nodes() {
+		result.AddNode(node)
+	}
+	for _, e := range triangulated.Edges() {
+		result.AddEdge(e.A, e.B)
+	}
+
+	// Copy factors.
+	for _, f := range mn.factorList {
+		result.AddFactor(f.Copy())
+	}
+
+	return result, nil
+}
+
+// minFillOrder returns an elimination ordering using the min-fill heuristic
+// on a graphgo.Graph.
+func minFillOrder(g *graphgo.Graph) []string {
+	nodes := g.Nodes()
+	sort.Strings(nodes)
+
+	adj := make(map[string]map[string]bool, len(nodes))
+	for _, n := range nodes {
+		adj[n] = make(map[string]bool)
+	}
+	for _, e := range g.Edges() {
+		adj[e.A][e.B] = true
+		adj[e.B][e.A] = true
+	}
+
+	remaining := make(map[string]bool, len(nodes))
+	for _, n := range nodes {
+		remaining[n] = true
+	}
+
+	order := make([]string, 0, len(nodes))
+	for len(remaining) > 0 {
+		best := ""
+		bestFill := -1
+		for _, n := range nodes {
+			if !remaining[n] {
+				continue
+			}
+			nbs := make([]string, 0, len(adj[n]))
+			for nb := range adj[n] {
+				nbs = append(nbs, nb)
+			}
+			fill := 0
+			for i := 0; i < len(nbs); i++ {
+				for j := i + 1; j < len(nbs); j++ {
+					if !adj[nbs[i]][nbs[j]] {
+						fill++
+					}
+				}
+			}
+			if best == "" || fill < bestFill || (fill == bestFill && n < best) {
+				best = n
+				bestFill = fill
+			}
+		}
+
+		order = append(order, best)
+		delete(remaining, best)
+
+		// Add fill edges and eliminate.
+		nbs := make([]string, 0, len(adj[best]))
+		for nb := range adj[best] {
+			nbs = append(nbs, nb)
+		}
+		for i := 0; i < len(nbs); i++ {
+			for j := i + 1; j < len(nbs); j++ {
+				adj[nbs[i]][nbs[j]] = true
+				adj[nbs[j]][nbs[i]] = true
+			}
+		}
+		for nb := range adj[best] {
+			delete(adj[nb], best)
+		}
+		delete(adj, best)
+	}
+
+	return order
+}
+
+// ToFactorGraph converts the Markov network to a factor graph.
+func (mn *MarkovNetwork) ToFactorGraph() (*FactorGraph, error) {
+	fg := NewFactorGraph()
+
+	// Add all variables with cardinalities from factors.
+	for _, node := range mn.graph.Nodes() {
+		card, err := mn.GetCardinality(node)
+		if err != nil {
+			return nil, fmt.Errorf("models: ToFactorGraph: %w", err)
+		}
+		if err := fg.AddVariable(node, card); err != nil {
+			return nil, fmt.Errorf("models: ToFactorGraph: %w", err)
+		}
+	}
+
+	// Add all factors.
+	for _, f := range mn.factorList {
+		if err := fg.AddFactor(f.Copy()); err != nil {
+			return nil, fmt.Errorf("models: ToFactorGraph: %w", err)
+		}
+	}
+
+	return fg, nil
+}
+
+// ToBayesianModel converts the Markov network to a Bayesian network by
+// triangulating the graph and finding a topological ordering of the
+// resulting DAG. The CPDs are derived from the factors.
+func (mn *MarkovNetwork) ToBayesianModel() (*BayesianNetwork, error) {
+	if err := mn.CheckModel(); err != nil {
+		return nil, fmt.Errorf("models: ToBayesianModel: %w", err)
+	}
+
+	// Build graphgo.Graph.
+	g := graphgo.NewGraph()
+	for _, node := range mn.graph.Nodes() {
+		g.AddNode(node)
+	}
+	for _, e := range mn.graph.Edges() {
+		g.AddEdge(e.A, e.B)
+	}
+
+	// Triangulate.
+	order := minDegreeOrder(g)
+	triangulated := graphgo.Triangulate(g, order)
+
+	// Find maximal cliques from the triangulated graph.
+	cliques := graphgo.MaxCliques(triangulated)
+
+	// Build a DAG using the elimination order. Nodes earlier in the order
+	// become parents of later nodes when they share a clique.
+	bn := NewBayesianNetwork()
+	allNodes := mn.graph.Nodes()
+	for _, node := range allNodes {
+		bn.AddNode(node)
+	}
+
+	// Create an ordering: use elimination order (reversed gives a
+	// topological ordering of the resulting DAG).
+	posInOrder := make(map[string]int, len(order))
+	for i, n := range order {
+		posInOrder[n] = i
+	}
+	// Nodes not in elimination order (shouldn't happen, but handle gracefully)
+	for _, n := range allNodes {
+		if _, ok := posInOrder[n]; !ok {
+			posInOrder[n] = len(order)
+		}
+	}
+
+	// For each clique, create directed edges from earlier nodes to later ones.
+	for _, clique := range cliques {
+		sorted := make([]string, len(clique))
+		copy(sorted, clique)
+		sort.Slice(sorted, func(i, j int) bool {
+			return posInOrder[sorted[i]] < posInOrder[sorted[j]]
+		})
+		// Last node in elimination order within the clique gets parents = all earlier nodes.
+		for i := 1; i < len(sorted); i++ {
+			child := sorted[i]
+			parent := sorted[i-1]
+			// Add edges from all earlier nodes to later ones.
+			for j := 0; j < i; j++ {
+				bn.AddEdge(sorted[j], child)
+			}
+			_ = parent // suppress unused
+		}
+	}
+
+	// Build cardinality map.
+	cardMap := make(map[string]int)
+	for _, f := range mn.factorList {
+		vars := f.Variables()
+		card := f.Cardinality()
+		for i, v := range vars {
+			if _, ok := cardMap[v]; !ok {
+				cardMap[v] = card[i]
+			}
+		}
+	}
+
+	// Compute the joint factor.
+	if len(mn.factorList) == 0 {
+		return nil, fmt.Errorf("models: ToBayesianModel: no factors in network")
+	}
+	joint, err := factors.FactorProduct(mn.factorList...)
+	if err != nil {
+		return nil, fmt.Errorf("models: ToBayesianModel: joint product failed: %w", err)
+	}
+
+	// For each node, compute P(node | parents) = P(node, parents) / P(parents)
+	// by marginalizing the joint.
+	nodes := bn.Nodes()
+	for _, node := range nodes {
+		parents := bn.Parents(node)
+		card := cardMap[node]
+		evidenceVars := parents
+		evidenceCards := make([]int, len(parents))
+		for i, p := range parents {
+			evidenceCards[i] = cardMap[p]
+		}
+
+		numParentConfigs := 1
+		for _, ec := range evidenceCards {
+			numParentConfigs *= ec
+		}
+
+		// Scope of CPD: [node] + parents
+		scopeVars := make([]string, 0, 1+len(parents))
+		scopeVars = append(scopeVars, node)
+		scopeVars = append(scopeVars, parents...)
+
+		// Marginalize joint to scope variables.
+		jointVars := joint.Variables()
+		var margOutVars []string
+		scopeSet := make(map[string]bool, len(scopeVars))
+		for _, v := range scopeVars {
+			scopeSet[v] = true
+		}
+		for _, v := range jointVars {
+			if !scopeSet[v] {
+				margOutVars = append(margOutVars, v)
+			}
+		}
+
+		var scopeFactor *factors.DiscreteFactor
+		if len(margOutVars) > 0 {
+			scopeFactor, err = joint.Marginalize(margOutVars)
+			if err != nil {
+				return nil, fmt.Errorf("models: ToBayesianModel: marginalize for %q failed: %w", node, err)
+			}
+		} else {
+			scopeFactor = joint.Copy()
+		}
+
+		// Build the CPD values table: [childState][parentConfig]
+		values := make([][]float64, card)
+		for cs := 0; cs < card; cs++ {
+			values[cs] = make([]float64, numParentConfigs)
+		}
+
+		if len(parents) > 0 {
+			// Compute P(parents) by marginalizing out node.
+			parentFactor, err := scopeFactor.Marginalize([]string{node})
+			if err != nil {
+				return nil, fmt.Errorf("models: ToBayesianModel: parent marginalize for %q failed: %w", node, err)
+			}
+
+			// Fill in CPD values.
+			for cs := 0; cs < card; cs++ {
+				for pc := 0; pc < numParentConfigs; pc++ {
+					// Decompose parent config.
+					parentAssignment := make(map[string]int, len(parents))
+					rem := pc
+					for i := len(parents) - 1; i >= 0; i-- {
+						parentAssignment[parents[i]] = rem % evidenceCards[i]
+						rem /= evidenceCards[i]
+					}
+
+					assignment := make(map[string]int, len(scopeVars))
+					for k, v := range parentAssignment {
+						assignment[k] = v
+					}
+					assignment[node] = cs
+
+					jointVal := scopeFactor.GetValue(assignment)
+					parentVal := parentFactor.GetValue(parentAssignment)
+					if parentVal > 0 {
+						values[cs][pc] = jointVal / parentVal
+					}
+				}
+			}
+		} else {
+			// No parents: normalize the marginal.
+			sum := 0.0
+			for cs := 0; cs < card; cs++ {
+				values[cs][0] = scopeFactor.GetValue(map[string]int{node: cs})
+				sum += values[cs][0]
+			}
+			if sum > 0 {
+				for cs := 0; cs < card; cs++ {
+					values[cs][0] /= sum
+				}
+			}
+		}
+
+		// Build TabularCPD.
+		cpd, err := factors.NewTabularCPD(node, card, values, evidenceVars, evidenceCards)
+		if err != nil {
+			return nil, fmt.Errorf("models: ToBayesianModel: CPD creation for %q failed: %w", node, err)
+		}
+		if err := bn.AddCPD(cpd); err != nil {
+			return nil, fmt.Errorf("models: ToBayesianModel: AddCPD for %q failed: %w", node, err)
+		}
+	}
+
+	return bn, nil
+}
+
+// GetLocalIndependencies returns the local Markov property independence
+// assertions for a node. In a Markov network, a node is conditionally
+// independent of all non-neighbors given its neighbors (Markov blanket).
+func (mn *MarkovNetwork) GetLocalIndependencies(node string) ([]*independencies.IndependenceAssertion, error) {
+	if !mn.graph.HasNode(node) {
+		return nil, fmt.Errorf("models: node %q not in network", node)
+	}
+
+	neighbors := mn.graph.Neighbors(node)
+	neighborSet := make(map[string]bool, len(neighbors))
+	neighborSet[node] = true
+	for _, nb := range neighbors {
+		neighborSet[nb] = true
+	}
+
+	// Non-neighbors (excluding the node itself).
+	var nonNeighbors []string
+	for _, n := range mn.graph.Nodes() {
+		if !neighborSet[n] {
+			nonNeighbors = append(nonNeighbors, n)
+		}
+	}
+
+	if len(nonNeighbors) == 0 {
+		return nil, nil
+	}
+
+	assertion := independencies.NewIndependenceAssertion(
+		[]string{node},
+		nonNeighbors,
+		neighbors,
+	)
+	return []*independencies.IndependenceAssertion{assertion}, nil
 }
 
 // Copy returns a deep copy of the MarkovNetwork.

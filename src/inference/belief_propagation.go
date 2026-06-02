@@ -502,6 +502,403 @@ func (bp *BeliefPropagation) IsCalibrated() bool {
 	return bp.calibrated
 }
 
+// MaxCalibrate runs the collect-distribute message passing algorithm using
+// max-product messages instead of sum-product. After max-calibration, each
+// clique potential represents the max-marginal over its variables.
+func (bp *BeliefPropagation) MaxCalibrate() error {
+	if err := bp.initializePotentials(); err != nil {
+		return err
+	}
+
+	if len(bp.cliques) == 0 {
+		bp.calibrated = true
+		return nil
+	}
+
+	if len(bp.cliques) == 1 {
+		bp.calibrated = true
+		return nil
+	}
+
+	root := 0
+
+	parent := make([]int, len(bp.cliques))
+	for i := range parent {
+		parent[i] = -1
+	}
+	visited := make([]bool, len(bp.cliques))
+	visited[root] = true
+	queue := []int{root}
+	var bfsOrder []int
+	bfsOrder = append(bfsOrder, root)
+
+	for len(queue) > 0 {
+		curr := queue[0]
+		queue = queue[1:]
+		for _, nb := range bp.neighbors[curr] {
+			if !visited[nb] {
+				visited[nb] = true
+				parent[nb] = curr
+				queue = append(queue, nb)
+				bfsOrder = append(bfsOrder, nb)
+			}
+		}
+	}
+
+	// Collect phase with max messages.
+	for idx := len(bfsOrder) - 1; idx >= 1; idx-- {
+		child := bfsOrder[idx]
+		par := parent[child]
+		msg, err := bp.computeMaxMessage(child, par)
+		if err != nil {
+			return fmt.Errorf("belief_propagation: max collect message %d->%d failed: %w", child, par, err)
+		}
+		bp.messages[msgKey(child, par)] = msg
+	}
+
+	// Distribute phase with max messages.
+	for idx := 0; idx < len(bfsOrder)-1; idx++ {
+		par := bfsOrder[idx]
+		for _, nb := range bp.neighbors[par] {
+			if parent[nb] == par {
+				msg, err := bp.computeMaxMessage(par, nb)
+				if err != nil {
+					return fmt.Errorf("belief_propagation: max distribute message %d->%d failed: %w", par, nb, err)
+				}
+				bp.messages[msgKey(par, nb)] = msg
+			}
+		}
+	}
+
+	// Update potentials.
+	for i := range bp.cliques {
+		belief := bp.potentials[i]
+		for _, nb := range bp.neighbors[i] {
+			key := msgKey(nb, i)
+			if msg, ok := bp.messages[key]; ok {
+				prod, err := factors.FactorProduct(belief, msg)
+				if err != nil {
+					return fmt.Errorf("belief_propagation: failed to absorb max message into clique %d: %w", i, err)
+				}
+				belief = prod
+			}
+		}
+		bp.potentials[i] = belief
+	}
+
+	bp.calibrated = true
+	return nil
+}
+
+// computeMaxMessage computes the max-product message from clique src to dst.
+// Like computeMessage but uses max instead of sum for marginalization.
+func (bp *BeliefPropagation) computeMaxMessage(src, dst int) (*factors.DiscreteFactor, error) {
+	current := bp.potentials[src]
+
+	for _, nb := range bp.neighbors[src] {
+		if nb == dst {
+			continue
+		}
+		key := msgKey(nb, src)
+		if msg, ok := bp.messages[key]; ok {
+			prod, err := factors.FactorProduct(current, msg)
+			if err != nil {
+				return nil, err
+			}
+			current = prod
+		}
+	}
+
+	sepKey := edgeKey(src, dst)
+	sepVars := bp.separators[sepKey]
+
+	sepSet := make(map[string]bool, len(sepVars))
+	for _, v := range sepVars {
+		sepSet[v] = true
+	}
+
+	currentVars := current.Variables()
+	var margVars []string
+	for _, v := range currentVars {
+		if !sepSet[v] {
+			margVars = append(margVars, v)
+		}
+	}
+
+	if len(margVars) == 0 {
+		return current.Copy(), nil
+	}
+
+	// Max-marginalize: for each variable, take the max instead of sum.
+	result := current
+	for _, mv := range margVars {
+		maxed, err := maxMarginalizeOne(result, mv)
+		if err != nil {
+			return nil, err
+		}
+		result = maxed
+	}
+	return result, nil
+}
+
+// maxMarginalizeOne maximizes out a single variable from a factor.
+func maxMarginalizeOne(f *factors.DiscreteFactor, variable string) (*factors.DiscreteFactor, error) {
+	fVars := f.Variables()
+	fCard := f.Cardinality()
+	idx := -1
+	for i, v := range fVars {
+		if v == variable {
+			idx = i
+			break
+		}
+	}
+	if idx == -1 {
+		return nil, fmt.Errorf("belief_propagation: variable %q not in factor", variable)
+	}
+
+	var newVars []string
+	var newCard []int
+	for i, v := range fVars {
+		if i != idx {
+			newVars = append(newVars, v)
+			newCard = append(newCard, fCard[i])
+		}
+	}
+
+	newSize := 1
+	for _, c := range newCard {
+		newSize *= c
+	}
+
+	newValues := make([]float64, newSize)
+	initialized := make([]bool, newSize)
+
+	totalSize := 1
+	for _, c := range fCard {
+		totalSize *= c
+	}
+	data := f.Values().Data()
+
+	for flat := 0; flat < totalSize; flat++ {
+		// Decompose flat index.
+		assignment := make(map[string]int, len(fVars))
+		rem := flat
+		for i := len(fVars) - 1; i >= 0; i-- {
+			assignment[fVars[i]] = rem % fCard[i]
+			rem /= fCard[i]
+		}
+		// Compute flat index in new factor.
+		newFlat := 0
+		stride := 1
+		for i := len(newVars) - 1; i >= 0; i-- {
+			newFlat += assignment[newVars[i]] * stride
+			stride *= newCard[i]
+		}
+		val := data[flat]
+		if !initialized[newFlat] || val > newValues[newFlat] {
+			newValues[newFlat] = val
+			initialized[newFlat] = true
+		}
+	}
+
+	return factors.NewDiscreteFactor(newVars, newCard, newValues)
+}
+
+// MAPQuery performs MAP inference via max-calibration. It finds the
+// most probable joint assignment to queryVars given evidence.
+func (bp *BeliefPropagation) MAPQuery(queryVars []string, evidence map[string]int) (map[string]int, error) {
+	if len(queryVars) == 0 {
+		return nil, fmt.Errorf("belief_propagation: queryVars must not be empty")
+	}
+
+	// Build augmented factors with evidence indicators.
+	augFactors := make(map[int][]*factors.DiscreteFactor, len(bp.initialFactors))
+	for idx, fl := range bp.initialFactors {
+		augFactors[idx] = make([]*factors.DiscreteFactor, len(fl))
+		for i, f := range fl {
+			augFactors[idx][i] = f.Copy()
+		}
+	}
+
+	for v, val := range evidence {
+		found := false
+		for ci, clique := range bp.cliques {
+			for _, cv := range clique {
+				if cv == v {
+					card, ok := bp.cardMap[v]
+					if !ok {
+						return nil, fmt.Errorf("belief_propagation: unknown cardinality for evidence variable %q", v)
+					}
+					vals := make([]float64, card)
+					vals[val] = 1.0
+					indicator, err := factors.NewDiscreteFactor([]string{v}, []int{card}, vals)
+					if err != nil {
+						return nil, fmt.Errorf("belief_propagation: failed to create indicator for %q: %w", v, err)
+					}
+					augFactors[ci] = append(augFactors[ci], indicator)
+					found = true
+					break
+				}
+			}
+			if found {
+				break
+			}
+		}
+		if !found {
+			return nil, fmt.Errorf("belief_propagation: evidence variable %q not found in any clique", v)
+		}
+	}
+
+	tmp := NewBeliefPropagation(bp.cliques, bp.separators, augFactors)
+	if err := tmp.MaxCalibrate(); err != nil {
+		return nil, fmt.Errorf("belief_propagation: max-calibration failed: %w", err)
+	}
+
+	// Find a clique containing all query vars.
+	cliqueIdx := tmp.findClique(queryVars)
+	if cliqueIdx < 0 {
+		return nil, fmt.Errorf("belief_propagation: no clique contains all query variables %v", queryVars)
+	}
+
+	belief := tmp.potentials[cliqueIdx]
+
+	// Marginalize to query vars using max.
+	querySet := make(map[string]bool, len(queryVars))
+	for _, v := range queryVars {
+		querySet[v] = true
+	}
+	beliefVars := belief.Variables()
+	var margVars []string
+	for _, v := range beliefVars {
+		if !querySet[v] {
+			margVars = append(margVars, v)
+		}
+	}
+	result := belief
+	for _, mv := range margVars {
+		maxed, err := maxMarginalizeOne(result, mv)
+		if err != nil {
+			return nil, err
+		}
+		result = maxed
+	}
+
+	// Find the assignment that maximizes the result factor.
+	vars := result.Variables()
+	card := result.Cardinality()
+	totalSize := 1
+	for _, c := range card {
+		totalSize *= c
+	}
+
+	bestVal := -1.0
+	bestAssignment := make(map[string]int, len(vars))
+
+	for flat := 0; flat < totalSize; flat++ {
+		assignment := make(map[string]int, len(vars))
+		rem := flat
+		for i := len(vars) - 1; i >= 0; i-- {
+			assignment[vars[i]] = rem % card[i]
+			rem /= card[i]
+		}
+		val := result.GetValue(assignment)
+		if val > bestVal {
+			bestVal = val
+			for k, v := range assignment {
+				bestAssignment[k] = v
+			}
+		}
+	}
+
+	return bestAssignment, nil
+}
+
+// GetCliques returns all cliques in the junction tree.
+func (bp *BeliefPropagation) GetCliques() [][]string {
+	result := make([][]string, len(bp.cliques))
+	for i, c := range bp.cliques {
+		cp := make([]string, len(c))
+		copy(cp, c)
+		result[i] = cp
+	}
+	return result
+}
+
+// GetSepsetBeliefs returns the calibrated separator beliefs. Each separator
+// belief is computed by marginalizing the adjacent clique belief down to
+// the separator variables. Returns nil values if not calibrated.
+func (bp *BeliefPropagation) GetSepsetBeliefs() map[string]*factors.DiscreteFactor {
+	result := make(map[string]*factors.DiscreteFactor, len(bp.separators))
+
+	if !bp.calibrated {
+		for k := range bp.separators {
+			result[k] = nil
+		}
+		return result
+	}
+
+	for k, sepVars := range bp.separators {
+		// Parse the edge key to find an adjacent clique.
+		a, b := parseEdgeKey(k)
+		if a < 0 || a >= len(bp.potentials) {
+			result[k] = nil
+			continue
+		}
+
+		// Marginalize clique a's belief to separator vars.
+		belief := bp.potentials[a]
+		if belief == nil {
+			result[k] = nil
+			continue
+		}
+
+		sepSet := make(map[string]bool, len(sepVars))
+		for _, v := range sepVars {
+			sepSet[v] = true
+		}
+
+		beliefVars := belief.Variables()
+		var margVars []string
+		for _, v := range beliefVars {
+			if !sepSet[v] {
+				margVars = append(margVars, v)
+			}
+		}
+
+		if len(margVars) == 0 {
+			result[k] = belief.Copy()
+			continue
+		}
+
+		marg, err := belief.Marginalize(margVars)
+		if err != nil {
+			// If marginalization fails, just use clique b.
+			if b >= 0 && b < len(bp.potentials) && bp.potentials[b] != nil {
+				beliefB := bp.potentials[b]
+				beliefBVars := beliefB.Variables()
+				var margVarsB []string
+				for _, v := range beliefBVars {
+					if !sepSet[v] {
+						margVarsB = append(margVarsB, v)
+					}
+				}
+				if len(margVarsB) > 0 {
+					margB, errB := beliefB.Marginalize(margVarsB)
+					if errB == nil {
+						result[k] = margB
+						continue
+					}
+				}
+			}
+			result[k] = nil
+			continue
+		}
+		result[k] = marg
+	}
+
+	return result
+}
+
 // String returns a human-readable summary of the junction tree structure.
 func (bp *BeliefPropagation) String() string {
 	var b strings.Builder

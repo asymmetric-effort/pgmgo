@@ -3,7 +3,9 @@ package tabgo
 import (
 	"encoding/csv"
 	"fmt"
+	"io"
 	"os"
+	"strings"
 )
 
 // ReadCSV reads a CSV file and returns a DataFrame.
@@ -16,7 +18,14 @@ func ReadCSV(path string) (*DataFrame, error) {
 	}
 	defer f.Close()
 
-	r := csv.NewReader(f)
+	return ReadCSVFromReader(f)
+}
+
+// ReadCSVFromReader reads CSV data from an io.Reader and returns a DataFrame.
+// The first row is treated as column headers.
+// All values are stored as strings.
+func ReadCSVFromReader(rd io.Reader) (*DataFrame, error) {
+	r := csv.NewReader(rd)
 	records, err := r.ReadAll()
 	if err != nil {
 		return nil, err
@@ -35,6 +44,11 @@ func ReadCSV(path string) (*DataFrame, error) {
 		rows = append(rows, row)
 	}
 	return NewDataFrameFromRows(headers, rows), nil
+}
+
+// ReadCSVFromString reads CSV data from a string and returns a DataFrame.
+func ReadCSVFromString(s string) (*DataFrame, error) {
+	return ReadCSVFromReader(strings.NewReader(s))
 }
 
 // WriteCSV writes a DataFrame to a CSV file.

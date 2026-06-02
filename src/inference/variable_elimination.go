@@ -3,6 +3,7 @@ package inference
 import (
 	"fmt"
 
+	"github.com/asymmetric-effort/pgmgo/lib/graphgo"
 	"github.com/asymmetric-effort/pgmgo/src/factors"
 )
 
@@ -234,4 +235,339 @@ func flatToAssignment(vars []string, card []int, flat int) map[string]int {
 		rem /= card[i]
 	}
 	return assignment
+}
+
+// MaxMarginal computes the max-marginal of queryVars given evidence.
+// Like Query, but during elimination each variable is maximized out
+// rather than summed out, yielding the factor whose values are
+// max_{hidden} Product(factors | evidence).
+func (ve *VariableElimination) MaxMarginal(queryVars []string, evidence map[string]int) (*factors.DiscreteFactor, error) {
+	if len(queryVars) == 0 {
+		return nil, fmt.Errorf("inference: queryVars must not be empty")
+	}
+
+	workingFactors, err := reduceAll(ve.factors, evidence)
+	if err != nil {
+		return nil, fmt.Errorf("inference: evidence reduction failed: %w", err)
+	}
+
+	allVars := collectVariables(workingFactors)
+
+	keepSet := make(map[string]bool, len(queryVars)+len(evidence))
+	for _, v := range queryVars {
+		keepSet[v] = true
+	}
+	for v := range evidence {
+		keepSet[v] = true
+	}
+
+	var eliminateVars []string
+	for v := range allVars {
+		if !keepSet[v] {
+			eliminateVars = append(eliminateVars, v)
+		}
+	}
+
+	heuristic := ve.heuristic
+	if heuristic == "" {
+		heuristic = "min_neighbors"
+	}
+	order, err := GetEliminationOrder(workingFactors, eliminateVars, heuristic)
+	if err != nil {
+		return nil, fmt.Errorf("inference: elimination order failed: %w", err)
+	}
+
+	for _, elimVar := range order {
+		workingFactors, err = maxEliminateVariable(workingFactors, elimVar)
+		if err != nil {
+			return nil, fmt.Errorf("inference: failed to max-eliminate %q: %w", elimVar, err)
+		}
+	}
+
+	if len(workingFactors) == 0 {
+		return nil, fmt.Errorf("inference: no factors remain after elimination")
+	}
+
+	result, err := factors.FactorProduct(workingFactors...)
+	if err != nil {
+		return nil, fmt.Errorf("inference: final product failed: %w", err)
+	}
+
+	result.Normalize()
+	return result, nil
+}
+
+// maxEliminateVariable is like eliminateVariable but takes the max over
+// the eliminated variable instead of summing.
+func maxEliminateVariable(factorList []*factors.DiscreteFactor, variable string) ([]*factors.DiscreteFactor, error) {
+	var containing []*factors.DiscreteFactor
+	var remaining []*factors.DiscreteFactor
+
+	for _, f := range factorList {
+		if varSet(f)[variable] {
+			containing = append(containing, f)
+		} else {
+			remaining = append(remaining, f)
+		}
+	}
+
+	if len(containing) == 0 {
+		return factorList, nil
+	}
+
+	product, err := factors.FactorProduct(containing...)
+	if err != nil {
+		return nil, err
+	}
+
+	prodVars := product.Variables()
+	if len(prodVars) == 1 && prodVars[0] == variable {
+		return remaining, nil
+	}
+
+	maximized, err := maxMarginalize(product, variable)
+	if err != nil {
+		return nil, err
+	}
+
+	return append(remaining, maximized), nil
+}
+
+// maxMarginalize returns a new factor with the given variable maximized out.
+// For each assignment to the remaining variables, the value is the maximum
+// over all states of the eliminated variable.
+func maxMarginalize(f *factors.DiscreteFactor, variable string) (*factors.DiscreteFactor, error) {
+	idx := -1
+	fVars := f.Variables()
+	fCard := f.Cardinality()
+	for i, v := range fVars {
+		if v == variable {
+			idx = i
+			break
+		}
+	}
+	if idx == -1 {
+		return nil, fmt.Errorf("inference: variable %q not in factor", variable)
+	}
+
+	var newVars []string
+	var newCard []int
+	for i, v := range fVars {
+		if i != idx {
+			newVars = append(newVars, v)
+			newCard = append(newCard, fCard[i])
+		}
+	}
+
+	newSize := 1
+	for _, c := range newCard {
+		newSize *= c
+	}
+
+	newValues := make([]float64, newSize)
+	for i := range newValues {
+		newValues[i] = -1
+	}
+
+	totalSize := 1
+	for _, c := range fCard {
+		totalSize *= c
+	}
+	data := f.Values().Data()
+
+	for flat := 0; flat < totalSize; flat++ {
+		assignment := flatToAssignment(fVars, fCard, flat)
+		// Compute flat index in new factor.
+		newFlat := 0
+		stride := 1
+		for i := len(newVars) - 1; i >= 0; i-- {
+			newFlat += assignment[newVars[i]] * stride
+			stride *= newCard[i]
+		}
+		val := data[flat]
+		if newValues[newFlat] < 0 || val > newValues[newFlat] {
+			newValues[newFlat] = val
+		}
+	}
+
+	return factors.NewDiscreteFactor(newVars, newCard, newValues)
+}
+
+// InducedGraph returns the induced graph (also called the filled graph) that
+// results from eliminating variables in the given order. Two variables are
+// connected in the induced graph if they appear together in the same factor
+// at any point during elimination.
+func (ve *VariableElimination) InducedGraph(eliminationOrder []string) (*graphgo.Graph, error) {
+	if len(eliminationOrder) == 0 {
+		return graphgo.NewGraph(), nil
+	}
+
+	// Build factor variable sets.
+	factorVarSets := make([]map[string]bool, len(ve.factors))
+	for i, f := range ve.factors {
+		factorVarSets[i] = make(map[string]bool)
+		for _, v := range f.Variables() {
+			factorVarSets[i][v] = true
+		}
+	}
+
+	// Build interaction graph (adjacency).
+	adj := make(map[string]map[string]bool)
+	for _, vs := range factorVarSets {
+		vars := make([]string, 0, len(vs))
+		for v := range vs {
+			vars = append(vars, v)
+		}
+		for i := 0; i < len(vars); i++ {
+			if adj[vars[i]] == nil {
+				adj[vars[i]] = make(map[string]bool)
+			}
+			for j := i + 1; j < len(vars); j++ {
+				if adj[vars[j]] == nil {
+					adj[vars[j]] = make(map[string]bool)
+				}
+				adj[vars[i]][vars[j]] = true
+				adj[vars[j]][vars[i]] = true
+			}
+		}
+	}
+
+	// Collect all edges that ever appear (initial + fill edges).
+	allEdges := make(map[string]bool)
+	allNodes := make(map[string]bool)
+	for v := range adj {
+		allNodes[v] = true
+	}
+
+	// Record initial edges.
+	for v, neighbors := range adj {
+		for nb := range neighbors {
+			key := v + "\x00" + nb
+			if nb < v {
+				key = nb + "\x00" + v
+			}
+			allEdges[key] = true
+		}
+	}
+
+	// Simulate elimination.
+	for _, node := range eliminationOrder {
+		neighbors := make([]string, 0, len(adj[node]))
+		for nb := range adj[node] {
+			neighbors = append(neighbors, nb)
+		}
+		// Connect all pairs of neighbors (fill edges).
+		for i := 0; i < len(neighbors); i++ {
+			for j := i + 1; j < len(neighbors); j++ {
+				a, b := neighbors[i], neighbors[j]
+				adj[a][b] = true
+				adj[b][a] = true
+				key := a + "\x00" + b
+				if b < a {
+					key = b + "\x00" + a
+				}
+				allEdges[key] = true
+			}
+		}
+		// Remove node.
+		for nb := range adj[node] {
+			delete(adj[nb], node)
+		}
+		delete(adj, node)
+	}
+
+	// Build the resulting graphgo.Graph.
+	g := graphgo.NewGraph()
+	for v := range allNodes {
+		g.AddNode(v)
+	}
+	for key := range allEdges {
+		parts := splitEdgeKey(key)
+		g.AddEdge(parts[0], parts[1])
+	}
+
+	return g, nil
+}
+
+// splitEdgeKey splits a NUL-separated edge key into its two parts.
+func splitEdgeKey(key string) [2]string {
+	for i := 0; i < len(key); i++ {
+		if key[i] == '\x00' {
+			return [2]string{key[:i], key[i+1:]}
+		}
+	}
+	return [2]string{key, ""}
+}
+
+// InducedWidth returns the induced width (treewidth) for the given
+// elimination order, which is the maximum clique size minus 1 in the
+// induced graph.
+func (ve *VariableElimination) InducedWidth(eliminationOrder []string) (int, error) {
+	if len(eliminationOrder) == 0 {
+		return 0, nil
+	}
+
+	// Build factor variable sets.
+	factorVarSets := make([]map[string]bool, len(ve.factors))
+	for i, f := range ve.factors {
+		factorVarSets[i] = make(map[string]bool)
+		for _, v := range f.Variables() {
+			factorVarSets[i][v] = true
+		}
+	}
+
+	// Build interaction graph.
+	adj := make(map[string]map[string]bool)
+	for _, vs := range factorVarSets {
+		vars := make([]string, 0, len(vs))
+		for v := range vs {
+			vars = append(vars, v)
+		}
+		for i := 0; i < len(vars); i++ {
+			if adj[vars[i]] == nil {
+				adj[vars[i]] = make(map[string]bool)
+			}
+			for j := i + 1; j < len(vars); j++ {
+				if adj[vars[j]] == nil {
+					adj[vars[j]] = make(map[string]bool)
+				}
+				adj[vars[i]][vars[j]] = true
+				adj[vars[j]][vars[i]] = true
+			}
+		}
+	}
+
+	maxWidth := 0
+
+	for _, node := range eliminationOrder {
+		neighbors := make([]string, 0, len(adj[node]))
+		for nb := range adj[node] {
+			neighbors = append(neighbors, nb)
+		}
+		// The clique formed is {node} + neighbors; width = len(neighbors).
+		if len(neighbors) > maxWidth {
+			maxWidth = len(neighbors)
+		}
+		// Fill edges.
+		for i := 0; i < len(neighbors); i++ {
+			for j := i + 1; j < len(neighbors); j++ {
+				a, b := neighbors[i], neighbors[j]
+				if adj[a] == nil {
+					adj[a] = make(map[string]bool)
+				}
+				if adj[b] == nil {
+					adj[b] = make(map[string]bool)
+				}
+				adj[a][b] = true
+				adj[b][a] = true
+			}
+		}
+		// Remove node.
+		for nb := range adj[node] {
+			delete(adj[nb], node)
+		}
+		delete(adj, node)
+	}
+
+	return maxWidth, nil
 }
