@@ -1,0 +1,190 @@
+{
+  "generator": "metrics",
+  "pgmpy_version": "1.1.2",
+  "test_cases": [
+    {
+      "description": "SHD between true graph (3 edges) and estimated with one extra edge",
+      "expected": {
+        "shd": 1
+      },
+      "input": {
+        "estimated_edges": [
+          [
+            "A",
+            "B"
+          ],
+          [
+            "B",
+            "C"
+          ],
+          [
+            "A",
+            "C"
+          ],
+          [
+            "C",
+            "D"
+          ]
+        ],
+        "estimated_nodes": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "true_edges": [
+          [
+            "A",
+            "B"
+          ],
+          [
+            "B",
+            "C"
+          ],
+          [
+            "A",
+            "C"
+          ]
+        ],
+        "true_nodes": [
+          "A",
+          "B",
+          "C"
+        ]
+      },
+      "name": "shd_one_extra_edge"
+    },
+    {
+      "description": "SHD between true graph and estimated with one reversed edge (A->B vs B->A)",
+      "expected": {
+        "shd": 1
+      },
+      "input": {
+        "estimated_edges": [
+          [
+            "B",
+            "A"
+          ],
+          [
+            "B",
+            "C"
+          ]
+        ],
+        "estimated_nodes": [
+          "A",
+          "B",
+          "C"
+        ],
+        "true_edges": [
+          [
+            "A",
+            "B"
+          ],
+          [
+            "B",
+            "C"
+          ]
+        ],
+        "true_nodes": [
+          "A",
+          "B",
+          "C"
+        ]
+      },
+      "name": "shd_reversal"
+    },
+    {
+      "description": "Adjacency confusion matrix: true has A->C, est has C->D instead",
+      "expected": {
+        "fn": 1,
+        "fp": 1,
+        "tn": 2,
+        "tp": 2
+      },
+      "input": {
+        "estimated_edges": [
+          [
+            "A",
+            "B"
+          ],
+          [
+            "B",
+            "C"
+          ],
+          [
+            "C",
+            "D"
+          ]
+        ],
+        "estimated_nodes": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "true_edges": [
+          [
+            "A",
+            "B"
+          ],
+          [
+            "B",
+            "C"
+          ],
+          [
+            "A",
+            "C"
+          ]
+        ],
+        "true_nodes": [
+          "A",
+          "B",
+          "C"
+        ]
+      },
+      "name": "adjacency_confusion"
+    },
+    {
+      "description": "Orientation confusion matrix: B->C reversed to C->B",
+      "expected": {
+        "fn": 1,
+        "fp": 1,
+        "tn": 1,
+        "tp": 1
+      },
+      "input": {
+        "estimated_edges": [
+          [
+            "A",
+            "B"
+          ],
+          [
+            "C",
+            "B"
+          ]
+        ],
+        "estimated_nodes": [
+          "A",
+          "B",
+          "C"
+        ],
+        "true_edges": [
+          [
+            "A",
+            "B"
+          ],
+          [
+            "B",
+            "C"
+          ]
+        ],
+        "true_nodes": [
+          "A",
+          "B",
+          "C"
+        ]
+      },
+      "name": "orientation_confusion"
+    }
+  ]
+}

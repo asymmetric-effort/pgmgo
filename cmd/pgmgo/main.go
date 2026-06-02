@@ -7,7 +7,7 @@ import (
 	"github.com/asymmetric-effort/pgmgo/src/readwrite"
 )
 
-const version = "0.0.14"
+const version = "0.0.15"
 
 func main() {
 	if len(os.Args) < 2 {
