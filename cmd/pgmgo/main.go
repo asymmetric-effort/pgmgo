@@ -7,7 +7,7 @@ import (
 	"github.com/asymmetric-effort/pgmgo/src/readwrite"
 )
 
-const version = "0.0.18"
+const version = "0.0.19"
 
 func main() {
 	if len(os.Args) < 2 {

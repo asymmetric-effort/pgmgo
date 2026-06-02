@@ -26,6 +26,127 @@ func FactorProduct(factors ...*DiscreteFactor) (*DiscreteFactor, error) {
 	return result, nil
 }
 
+// FactorDivide divides f1 by f2. The variables of f2 must be a subset of f1's
+// variables. For each assignment in f1, the corresponding value in f2 is looked
+// up and divided. Division by zero produces a zero in the result.
+func FactorDivide(f1, f2 *DiscreteFactor) (*DiscreteFactor, error) {
+	if f1 == nil || f2 == nil {
+		return nil, fmt.Errorf("factors: FactorDivide requires non-nil factors")
+	}
+
+	// Validate that f2's variables are a subset of f1's variables with matching cardinalities.
+	f1VarIdx := make(map[string]int, len(f1.variables))
+	for i, v := range f1.variables {
+		f1VarIdx[v] = i
+	}
+	for i, v := range f2.variables {
+		idx, ok := f1VarIdx[v]
+		if !ok {
+			return nil, fmt.Errorf("factors: variable %q in f2 is not in f1", v)
+		}
+		if f1.cardinality[idx] != f2.cardinality[i] {
+			return nil, fmt.Errorf("factors: variable %q has cardinality %d in f1 but %d in f2",
+				v, f1.cardinality[idx], f2.cardinality[i])
+		}
+	}
+
+	// Build strides for f2.
+	f2VarIdx := make(map[string]int, len(f2.variables))
+	for i, v := range f2.variables {
+		f2VarIdx[v] = i
+	}
+	f2Strides := make([]int, len(f2.variables))
+	if len(f2.variables) > 0 {
+		f2Strides[len(f2.variables)-1] = 1
+		for i := len(f2.variables) - 2; i >= 0; i-- {
+			f2Strides[i] = f2Strides[i+1] * f2.cardinality[i+1]
+		}
+	}
+
+	f1Data := f1.values.Data()
+	f2Data := f2.values.Data()
+	totalSize := f1.totalSize()
+	newValues := make([]float64, totalSize)
+
+	for flat := 0; flat < totalSize; flat++ {
+		assignment := f1.flatToAssignment(flat)
+
+		// Compute flat index in f2.
+		f2Flat := 0
+		for i, v := range f2.variables {
+			f2Flat += assignment[v] * f2Strides[i]
+		}
+
+		denom := f2Data[f2Flat]
+		if denom == 0 {
+			newValues[flat] = 0
+		} else {
+			newValues[flat] = f1Data[flat] / denom
+		}
+	}
+
+	vars := make([]string, len(f1.variables))
+	copy(vars, f1.variables)
+	card := make([]int, len(f1.cardinality))
+	copy(card, f1.cardinality)
+	return NewDiscreteFactor(vars, card, newValues)
+}
+
+// FactorSumProduct performs sum-product variable elimination. For each variable
+// in eliminationOrder, all factors containing that variable are multiplied
+// together and the variable is marginalized out. The resulting factor replaces
+// those factors in the working set. After all eliminations, the remaining
+// factors are multiplied together and returned.
+func FactorSumProduct(factors []*DiscreteFactor, eliminationOrder []string) (*DiscreteFactor, error) {
+	if len(factors) == 0 {
+		return nil, fmt.Errorf("factors: FactorSumProduct requires at least one factor")
+	}
+
+	// Work on copies so we don't mutate the caller's slice.
+	working := make([]*DiscreteFactor, len(factors))
+	for i, f := range factors {
+		working[i] = f.Copy()
+	}
+
+	for _, elimVar := range eliminationOrder {
+		// Partition factors into those that contain elimVar and those that don't.
+		var relevant []*DiscreteFactor
+		var rest []*DiscreteFactor
+		for _, f := range working {
+			if f.varIndex(elimVar) >= 0 {
+				relevant = append(relevant, f)
+			} else {
+				rest = append(rest, f)
+			}
+		}
+		if len(relevant) == 0 {
+			// Variable not in any factor; skip.
+			continue
+		}
+
+		// Multiply all relevant factors together.
+		product, err := FactorProduct(relevant...)
+		if err != nil {
+			return nil, fmt.Errorf("factors: FactorSumProduct product step for %q: %w", elimVar, err)
+		}
+
+		// Marginalize out the variable.
+		marginalized, err := product.Marginalize([]string{elimVar})
+		if err != nil {
+			return nil, fmt.Errorf("factors: FactorSumProduct marginalize step for %q: %w", elimVar, err)
+		}
+
+		// Replace working set.
+		working = append(rest, marginalized)
+	}
+
+	// Multiply remaining factors.
+	if len(working) == 0 {
+		return nil, fmt.Errorf("factors: FactorSumProduct produced no remaining factors")
+	}
+	return FactorProduct(working...)
+}
+
 // pairwiseProduct multiplies two factors together.
 func pairwiseProduct(a, b *DiscreteFactor) (*DiscreteFactor, error) {
 	// Validate shared variables have matching cardinalities.
