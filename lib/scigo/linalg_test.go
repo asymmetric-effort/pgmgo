@@ -528,32 +528,302 @@ func TestLogm(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// Stub Tests
+// Polar Decomposition Tests
 // ---------------------------------------------------------------------------
 
-func TestStubs(t *testing.T) {
+func TestPolar(t *testing.T) {
+	a := [][]float64{
+		{1, 2},
+		{3, 4},
+	}
+	u, p, err := Polar(a)
+	if err != nil {
+		t.Fatalf("Polar: %v", err)
+	}
+	n := 2
+
+	// Verify A = U * P.
+	up := matMul(u, p, n)
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			if !approxEqual(up[i][j], a[i][j], 1e-8) {
+				t.Errorf("Polar: U*P[%d][%d] = %v, want %v", i, j, up[i][j], a[i][j])
+			}
+		}
+	}
+
+	// Verify U is orthogonal: U^T * U = I.
+	uT := make([][]float64, n)
+	for i := 0; i < n; i++ {
+		uT[i] = make([]float64, n)
+		for j := 0; j < n; j++ {
+			uT[i][j] = u[j][i]
+		}
+	}
+	utu := matMul(uT, u, n)
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			expected := 0.0
+			if i == j {
+				expected = 1.0
+			}
+			if !approxEqual(utu[i][j], expected, 1e-8) {
+				t.Errorf("Polar: U^T*U[%d][%d] = %v, want %v", i, j, utu[i][j], expected)
+			}
+		}
+	}
+
+	// Verify P is symmetric.
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			if !approxEqual(p[i][j], p[j][i], 1e-10) {
+				t.Errorf("Polar: P not symmetric at [%d][%d]", i, j)
+			}
+		}
+	}
+}
+
+func TestPolarEmpty(t *testing.T) {
 	_, _, err := Polar(nil)
 	if err == nil {
-		t.Error("Polar: expected error")
+		t.Error("Polar: expected error for nil input")
 	}
-	_, err = Fiedler(nil)
-	if err == nil {
-		t.Error("Fiedler: expected error")
+}
+
+// ---------------------------------------------------------------------------
+// Fiedler Matrix Tests
+// ---------------------------------------------------------------------------
+
+func TestFiedler(t *testing.T) {
+	a := []float64{1, 4, 2}
+	f := Fiedler(a)
+	expected := [][]float64{
+		{0, 3, 1},
+		{3, 0, 2},
+		{1, 2, 0},
 	}
-	_, err = Leslie(nil, nil)
-	if err == nil {
-		t.Error("Leslie: expected error")
+	for i := range expected {
+		for j := range expected[i] {
+			if !approxEqual(f[i][j], expected[i][j], 1e-14) {
+				t.Errorf("Fiedler[%d][%d] = %v, want %v", i, j, f[i][j], expected[i][j])
+			}
+		}
 	}
-	_, err = DFT(0)
-	if err == nil {
-		t.Error("DFT: expected error")
+	// Verify symmetry.
+	for i := 0; i < len(f); i++ {
+		for j := 0; j < len(f); j++ {
+			if f[i][j] != f[j][i] {
+				t.Errorf("Fiedler not symmetric at [%d][%d]", i, j)
+			}
+		}
 	}
-	_, _, err = LDL(nil)
-	if err == nil {
-		t.Error("LDL: expected error")
+}
+
+func TestFiedlerEmpty(t *testing.T) {
+	f := Fiedler(nil)
+	if f != nil {
+		t.Error("Fiedler(nil) should return nil")
 	}
-	_, _, err = Interpolative(nil, 0)
+}
+
+// ---------------------------------------------------------------------------
+// Leslie Matrix Tests
+// ---------------------------------------------------------------------------
+
+func TestLeslie(t *testing.T) {
+	f := []float64{0.1, 2.0, 1.0}
+	s := []float64{0.5, 0.3}
+	l := Leslie(f, s)
+	if l == nil {
+		t.Fatal("Leslie returned nil")
+	}
+	expected := [][]float64{
+		{0.1, 2.0, 1.0},
+		{0.5, 0, 0},
+		{0, 0.3, 0},
+	}
+	for i := range expected {
+		for j := range expected[i] {
+			if !approxEqual(l[i][j], expected[i][j], 1e-14) {
+				t.Errorf("Leslie[%d][%d] = %v, want %v", i, j, l[i][j], expected[i][j])
+			}
+		}
+	}
+}
+
+func TestLeslieEmpty(t *testing.T) {
+	if Leslie(nil, nil) != nil {
+		t.Error("Leslie(nil, nil) should return nil")
+	}
+}
+
+func TestLeslieMismatch(t *testing.T) {
+	// len(s) must be len(f)-1.
+	if Leslie([]float64{1, 2}, []float64{0.5, 0.5}) != nil {
+		t.Error("Leslie should return nil for mismatched lengths")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// DFT Matrix Tests
+// ---------------------------------------------------------------------------
+
+func TestDFT(t *testing.T) {
+	w, err := DFT(4)
+	if err != nil {
+		t.Fatalf("DFT: %v", err)
+	}
+	n := 4
+	// Verify W * W^* = n * I (unitarity up to scale).
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			sum := complex(0, 0)
+			for k := 0; k < n; k++ {
+				// W^* is conjugate: conj(W[k][j])
+				sum += w[i][k] * complex(real(w[j][k]), -imag(w[j][k]))
+			}
+			expected := complex(0, 0)
+			if i == j {
+				expected = complex(float64(n), 0)
+			}
+			if math.Abs(real(sum)-real(expected)) > 1e-10 || math.Abs(imag(sum)-imag(expected)) > 1e-10 {
+				t.Errorf("DFT: W*W^*[%d][%d] = %v, want %v", i, j, sum, expected)
+			}
+		}
+	}
+}
+
+func TestDFTInvalid(t *testing.T) {
+	_, err := DFT(0)
 	if err == nil {
-		t.Error("Interpolative: expected error")
+		t.Error("DFT(0): expected error")
+	}
+	_, err = DFT(-1)
+	if err == nil {
+		t.Error("DFT(-1): expected error")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// LDL Decomposition Tests
+// ---------------------------------------------------------------------------
+
+func TestLDL(t *testing.T) {
+	// Symmetric positive definite matrix.
+	a := [][]float64{
+		{4, 2, 1},
+		{2, 5, 3},
+		{1, 3, 6},
+	}
+	l, d, err := LDL(a)
+	if err != nil {
+		t.Fatalf("LDL: %v", err)
+	}
+	n := 3
+
+	// Verify A = L * D * L^T.
+	// First compute D as a diagonal matrix.
+	dMat := make([][]float64, n)
+	for i := 0; i < n; i++ {
+		dMat[i] = make([]float64, n)
+		dMat[i][i] = d[i]
+	}
+	lT := make([][]float64, n)
+	for i := 0; i < n; i++ {
+		lT[i] = make([]float64, n)
+		for j := 0; j < n; j++ {
+			lT[i][j] = l[j][i]
+		}
+	}
+	ld := matMul(l, dMat, n)
+	ldlt := matMul(ld, lT, n)
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			if !approxEqual(ldlt[i][j], a[i][j], 1e-10) {
+				t.Errorf("LDL: L*D*L^T[%d][%d] = %v, want %v", i, j, ldlt[i][j], a[i][j])
+			}
+		}
+	}
+
+	// Verify L is unit lower triangular.
+	for i := 0; i < n; i++ {
+		if !approxEqual(l[i][i], 1, 1e-14) {
+			t.Errorf("LDL: L[%d][%d] = %v, want 1", i, i, l[i][i])
+		}
+		for j := i + 1; j < n; j++ {
+			if l[i][j] != 0 {
+				t.Errorf("LDL: L[%d][%d] = %v, want 0", i, j, l[i][j])
+			}
+		}
+	}
+}
+
+func TestLDLEmpty(t *testing.T) {
+	_, _, err := LDL(nil)
+	if err == nil {
+		t.Error("LDL(nil): expected error")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Interpolative Decomposition Tests
+// ---------------------------------------------------------------------------
+
+func TestInterpolative(t *testing.T) {
+	// 4x3 matrix with rank 2.
+	a := [][]float64{
+		{1, 2, 3},
+		{4, 5, 9},
+		{7, 8, 15},
+		{2, 3, 5},
+	}
+	k := 2
+	idx, proj, err := Interpolative(a, k)
+	if err != nil {
+		t.Fatalf("Interpolative: %v", err)
+	}
+	if len(idx) != k {
+		t.Fatalf("Interpolative: got %d indices, want %d", len(idx), k)
+	}
+
+	// Reconstruct: A_approx = A[:, idx] * proj
+	m := len(a)
+	n := len(a[0])
+	approxA := make([][]float64, m)
+	for i := 0; i < m; i++ {
+		approxA[i] = make([]float64, n)
+		for j := 0; j < n; j++ {
+			for ki := 0; ki < k; ki++ {
+				approxA[i][j] += a[i][idx[ki]] * proj[ki][j]
+			}
+		}
+	}
+
+	// Since the matrix has rank 2, the approximation with k=2 should be exact.
+	for i := 0; i < m; i++ {
+		for j := 0; j < n; j++ {
+			if !approxEqual(approxA[i][j], a[i][j], 1e-8) {
+				t.Errorf("Interpolative: approx[%d][%d] = %v, want %v", i, j, approxA[i][j], a[i][j])
+			}
+		}
+	}
+}
+
+func TestInterpolativeEmpty(t *testing.T) {
+	_, _, err := Interpolative(nil, 1)
+	if err == nil {
+		t.Error("Interpolative(nil): expected error")
+	}
+}
+
+func TestInterpolativeInvalidK(t *testing.T) {
+	a := [][]float64{{1, 2}, {3, 4}}
+	_, _, err := Interpolative(a, 0)
+	if err == nil {
+		t.Error("Interpolative k=0: expected error")
+	}
+	_, _, err = Interpolative(a, 3)
+	if err == nil {
+		t.Error("Interpolative k>n: expected error")
 	}
 }

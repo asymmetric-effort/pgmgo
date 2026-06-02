@@ -139,6 +139,122 @@ func TestErfinv(t *testing.T) {
 	}
 }
 
+func TestBetaln(t *testing.T) {
+	// B(1,1) = Gamma(1)*Gamma(1)/Gamma(2) = 1*1/1 = 1, ln(1) = 0.
+	got := Betaln(1, 1)
+	if !approxEqual(got, 0, 1e-12) {
+		t.Errorf("Betaln(1,1) = %v, want 0", got)
+	}
+	// B(0.5, 0.5) = pi, ln(pi) ≈ 1.1447298858494.
+	got = Betaln(0.5, 0.5)
+	if !approxEqual(got, math.Log(math.Pi), 1e-10) {
+		t.Errorf("Betaln(0.5,0.5) = %v, want %v", got, math.Log(math.Pi))
+	}
+	// B(2, 3) = 1/12, ln(1/12).
+	got = Betaln(2, 3)
+	if !approxEqual(got, math.Log(1.0/12.0), 1e-10) {
+		t.Errorf("Betaln(2,3) = %v, want %v", got, math.Log(1.0/12.0))
+	}
+}
+
+func TestComb(t *testing.T) {
+	tests := []struct {
+		n, k int
+		want float64
+	}{
+		{5, 0, 1},
+		{5, 5, 1},
+		{5, 2, 10},
+		{10, 3, 120},
+		{20, 10, 184756},
+		{0, 0, 1},
+		{5, -1, 0},
+		{5, 6, 0},
+	}
+	for _, tc := range tests {
+		got := Comb(tc.n, tc.k)
+		if !approxEqual(got, tc.want, 1e-6) {
+			t.Errorf("Comb(%d,%d) = %v, want %v", tc.n, tc.k, got, tc.want)
+		}
+	}
+}
+
+func TestFactorial(t *testing.T) {
+	tests := []struct {
+		n    int
+		want float64
+	}{
+		{0, 1},
+		{1, 1},
+		{5, 120},
+		{10, 3628800},
+		{20, 2432902008176640000},
+	}
+	for _, tc := range tests {
+		got := Factorial(tc.n)
+		if !approxEqual(got, tc.want, tc.want*1e-10) {
+			t.Errorf("Factorial(%d) = %v, want %v", tc.n, got, tc.want)
+		}
+	}
+	// Negative should be NaN.
+	if !math.IsNaN(Factorial(-1)) {
+		t.Error("Factorial(-1) should be NaN")
+	}
+}
+
+func TestSoftmax(t *testing.T) {
+	// Basic test.
+	vals := []float64{1, 2, 3}
+	result := Softmax(vals)
+	if len(result) != 3 {
+		t.Fatalf("Softmax: got %d elements, want 3", len(result))
+	}
+	// Sum should be 1.
+	sum := 0.0
+	for _, v := range result {
+		sum += v
+	}
+	if !approxEqual(sum, 1, 1e-12) {
+		t.Errorf("Softmax sum = %v, want 1", sum)
+	}
+	// Values should be increasing since input is increasing.
+	if result[0] >= result[1] || result[1] >= result[2] {
+		t.Errorf("Softmax not monotonically increasing: %v", result)
+	}
+
+	// Numerical stability with large values.
+	large := []float64{1000, 1001, 1002}
+	resultLarge := Softmax(large)
+	sumLarge := 0.0
+	for _, v := range resultLarge {
+		sumLarge += v
+		if math.IsNaN(v) || math.IsInf(v, 0) {
+			t.Errorf("Softmax large: got NaN/Inf: %v", resultLarge)
+		}
+	}
+	if !approxEqual(sumLarge, 1, 1e-12) {
+		t.Errorf("Softmax large sum = %v, want 1", sumLarge)
+	}
+
+	// Equal values should give uniform distribution.
+	equal := []float64{5, 5, 5, 5}
+	resultEq := Softmax(equal)
+	for _, v := range resultEq {
+		if !approxEqual(v, 0.25, 1e-12) {
+			t.Errorf("Softmax equal: got %v, want 0.25", v)
+		}
+	}
+}
+
+func TestSoftmaxPanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("Softmax should panic on empty input")
+		}
+	}()
+	Softmax([]float64{})
+}
+
 func TestLogsumexp(t *testing.T) {
 	// Basic case
 	vals := []float64{1, 2, 3}

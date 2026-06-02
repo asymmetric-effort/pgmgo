@@ -416,9 +416,93 @@ func TestDirect_EmptyBounds(t *testing.T) {
 // MILP
 // ---------------------------------------------------------------------------
 
-func TestMILP_ReturnsError(t *testing.T) {
-	_, err := MILP(nil, nil, nil, nil, nil, nil)
+func TestMILP_Simple(t *testing.T) {
+	// minimize -x1 - 2*x2
+	// subject to x1 + x2 <= 4
+	//            x1 <= 3
+	//            x2 <= 3
+	//            x1, x2 >= 0, integer
+	c := []float64{-1, -2}
+	Aub := [][]float64{
+		{1, 1},
+		{1, 0},
+		{0, 1},
+	}
+	bub := []float64{4, 3, 3}
+	integrality := []bool{true, true}
+
+	res, err := MILP(c, Aub, bub, integrality)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !res.Success {
+		t.Error("MILP: expected success")
+	}
+	// Optimal integer solution: x1=1, x2=3, fun = -1 - 6 = -7
+	if !approxEqual(res.Fun, -7, 1e-6) {
+		t.Errorf("MILP: fun=%v, want -7", res.Fun)
+	}
+	// Check integrality.
+	for i, v := range res.X {
+		if integrality[i] && math.Abs(v-math.Round(v)) > 1e-6 {
+			t.Errorf("MILP: x[%d]=%v is not integer", i, v)
+		}
+	}
+}
+
+func TestMILP_NoIntegrality(t *testing.T) {
+	// Without integrality constraints, should behave like LP.
+	c := []float64{-1, -2}
+	Aub := [][]float64{
+		{1, 1},
+		{1, 0},
+		{0, 1},
+	}
+	bub := []float64{4, 3, 3}
+
+	res, err := MILP(c, Aub, bub, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !approxEqual(res.Fun, -7, 1e-6) {
+		t.Errorf("MILP no int: fun=%v, want -7", res.Fun)
+	}
+}
+
+func TestMILP_EmptyC(t *testing.T) {
+	_, err := MILP([]float64{}, nil, nil, nil)
 	if err == nil {
-		t.Error("MILP should return an error")
+		t.Error("MILP should error on empty c")
+	}
+}
+
+func TestMILP_FractionalLP(t *testing.T) {
+	// Problem where LP relaxation gives non-integer solution but integer optimum exists.
+	// minimize -x1 - x2
+	// subject to 2*x1 + x2 <= 5
+	//            x1 + 2*x2 <= 5
+	//            x1, x2 >= 0, integer
+	c := []float64{-1, -1}
+	Aub := [][]float64{
+		{2, 1},
+		{1, 2},
+	}
+	bub := []float64{5, 5}
+	integrality := []bool{true, true}
+
+	res, err := MILP(c, Aub, bub, integrality)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Check that solution is integer.
+	for i, v := range res.X {
+		if math.Abs(v-math.Round(v)) > 1e-6 {
+			t.Errorf("MILP fractional: x[%d]=%v is not integer", i, v)
+		}
+	}
+	// Check feasibility: 2*x1+x2 <= 5 and x1+2*x2 <= 5.
+	x1, x2 := res.X[0], res.X[1]
+	if 2*x1+x2 > 5+1e-6 || x1+2*x2 > 5+1e-6 {
+		t.Errorf("MILP fractional: solution not feasible: x=%v", res.X)
 	}
 }

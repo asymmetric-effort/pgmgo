@@ -708,37 +708,344 @@ func sqrtmInternal(a [][]float64) ([][]float64, error) {
 }
 
 // ---------------------------------------------------------------------------
-// Stubs for remaining functions
+// Polar Decomposition
 // ---------------------------------------------------------------------------
 
-// Polar returns an error indicating it is not yet implemented.
-func Polar(_ [][]float64) ([][]float64, [][]float64, error) {
-	return nil, nil, errors.New("scigo.Polar: not yet implemented")
+// Polar computes the polar decomposition A = U*P where U is unitary and P is
+// positive semi-definite. Uses SVD via the iterative approach:
+// A = U_svd * S * V_svd^T, then U_polar = U_svd * V_svd^T, P = V_svd * S * V_svd^T.
+// This implementation uses the Newton iteration for the unitary factor.
+func Polar(a [][]float64) (u, p [][]float64, err error) {
+	n := len(a)
+	if n == 0 {
+		return nil, nil, errors.New("scigo.Polar: empty matrix")
+	}
+	for _, row := range a {
+		if len(row) != n {
+			return nil, nil, errors.New("scigo.Polar: matrix must be square")
+		}
+	}
+
+	// Newton iteration for the unitary polar factor:
+	// U_{k+1} = 0.5 * (U_k + U_k^{-T})
+	// Converges to the unitary factor.
+	u = matCopy(a)
+	for iter := 0; iter < 100; iter++ {
+		uInv, err2 := matInverse(u)
+		if err2 != nil {
+			return nil, nil, errors.New("scigo.Polar: singular matrix encountered")
+		}
+		// Transpose uInv
+		uInvT := make([][]float64, n)
+		for i := 0; i < n; i++ {
+			uInvT[i] = make([]float64, n)
+			for j := 0; j < n; j++ {
+				uInvT[i][j] = uInv[j][i]
+			}
+		}
+		uNew := matScale(matAdd(u, uInvT), 0.5)
+		diff := matNorm1(matSub(uNew, u))
+		u = uNew
+		if diff < 1e-12 {
+			break
+		}
+	}
+
+	// P = U^T * A
+	uT := make([][]float64, n)
+	for i := 0; i < n; i++ {
+		uT[i] = make([]float64, n)
+		for j := 0; j < n; j++ {
+			uT[i][j] = u[j][i]
+		}
+	}
+	p = matMul(uT, a, n)
+
+	// Symmetrize P: P = (P + P^T) / 2
+	for i := 0; i < n; i++ {
+		for j := i + 1; j < n; j++ {
+			avg := (p[i][j] + p[j][i]) / 2
+			p[i][j] = avg
+			p[j][i] = avg
+		}
+	}
+
+	return u, p, nil
 }
 
-// Fiedler returns an error indicating it is not yet implemented.
-func Fiedler(_ []float64) ([][]float64, error) {
-	return nil, errors.New("scigo.Fiedler: not yet implemented")
+// ---------------------------------------------------------------------------
+// Fiedler Matrix
+// ---------------------------------------------------------------------------
+
+// Fiedler returns the Fiedler matrix where F[i][j] = |a[i] - a[j]|.
+func Fiedler(a []float64) [][]float64 {
+	n := len(a)
+	if n == 0 {
+		return nil
+	}
+	result := make([][]float64, n)
+	for i := 0; i < n; i++ {
+		result[i] = make([]float64, n)
+		for j := 0; j < n; j++ {
+			result[i][j] = math.Abs(a[i] - a[j])
+		}
+	}
+	return result
 }
 
-// Leslie returns an error indicating it is not yet implemented.
-func Leslie(_, _ []float64) ([][]float64, error) {
-	return nil, errors.New("scigo.Leslie: not yet implemented")
+// ---------------------------------------------------------------------------
+// Leslie Matrix
+// ---------------------------------------------------------------------------
+
+// Leslie returns the Leslie population matrix. The first row contains the
+// fecundity rates f, and the sub-diagonal contains the survival rates s.
+// The matrix dimension is len(f) x len(f), and len(s) must be len(f)-1.
+func Leslie(f, s []float64) [][]float64 {
+	n := len(f)
+	if n == 0 {
+		return nil
+	}
+	if len(s) != n-1 {
+		return nil
+	}
+	result := make([][]float64, n)
+	for i := 0; i < n; i++ {
+		result[i] = make([]float64, n)
+	}
+	// First row: fecundity.
+	for j := 0; j < n; j++ {
+		result[0][j] = f[j]
+	}
+	// Sub-diagonal: survival.
+	for i := 1; i < n; i++ {
+		result[i][i-1] = s[i-1]
+	}
+	return result
 }
 
-// DFT returns an error indicating it is not yet implemented.
-func DFT(_ int) ([][]complex128, error) {
-	return nil, errors.New("scigo.DFT: not yet implemented")
+// ---------------------------------------------------------------------------
+// DFT Matrix
+// ---------------------------------------------------------------------------
+
+// DFT returns the n x n DFT matrix where W[j][k] = exp(-2*pi*i*j*k/n).
+// Returns an error if n <= 0.
+func DFT(n int) ([][]complex128, error) {
+	if n <= 0 {
+		return nil, errors.New("scigo.DFT: n must be positive")
+	}
+	w := make([][]complex128, n)
+	fn := float64(n)
+	for j := 0; j < n; j++ {
+		w[j] = make([]complex128, n)
+		for k := 0; k < n; k++ {
+			angle := -2 * math.Pi * float64(j) * float64(k) / fn
+			w[j][k] = complex(math.Cos(angle), math.Sin(angle))
+		}
+	}
+	return w, nil
 }
 
-// LDL returns an error indicating it is not yet implemented.
-func LDL(_ [][]float64) ([][]float64, []float64, error) {
-	return nil, nil, errors.New("scigo.LDL: not yet implemented")
+// ---------------------------------------------------------------------------
+// LDL Decomposition
+// ---------------------------------------------------------------------------
+
+// LDL computes the LDL decomposition of a symmetric matrix: A = L*D*L^T
+// where L is lower triangular with unit diagonal and D is a diagonal vector.
+// Returns L as a full matrix and d as the diagonal entries.
+func LDL(a [][]float64) (l [][]float64, d []float64, err error) {
+	n := len(a)
+	if n == 0 {
+		return nil, nil, errors.New("scigo.LDL: empty matrix")
+	}
+	for _, row := range a {
+		if len(row) != n {
+			return nil, nil, errors.New("scigo.LDL: matrix must be square")
+		}
+	}
+
+	l = make([][]float64, n)
+	for i := 0; i < n; i++ {
+		l[i] = make([]float64, n)
+		l[i][i] = 1
+	}
+	d = make([]float64, n)
+
+	for j := 0; j < n; j++ {
+		// Compute d[j] = a[j][j] - sum_{k=0}^{j-1} l[j][k]^2 * d[k]
+		sum := 0.0
+		for k := 0; k < j; k++ {
+			sum += l[j][k] * l[j][k] * d[k]
+		}
+		d[j] = a[j][j] - sum
+
+		// Compute l[i][j] for i > j
+		for i := j + 1; i < n; i++ {
+			sum = 0.0
+			for k := 0; k < j; k++ {
+				sum += l[i][k] * l[j][k] * d[k]
+			}
+			if math.Abs(d[j]) < 1e-14 {
+				l[i][j] = 0
+			} else {
+				l[i][j] = (a[i][j] - sum) / d[j]
+			}
+		}
+	}
+
+	return l, d, nil
 }
 
-// Interpolative returns an error indicating it is not yet implemented.
-func Interpolative(_ [][]float64, _ int) ([]int, [][]float64, error) {
-	return nil, nil, errors.New("scigo.Interpolative: not yet implemented")
+// ---------------------------------------------------------------------------
+// Interpolative Decomposition
+// ---------------------------------------------------------------------------
+
+// Interpolative computes the interpolative decomposition of a matrix using
+// column-pivoted QR factorization. It selects k columns that best approximate
+// the matrix. Returns the column indices and the projection matrix such that
+// A ≈ A[:, idx] * proj.
+func Interpolative(a [][]float64, k int) (idx []int, proj [][]float64, err error) {
+	m := len(a)
+	if m == 0 {
+		return nil, nil, errors.New("scigo.Interpolative: empty matrix")
+	}
+	n := len(a[0])
+	if k <= 0 || k > n {
+		return nil, nil, errors.New("scigo.Interpolative: k must be in [1, n]")
+	}
+	if k > m {
+		return nil, nil, errors.New("scigo.Interpolative: k must not exceed number of rows")
+	}
+
+	// Column-pivoted QR: we work on a transposed copy to pivot columns.
+	// We'll work with the matrix columns directly.
+	// Copy columns.
+	cols := make([][]float64, n)
+	for j := 0; j < n; j++ {
+		cols[j] = make([]float64, m)
+		for i := 0; i < m; i++ {
+			cols[j][i] = a[i][j]
+		}
+	}
+
+	// Compute column norms.
+	piv := make([]int, n)
+	for i := range piv {
+		piv[i] = i
+	}
+	norms := make([]float64, n)
+	for j := 0; j < n; j++ {
+		s := 0.0
+		for i := 0; i < m; i++ {
+			s += cols[j][i] * cols[j][i]
+		}
+		norms[j] = s
+	}
+
+	// Build R matrix (k x n) by performing k steps of pivoted QR on the columns.
+	r := make([][]float64, k)
+	for i := range r {
+		r[i] = make([]float64, n)
+	}
+
+	for step := 0; step < k; step++ {
+		// Find pivot: column with largest remaining norm.
+		maxNorm := norms[step]
+		maxIdx := step
+		for j := step + 1; j < n; j++ {
+			if norms[j] > maxNorm {
+				maxNorm = norms[j]
+				maxIdx = j
+			}
+		}
+		// Swap columns.
+		cols[step], cols[maxIdx] = cols[maxIdx], cols[step]
+		piv[step], piv[maxIdx] = piv[maxIdx], piv[step]
+		norms[step], norms[maxIdx] = norms[maxIdx], norms[step]
+		// Also swap already computed R entries.
+		for i := 0; i < step; i++ {
+			r[i][step], r[i][maxIdx] = r[i][maxIdx], r[i][step]
+		}
+
+		// Compute Householder reflection for cols[step][step:m].
+		x := make([]float64, m-step)
+		for i := 0; i < m-step; i++ {
+			x[i] = cols[step][step+i]
+		}
+		alpha := vecNorm(x)
+		if x[0] > 0 {
+			alpha = -alpha
+		}
+		x[0] -= alpha
+		xn := vecNorm(x)
+
+		r[step][step] = alpha
+
+		if xn > 1e-14 {
+			for i := range x {
+				x[i] /= xn
+			}
+
+			// Apply Householder to remaining columns.
+			for j := step + 1; j < n; j++ {
+				dot := 0.0
+				for i := 0; i < m-step; i++ {
+					dot += x[i] * cols[j][step+i]
+				}
+				for i := 0; i < m-step; i++ {
+					cols[j][step+i] -= 2 * x[i] * dot
+				}
+				r[step][j] = cols[j][step]
+
+				// Update norm.
+				norms[j] -= cols[j][step] * cols[j][step]
+				if norms[j] < 0 {
+					norms[j] = 0
+				}
+			}
+		}
+	}
+
+	// idx = piv[:k]
+	idx = make([]int, k)
+	copy(idx, piv[:k])
+
+	// proj = R11^{-1} * R12 where R11 = R[:k, :k] and R12 = R[:k, k:n]
+	// R11 is upper triangular.
+	// proj has dimension k x n; first k columns form identity.
+	proj = make([][]float64, k)
+	for i := 0; i < k; i++ {
+		proj[i] = make([]float64, n)
+	}
+	// Identity for the first k columns (in the pivoted ordering).
+	for i := 0; i < k; i++ {
+		proj[i][piv[i]] = 1
+	}
+	// Solve R11 * X = R12 for each column j >= k.
+	for jj := k; jj < n; jj++ {
+		// Extract column jj of R12.
+		rhs := make([]float64, k)
+		for i := 0; i < k; i++ {
+			rhs[i] = r[i][jj]
+		}
+		// Back-substitution with R11 (upper triangular).
+		sol := make([]float64, k)
+		for i := k - 1; i >= 0; i-- {
+			s := rhs[i]
+			for j := i + 1; j < k; j++ {
+				s -= r[i][j] * sol[j]
+			}
+			if math.Abs(r[i][i]) < 1e-14 {
+				sol[i] = 0
+			} else {
+				sol[i] = s / r[i][i]
+			}
+		}
+		for i := 0; i < k; i++ {
+			proj[i][piv[jj]] = sol[i]
+		}
+	}
+
+	return idx, proj, nil
 }
 
 // ---------------------------------------------------------------------------

@@ -238,6 +238,66 @@ func Logsumexp(values []float64) float64 {
 	return maxVal + math.Log(sum)
 }
 
+// Betaln returns the natural logarithm of the Beta function: ln(B(a, b)).
+// B(a, b) = Gamma(a)*Gamma(b) / Gamma(a+b).
+func Betaln(a, b float64) float64 {
+	return Gammaln(a) + Gammaln(b) - Gammaln(a+b)
+}
+
+// Comb returns the number of combinations C(n, k) = n! / (k! * (n-k)!).
+// Uses Gammaln for numerical stability with large values.
+// Returns 0 if k < 0 or k > n.
+func Comb(n, k int) float64 {
+	if k < 0 || k > n {
+		return 0
+	}
+	if k == 0 || k == n {
+		return 1
+	}
+	return math.Exp(Gammaln(float64(n)+1) - Gammaln(float64(k)+1) - Gammaln(float64(n-k)+1))
+}
+
+// Factorial returns n! as a float64.
+// Uses Gammaln for numerical stability: n! = exp(Gammaln(n+1)).
+// Returns NaN for negative n.
+func Factorial(n int) float64 {
+	if n < 0 {
+		return math.NaN()
+	}
+	if n == 0 || n == 1 {
+		return 1
+	}
+	return math.Exp(Gammaln(float64(n) + 1))
+}
+
+// Softmax computes the softmax function in a numerically stable way.
+// softmax(x_i) = exp(x_i - max) / sum(exp(x_j - max)).
+// Panics if values is empty.
+func Softmax(values []float64) []float64 {
+	if len(values) == 0 {
+		panic("scigo: Softmax: values must not be empty")
+	}
+
+	// Find max for numerical stability.
+	maxVal := values[0]
+	for _, v := range values[1:] {
+		if v > maxVal {
+			maxVal = v
+		}
+	}
+
+	result := make([]float64, len(values))
+	sum := 0.0
+	for i, v := range values {
+		result[i] = math.Exp(v - maxVal)
+		sum += result[i]
+	}
+	for i := range result {
+		result[i] /= sum
+	}
+	return result
+}
+
 // RegularizedIncompleteBeta computes the regularized incomplete beta function I_x(a, b).
 // I_x(a, b) = B(x; a, b) / B(a, b), where B(x; a, b) is the incomplete beta function.
 // Uses the continued fraction representation from Numerical Recipes.

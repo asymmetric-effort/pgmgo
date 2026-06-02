@@ -874,10 +874,160 @@ func Direct(f func([]float64) float64, bounds [][2]float64) (*OptResult, error) 
 	}, nil
 }
 
-// MILP returns an error indicating that mixed-integer linear programming
-// is not implemented. A full MILP solver requires significant infrastructure
-// (branch-and-bound, cutting planes, etc.) that is beyond the scope of this package.
-func MILP(_ []float64, _ [][]float64, _ []float64, _ [][]float64, _ []float64, _ []bool) (*OptResult, error) {
-	return nil, errors.New("scigo: MILP: mixed-integer linear programming is not implemented; " +
-		"use a dedicated solver such as GLPK, CPLEX, or Gurobi")
+// MILP solves a mixed-integer linear programming problem using branch-and-bound
+// on top of the existing Linprog (LP relaxation).
+//
+//	minimize    c^T x
+//	subject to  Aub * x <= bub
+//	            x >= 0
+//	            x[i] is integer for all i where integrality[i] is true
+//
+// This is a simplified implementation suitable for small problems only.
+// Aub/bub can be nil for no inequality constraints.
+func MILP(c []float64, Aub [][]float64, bub []float64, integrality []bool) (*OptResult, error) {
+	nVars := len(c)
+	if nVars == 0 {
+		return nil, errors.New("scigo: MILP: c must not be empty")
+	}
+	if integrality != nil && len(integrality) != nVars {
+		return nil, errors.New("scigo: MILP: integrality must have same length as c")
+	}
+
+	// If no integrality constraints, just solve the LP.
+	hasInt := false
+	if integrality != nil {
+		for _, v := range integrality {
+			if v {
+				hasInt = true
+				break
+			}
+		}
+	}
+	if !hasInt {
+		return Linprog(c, Aub, bub, nil, nil)
+	}
+
+	type node struct {
+		extraAub [][]float64
+		extraBub []float64
+	}
+
+	bestFun := math.Inf(1)
+	var bestX []float64
+
+	// Branch-and-bound using a stack (DFS).
+	stack := []node{{nil, nil}}
+	maxNodes := 10000
+	visited := 0
+
+	for len(stack) > 0 && visited < maxNodes {
+		visited++
+		// Pop from stack.
+		cur := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		// Build full constraint set.
+		totalIneq := len(Aub) + len(cur.extraAub)
+		fullAub := make([][]float64, 0, totalIneq)
+		fullBub := make([]float64, 0, totalIneq)
+		if Aub != nil {
+			fullAub = append(fullAub, Aub...)
+			fullBub = append(fullBub, bub...)
+		}
+		fullAub = append(fullAub, cur.extraAub...)
+		fullBub = append(fullBub, cur.extraBub...)
+
+		var res *OptResult
+		var err error
+		if len(fullAub) == 0 {
+			res, err = Linprog(c, nil, nil, nil, nil)
+		} else {
+			res, err = Linprog(c, fullAub, fullBub, nil, nil)
+		}
+		if err != nil || !res.Success {
+			continue // Infeasible or unbounded, prune.
+		}
+
+		// Prune if LP relaxation is worse than best known.
+		if res.Fun >= bestFun-1e-10 {
+			continue
+		}
+
+		// Check if all integer variables are integral.
+		fracIdx := -1
+		maxFrac := 0.0
+		for i := 0; i < nVars; i++ {
+			if integrality[i] {
+				rounded := math.Round(res.X[i])
+				frac := math.Abs(res.X[i] - rounded)
+				if frac > 1e-6 && frac > maxFrac {
+					maxFrac = frac
+					fracIdx = i
+				}
+			}
+		}
+
+		if fracIdx == -1 {
+			// All integer constraints satisfied.
+			if res.Fun < bestFun {
+				bestFun = res.Fun
+				bestX = make([]float64, nVars)
+				copy(bestX, res.X)
+			}
+			continue
+		}
+
+		// Branch on fracIdx.
+		val := res.X[fracIdx]
+		floorVal := math.Floor(val)
+		ceilVal := math.Ceil(val)
+
+		// Left branch: x[fracIdx] <= floor(val)
+		// Encode as: 1*x[fracIdx] <= floorVal
+		leftRow := make([]float64, nVars)
+		leftRow[fracIdx] = 1
+		leftExtra := make([][]float64, len(cur.extraAub)+1)
+		leftBubExtra := make([]float64, len(cur.extraBub)+1)
+		copy(leftExtra, cur.extraAub)
+		copy(leftBubExtra, cur.extraBub)
+		leftExtra[len(cur.extraAub)] = leftRow
+		leftBubExtra[len(cur.extraBub)] = floorVal
+
+		// Right branch: x[fracIdx] >= ceil(val) => -x[fracIdx] <= -ceilVal
+		rightRow := make([]float64, nVars)
+		rightRow[fracIdx] = -1
+		rightExtra := make([][]float64, len(cur.extraAub)+1)
+		rightBubExtra := make([]float64, len(cur.extraBub)+1)
+		copy(rightExtra, cur.extraAub)
+		copy(rightBubExtra, cur.extraBub)
+		rightExtra[len(cur.extraAub)] = rightRow
+		rightBubExtra[len(cur.extraBub)] = -ceilVal
+
+		stack = append(stack,
+			node{leftExtra, leftBubExtra},
+			node{rightExtra, rightBubExtra},
+		)
+	}
+
+	if bestX == nil {
+		return nil, errors.New("scigo: MILP: no feasible integer solution found")
+	}
+
+	// Round integer variables to clean values.
+	for i := 0; i < nVars; i++ {
+		if integrality[i] {
+			bestX[i] = math.Round(bestX[i])
+		}
+	}
+	fun := 0.0
+	for i := 0; i < nVars; i++ {
+		fun += c[i] * bestX[i]
+	}
+
+	return &OptResult{
+		X:       bestX,
+		Fun:     fun,
+		Success: true,
+		Nit:     visited,
+	}, nil
 }
