@@ -23,6 +23,7 @@ export function Cli() {
             <tr><th>Command</th><th>Description</th></tr>
           </thead>
           <tbody>
+            <tr><td><code>validate &lt;file&gt;</code></td><td>Validate a BIF model file</td></tr>
             <tr><td><code>version</code></td><td>Print version information</td></tr>
             <tr><td><code>help</code></td><td>Show help message</td></tr>
           </tbody>
