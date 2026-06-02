@@ -91,7 +91,7 @@ func TestRunValidate_ValidFile(t *testing.T) {
 }
 
 func TestVersion(t *testing.T) {
-	if version != "0.0.12" {
-		t.Errorf("expected version 0.0.12, got %s", version)
+	if version != "0.0.13" {
+		t.Errorf("expected version 0.0.13, got %s", version)
 	}
 }

@@ -198,3 +198,110 @@ func (c *ChiSquared) Var() float64 {
 func (c *ChiSquared) SurvivalFunction(x float64) float64 {
 	return 1 - c.CDF(x)
 }
+
+// ---------------------------------------------------------------------------
+// Student's t-Distribution
+// ---------------------------------------------------------------------------
+
+// TDistribution represents a Student's t-distribution with df degrees of freedom.
+type TDistribution struct {
+	df float64
+}
+
+// NewTDistribution creates a TDistribution with the given degrees of freedom.
+// Panics if df <= 0.
+func NewTDistribution(df float64) *TDistribution {
+	if df <= 0 {
+		panic("scigo: TDistribution df must be positive")
+	}
+	return &TDistribution{df: df}
+}
+
+// PDF returns the probability density of the t-distribution at x.
+func (td *TDistribution) PDF(x float64) float64 {
+	v := td.df
+	coeff := math.Exp(Gammaln((v+1)/2) - Gammaln(v/2))
+	coeff /= math.Sqrt(v * math.Pi)
+	return coeff * math.Pow(1+x*x/v, -(v+1)/2)
+}
+
+// CDF returns the cumulative distribution function of the t-distribution at x.
+// Uses the regularized incomplete beta function: CDF(x) = 1 - 0.5*I(v/(v+x^2); v/2, 1/2) for x >= 0.
+func (td *TDistribution) CDF(x float64) float64 {
+	v := td.df
+	if x == 0 {
+		return 0.5
+	}
+	// Use the relationship: CDF(t) = 1 - 0.5 * I_x(a, b)
+	// where x = v/(v+t^2), a = v/2, b = 1/2
+	bt := v / (v + x*x)
+	ib := RegularizedIncompleteBeta(bt, v/2, 0.5)
+	if x >= 0 {
+		return 1 - 0.5*ib
+	}
+	return 0.5 * ib
+}
+
+// SurvivalFunction returns the survival function (1 - CDF) at x.
+// This is the two-tailed p-value when called as 2*SF(|t|).
+func (td *TDistribution) SurvivalFunction(x float64) float64 {
+	return 1 - td.CDF(x)
+}
+
+// LogPDF returns the natural log of the PDF at x.
+func (td *TDistribution) LogPDF(x float64) float64 {
+	v := td.df
+	return Gammaln((v+1)/2) - Gammaln(v/2) - 0.5*math.Log(v*math.Pi) - (v+1)/2*math.Log(1+x*x/v)
+}
+
+// Mean returns the mean of the t-distribution (0 for df > 1, NaN otherwise).
+func (td *TDistribution) Mean() float64 {
+	if td.df > 1 {
+		return 0
+	}
+	return math.NaN()
+}
+
+// Var returns the variance of the t-distribution.
+func (td *TDistribution) Var() float64 {
+	if td.df > 2 {
+		return td.df / (td.df - 2)
+	}
+	if td.df > 1 {
+		return math.Inf(1)
+	}
+	return math.NaN()
+}
+
+// PPF returns the percent point function (inverse CDF) for probability p.
+// Uses Newton's method.
+func (td *TDistribution) PPF(p float64) float64 {
+	if p <= 0 {
+		return math.Inf(-1)
+	}
+	if p >= 1 {
+		return math.Inf(1)
+	}
+	if p == 0.5 {
+		return 0
+	}
+
+	// Initial guess from normal approximation
+	n := NewNormal(0, 1)
+	x := n.PPF(p)
+
+	// Newton's method
+	for i := 0; i < 50; i++ {
+		cdfVal := td.CDF(x)
+		pdfVal := td.PDF(x)
+		if pdfVal == 0 {
+			break
+		}
+		dx := (cdfVal - p) / pdfVal
+		x -= dx
+		if math.Abs(dx) < 1e-12*(1+math.Abs(x)) {
+			break
+		}
+	}
+	return x
+}

@@ -237,3 +237,81 @@ func Logsumexp(values []float64) float64 {
 
 	return maxVal + math.Log(sum)
 }
+
+// RegularizedIncompleteBeta computes the regularized incomplete beta function I_x(a, b).
+// I_x(a, b) = B(x; a, b) / B(a, b), where B(x; a, b) is the incomplete beta function.
+// Uses the continued fraction representation from Numerical Recipes.
+func RegularizedIncompleteBeta(x, a, b float64) float64 {
+	if x < 0 || x > 1 {
+		return math.NaN()
+	}
+	if x == 0 {
+		return 0
+	}
+	if x == 1 {
+		return 1
+	}
+
+	// Use the symmetry relation when x > (a+1)/(a+b+2) for better convergence
+	if x > (a+1)/(a+b+2) {
+		return 1 - RegularizedIncompleteBeta(1-x, b, a)
+	}
+
+	lbeta := Gammaln(a) + Gammaln(b) - Gammaln(a+b)
+	bt := math.Exp(a*math.Log(x) + b*math.Log(1-x) - lbeta)
+
+	return bt * betacf(a, b, x) / a
+}
+
+// betacf evaluates the continued fraction for the incomplete beta function
+// using the modified Lentz's method (Numerical Recipes algorithm).
+func betacf(a, b, x float64) float64 {
+	const maxIter = 200
+	const eps = 1e-14
+	const fpmin = 1e-30
+
+	qab := a + b
+	qap := a + 1
+	qam := a - 1
+	c := 1.0
+	d := 1 - qab*x/qap
+	if math.Abs(d) < fpmin {
+		d = fpmin
+	}
+	d = 1.0 / d
+	h := d
+
+	for m := 1; m <= maxIter; m++ {
+		fm := float64(m)
+		// Even step
+		aa := fm * (b - fm) * x / ((qam + 2*fm) * (a + 2*fm))
+		d = 1 + aa*d
+		if math.Abs(d) < fpmin {
+			d = fpmin
+		}
+		c = 1 + aa/c
+		if math.Abs(c) < fpmin {
+			c = fpmin
+		}
+		d = 1.0 / d
+		h *= d * c
+
+		// Odd step
+		aa = -(a + fm) * (qab + fm) * x / ((a + 2*fm) * (qap + 2*fm))
+		d = 1 + aa*d
+		if math.Abs(d) < fpmin {
+			d = fpmin
+		}
+		c = 1 + aa/c
+		if math.Abs(c) < fpmin {
+			c = fpmin
+		}
+		d = 1.0 / d
+		del := d * c
+		h *= del
+		if math.Abs(del-1) < eps {
+			break
+		}
+	}
+	return h
+}
