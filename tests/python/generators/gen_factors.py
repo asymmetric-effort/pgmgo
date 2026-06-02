@@ -5,7 +5,7 @@ Generates test cases by exercising pgmpy's factor classes,
 capturing inputs and expected outputs as fixture data.
 """
 
-from pgmpy.factors.discrete import DiscreteFactor, TabularCPD
+from pgmpy.factors.discrete import DiscreteFactor, JointProbabilityDistribution, TabularCPD
 import numpy as np
 
 
@@ -37,6 +37,7 @@ def generate() -> list[dict]:
     test_cases.append(_test_discrete_factor_reduce())
     test_cases.append(_test_discrete_factor_product())
     test_cases.append(_test_tabular_cpd_creation())
+    test_cases.append(_test_joint_probability_distribution())
 
     return test_cases
 
@@ -149,5 +150,38 @@ def _test_tabular_cpd_creation():
             "variables": sorted(list(cpd.variables)),
             "cardinality": [int(c) for c in cpd.cardinality],
             "values": cpd.get_values().tolist(),
+        },
+    }
+
+
+def _test_joint_probability_distribution():
+    """Test JointProbabilityDistribution creation and marginal computation."""
+    jpd = JointProbabilityDistribution(
+        ["X", "Y"], [2, 2], [0.3, 0.1, 0.2, 0.4],
+    )
+
+    marginal_x = jpd.marginal_distribution(["X"], inplace=False)
+    marginal_y = jpd.marginal_distribution(["Y"], inplace=False)
+
+    return {
+        "name": "joint_probability_distribution",
+        "description": "Create 2-variable JPD and compute marginals",
+        "input": {
+            "variables": ["X", "Y"],
+            "cardinality": [2, 2],
+            "values": [0.3, 0.1, 0.2, 0.4],
+        },
+        "expected": {
+            "variables": sorted(list(jpd.variables)),
+            "cardinality": [int(c) for c in jpd.cardinality],
+            "values": jpd.values.flatten().tolist(),
+            "marginal_x": {
+                "variables": sorted(list(marginal_x.variables)),
+                "values": marginal_x.values.flatten().tolist(),
+            },
+            "marginal_y": {
+                "variables": sorted(list(marginal_y.variables)),
+                "values": marginal_y.values.flatten().tolist(),
+            },
         },
     }

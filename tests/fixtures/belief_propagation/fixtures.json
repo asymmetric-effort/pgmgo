@@ -1,9 +1,9 @@
 {
-  "generator": "inference",
+  "generator": "belief_propagation",
   "pgmpy_version": "1.1.2",
   "test_cases": [
     {
-      "description": "Query P(G | D=0, I=1) on student network",
+      "description": "BP query P(G | D=0, I=1) on student network",
       "expected": {
         "values": [
           0.05,
@@ -136,58 +136,19 @@
           "G"
         ]
       },
-      "name": "variable_elimination_query"
+      "name": "belief_propagation_query_g"
     },
     {
-      "description": "MAP query for G, L given D=0, I=0 on student network",
+      "description": "BP query P(L | I=0) on student network",
       "expected": {
-        "map_assignment": {
-          "G": 2,
-          "L": 0
-        }
-      },
-      "input": {
-        "edges": [
-          [
-            "D",
-            "G"
-          ],
-          [
-            "I",
-            "G"
-          ],
-          [
-            "G",
-            "L"
-          ],
-          [
-            "I",
-            "S"
-          ]
+        "values": [
+          0.34892,
+          0.65108
         ],
-        "evidence": {
-          "D": 0,
-          "I": 0
-        },
-        "query_variables": [
-          "G",
+        "variables": [
           "L"
         ]
       },
-      "name": "variable_elimination_map"
-    },
-    {
-      "description": "BP query P(G | D=0, I=1) on student network (matches VE)",
-      "expected": {
-        "values": [
-          0.05,
-          0.25,
-          0.7
-        ],
-        "variables": [
-          "G"
-        ]
-      },
       "input": {
         "cpds": {
           "D": {
@@ -303,14 +264,13 @@
           ]
         ],
         "evidence": {
-          "D": 0,
-          "I": 1
+          "I": 0
         },
         "query_variables": [
-          "G"
+          "L"
         ]
       },
-      "name": "belief_propagation_query"
+      "name": "belief_propagation_query_l"
     }
   ]
 }

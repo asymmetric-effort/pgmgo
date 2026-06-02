@@ -189,3 +189,81 @@ func TestCrossval_VariableEliminationMAP(t *testing.T) {
 		}
 	}
 }
+
+func TestCrossval_BeliefPropagationQuery(t *testing.T) {
+	ff := testutil.LoadFixtures(t, "inference/fixtures.json")
+	tc := ff.FindTestCase(t, "belief_propagation_query")
+
+	var input struct {
+		Edges          [][]string     `json:"edges"`
+		QueryVariables []string       `json:"query_variables"`
+		Evidence       map[string]int `json:"evidence"`
+		CPDs           map[string]struct {
+			VariableCard int         `json:"variable_card"`
+			Values       [][]float64 `json:"values"`
+			Evidence     []string    `json:"evidence"`
+			EvidenceCard []int       `json:"evidence_card"`
+		} `json:"cpds"`
+	}
+	tc.UnmarshalInput(t, &input)
+
+	var expected struct {
+		Variables []string  `json:"variables"`
+		Values    []float64 `json:"values"`
+	}
+	tc.UnmarshalExpected(t, &expected)
+
+	// Build BN, create JunctionTree, extract cliques/separators/factors.
+	bn := buildStudentBN(t, input.Edges, input.CPDs)
+
+	jt, err := models.NewJunctionTreeFromBN(bn)
+	if err != nil {
+		t.Fatalf("NewJunctionTreeFromBN failed: %v", err)
+	}
+
+	cliques := jt.Cliques()
+	separators := jt.SeparatorSets()
+
+	// Build clique factors map from the junction tree.
+	cliqueFactors := make(map[int][]*factors.DiscreteFactor, len(cliques))
+	for i, c := range cliques {
+		fs := jt.GetCliqueFactors(c)
+		if len(fs) > 0 {
+			cliqueFactors[i] = fs
+		}
+	}
+
+	// Create BeliefPropagation, Calibrate, and Query.
+	bp := inference.NewBeliefPropagation(cliques, separators, cliqueFactors)
+	if err := bp.Calibrate(); err != nil {
+		t.Fatalf("Calibrate failed: %v", err)
+	}
+
+	result, err := bp.Query(input.QueryVariables, input.Evidence)
+	if err != nil {
+		t.Fatalf("BP Query failed: %v", err)
+	}
+
+	// Verify result variables match expected.
+	gotVars := result.Variables()
+	if len(gotVars) != len(expected.Variables) {
+		t.Fatalf("result variables: expected %v, got %v", expected.Variables, gotVars)
+	}
+	for i := range expected.Variables {
+		if gotVars[i] != expected.Variables[i] {
+			t.Errorf("result variables[%d]: expected %q, got %q", i, expected.Variables[i], gotVars[i])
+		}
+	}
+
+	// Compare result values against pgmpy's expected values with tolerance.
+	gotValues := result.Values().Data()
+	if len(gotValues) != len(expected.Values) {
+		t.Fatalf("result values length: expected %d, got %d", len(expected.Values), len(gotValues))
+	}
+	for i := range expected.Values {
+		if math.Abs(gotValues[i]-expected.Values[i]) > 1e-6 {
+			t.Errorf("result values[%d]: expected %f, got %f (diff=%e)",
+				i, expected.Values[i], gotValues[i], math.Abs(gotValues[i]-expected.Values[i]))
+		}
+	}
+}

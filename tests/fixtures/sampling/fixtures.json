@@ -1,18 +1,181 @@
 {
-  "generator": "inference",
+  "generator": "sampling",
   "pgmpy_version": "1.1.2",
   "test_cases": [
     {
-      "description": "Query P(G | D=0, I=1) on student network",
+      "description": "Forward sample 10000 from student BN with seed=42, check empirical marginals",
       "expected": {
-        "values": [
-          0.05,
-          0.25,
-          0.7
+        "marginals": {
+          "D": [
+            0.6108,
+            0.3892
+          ],
+          "G": [
+            0.4377,
+            0.2741,
+            0.2882
+          ],
+          "I": [
+            0.6928,
+            0.3072
+          ],
+          "L": [
+            0.4425,
+            0.5575
+          ],
+          "S": [
+            0.7207,
+            0.2793
+          ]
+        },
+        "tolerance": 0.05
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
         ],
-        "variables": [
-          "G"
-        ]
+        "n_samples": 10000,
+        "seed": 42
+      },
+      "name": "forward_sampling"
+    },
+    {
+      "description": "Likelihood-weighted sample with evidence D=0, I=1",
+      "expected": {
+        "marginals": {
+          "D": [
+            1.0,
+            0.0
+          ],
+          "G": [
+            0.04930000000000001,
+            0.256,
+            0.6947000000000002
+          ],
+          "I": [
+            0.0,
+            1.0
+          ],
+          "L": [
+            0.7884000000000001,
+            0.21160000000000004
+          ],
+          "S": [
+            0.19670000000000004,
+            0.8033000000000002
+          ]
+        },
+        "tolerance": 0.05
       },
       "input": {
         "cpds": {
@@ -132,185 +295,10 @@
           "D": 0,
           "I": 1
         },
-        "query_variables": [
-          "G"
-        ]
+        "n_samples": 10000,
+        "seed": 42
       },
-      "name": "variable_elimination_query"
-    },
-    {
-      "description": "MAP query for G, L given D=0, I=0 on student network",
-      "expected": {
-        "map_assignment": {
-          "G": 2,
-          "L": 0
-        }
-      },
-      "input": {
-        "edges": [
-          [
-            "D",
-            "G"
-          ],
-          [
-            "I",
-            "G"
-          ],
-          [
-            "G",
-            "L"
-          ],
-          [
-            "I",
-            "S"
-          ]
-        ],
-        "evidence": {
-          "D": 0,
-          "I": 0
-        },
-        "query_variables": [
-          "G",
-          "L"
-        ]
-      },
-      "name": "variable_elimination_map"
-    },
-    {
-      "description": "BP query P(G | D=0, I=1) on student network (matches VE)",
-      "expected": {
-        "values": [
-          0.05,
-          0.25,
-          0.7
-        ],
-        "variables": [
-          "G"
-        ]
-      },
-      "input": {
-        "cpds": {
-          "D": {
-            "values": [
-              [
-                0.6
-              ],
-              [
-                0.4
-              ]
-            ],
-            "variable_card": 2
-          },
-          "G": {
-            "evidence": [
-              "D",
-              "I"
-            ],
-            "evidence_card": [
-              2,
-              2
-            ],
-            "values": [
-              [
-                0.3,
-                0.05,
-                0.9,
-                0.5
-              ],
-              [
-                0.4,
-                0.25,
-                0.08,
-                0.3
-              ],
-              [
-                0.3,
-                0.7,
-                0.02,
-                0.2
-              ]
-            ],
-            "variable_card": 3
-          },
-          "I": {
-            "values": [
-              [
-                0.7
-              ],
-              [
-                0.3
-              ]
-            ],
-            "variable_card": 2
-          },
-          "L": {
-            "evidence": [
-              "G"
-            ],
-            "evidence_card": [
-              3
-            ],
-            "values": [
-              [
-                0.1,
-                0.4,
-                0.99
-              ],
-              [
-                0.9,
-                0.6,
-                0.01
-              ]
-            ],
-            "variable_card": 2
-          },
-          "S": {
-            "evidence": [
-              "I"
-            ],
-            "evidence_card": [
-              2
-            ],
-            "values": [
-              [
-                0.95,
-                0.2
-              ],
-              [
-                0.05,
-                0.8
-              ]
-            ],
-            "variable_card": 2
-          }
-        },
-        "edges": [
-          [
-            "D",
-            "G"
-          ],
-          [
-            "I",
-            "G"
-          ],
-          [
-            "G",
-            "L"
-          ],
-          [
-            "I",
-            "S"
-          ]
-        ],
-        "evidence": {
-          "D": 0,
-          "I": 1
-        },
-        "query_variables": [
-          "G"
-        ]
-      },
-      "name": "belief_propagation_query"
+      "name": "likelihood_weighted_sampling"
     }
   ]
 }

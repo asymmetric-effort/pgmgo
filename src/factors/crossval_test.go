@@ -279,3 +279,61 @@ func TestCrossval_TabularCPDCreation(t *testing.T) {
 		t.Errorf("CPD validation failed: %v", err)
 	}
 }
+
+func TestCrossval_JointProbabilityDistribution(t *testing.T) {
+	ff := testutil.LoadFixtures(t, "factors/fixtures.json")
+	tc := ff.FindTestCase(t, "joint_probability_distribution")
+
+	var input struct {
+		Variables   []string  `json:"variables"`
+		Cardinality []int     `json:"cardinality"`
+		Values      []float64 `json:"values"`
+	}
+	tc.UnmarshalInput(t, &input)
+
+	var expected struct {
+		Variables   []string  `json:"variables"`
+		Cardinality []int     `json:"cardinality"`
+		Values      []float64 `json:"values"`
+		MarginalX   struct {
+			Variables []string  `json:"variables"`
+			Values    []float64 `json:"values"`
+		} `json:"marginal_x"`
+		MarginalY struct {
+			Variables []string  `json:"variables"`
+			Values    []float64 `json:"values"`
+		} `json:"marginal_y"`
+	}
+	tc.UnmarshalExpected(t, &expected)
+
+	// Create the JPD.
+	jpd, err := factors.NewJointProbabilityDistribution(input.Variables, input.Cardinality, input.Values)
+	if err != nil {
+		t.Fatalf("NewJointProbabilityDistribution failed: %v", err)
+	}
+
+	// Verify basic properties.
+	assertStringsEqual(t, "variables", sortedStrings(expected.Variables), sortedStrings(jpd.Variables()))
+	assertIntsEqual(t, "cardinality", expected.Cardinality, jpd.Cardinality())
+	assertFloat64sEqual(t, "values", expected.Values, jpd.Values().Data(), 1e-9)
+
+	// Compute and verify marginal over X.
+	margX, err := jpd.MarginalDistribution(expected.MarginalX.Variables)
+	if err != nil {
+		t.Fatalf("MarginalDistribution(%v) failed: %v", expected.MarginalX.Variables, err)
+	}
+	assertStringsEqual(t, "marginal_x variables",
+		sortedStrings(expected.MarginalX.Variables), sortedStrings(margX.Variables()))
+	assertFloat64sEqual(t, "marginal_x values",
+		expected.MarginalX.Values, margX.Values().Data(), 1e-6)
+
+	// Compute and verify marginal over Y.
+	margY, err := jpd.MarginalDistribution(expected.MarginalY.Variables)
+	if err != nil {
+		t.Fatalf("MarginalDistribution(%v) failed: %v", expected.MarginalY.Variables, err)
+	}
+	assertStringsEqual(t, "marginal_y variables",
+		sortedStrings(expected.MarginalY.Variables), sortedStrings(margY.Variables()))
+	assertFloat64sEqual(t, "marginal_y values",
+		expected.MarginalY.Values, margY.Values().Data(), 1e-6)
+}

@@ -275,6 +275,60 @@
         "variable_card": 3
       },
       "name": "tabular_cpd_creation"
+    },
+    {
+      "description": "Create 2-variable JPD and compute marginals",
+      "expected": {
+        "cardinality": [
+          2,
+          2
+        ],
+        "marginal_x": {
+          "values": [
+            0.4,
+            0.6000000000000001
+          ],
+          "variables": [
+            "X"
+          ]
+        },
+        "marginal_y": {
+          "values": [
+            0.5,
+            0.5
+          ],
+          "variables": [
+            "Y"
+          ]
+        },
+        "values": [
+          0.3,
+          0.1,
+          0.2,
+          0.4
+        ],
+        "variables": [
+          "X",
+          "Y"
+        ]
+      },
+      "input": {
+        "cardinality": [
+          2,
+          2
+        ],
+        "values": [
+          0.3,
+          0.1,
+          0.2,
+          0.4
+        ],
+        "variables": [
+          "X",
+          "Y"
+        ]
+      },
+      "name": "joint_probability_distribution"
     }
   ]
 }

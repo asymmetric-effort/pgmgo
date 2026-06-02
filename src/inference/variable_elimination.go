@@ -11,18 +11,28 @@ import (
 // from a Bayesian network's ToMarkovFactors (or constructed directly),
 // avoiding any direct dependency on the models package.
 type VariableElimination struct {
-	factors []*factors.DiscreteFactor
+	factors   []*factors.DiscreteFactor
+	heuristic string // elimination-order heuristic; empty means "min_neighbors"
 }
 
 // NewVariableElimination creates a new VariableElimination engine from the
 // given factor list. Each factor is deep-copied so the caller's originals
 // are not modified during inference.
-func NewVariableElimination(factorList []*factors.DiscreteFactor) *VariableElimination {
+//
+// An optional heuristic name may be provided to control the elimination
+// order. Supported values: "min_neighbors" (default), "min_fill",
+// "min_weight", "weighted_min_fill". If more than one heuristic is given
+// only the first is used.
+func NewVariableElimination(factorList []*factors.DiscreteFactor, heuristic ...string) *VariableElimination {
 	copied := make([]*factors.DiscreteFactor, len(factorList))
 	for i, f := range factorList {
 		copied[i] = f.Copy()
 	}
-	return &VariableElimination{factors: copied}
+	h := ""
+	if len(heuristic) > 0 {
+		h = heuristic[0]
+	}
+	return &VariableElimination{factors: copied, heuristic: h}
 }
 
 // Query computes P(queryVars | evidence) via variable elimination.
@@ -65,7 +75,14 @@ func (ve *VariableElimination) Query(queryVars []string, evidence map[string]int
 	}
 
 	// Step 2: determine elimination order.
-	order := MinNeighborsOrder(workingFactors, eliminateVars)
+	heuristic := ve.heuristic
+	if heuristic == "" {
+		heuristic = "min_neighbors"
+	}
+	order, err := GetEliminationOrder(workingFactors, eliminateVars, heuristic)
+	if err != nil {
+		return nil, fmt.Errorf("inference: elimination order failed: %w", err)
+	}
 
 	// Step 3: eliminate each variable in order.
 	for _, elimVar := range order {

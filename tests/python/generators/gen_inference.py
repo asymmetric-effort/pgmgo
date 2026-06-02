@@ -7,7 +7,7 @@ capturing inputs and expected outputs as fixture data.
 
 from pgmpy.models import DiscreteBayesianNetwork as BayesianNetwork
 from pgmpy.factors.discrete import TabularCPD
-from pgmpy.inference import VariableElimination
+from pgmpy.inference import BeliefPropagation, VariableElimination
 
 
 def generate() -> list[dict]:
@@ -16,6 +16,7 @@ def generate() -> list[dict]:
 
     test_cases.append(_test_variable_elimination_query())
     test_cases.append(_test_variable_elimination_map())
+    test_cases.append(_test_belief_propagation_query())
 
     return test_cases
 
@@ -119,5 +120,53 @@ def _test_variable_elimination_map():
         },
         "expected": {
             "map_assignment": dict(result),
+        },
+    }
+
+
+def _test_belief_propagation_query():
+    """Test BP marginal query with evidence (should match VE)."""
+    bn = _build_student_bn()
+    bp = BeliefPropagation(bn)
+
+    result = bp.query(variables=["G"], evidence={"D": 0, "I": 1})
+
+    return {
+        "name": "belief_propagation_query",
+        "description": "BP query P(G | D=0, I=1) on student network (matches VE)",
+        "input": {
+            "edges": [("D", "G"), ("I", "G"), ("G", "L"), ("I", "S")],
+            "cpds": {
+                "D": {"variable_card": 2, "values": [[0.6], [0.4]]},
+                "I": {"variable_card": 2, "values": [[0.7], [0.3]]},
+                "G": {
+                    "variable_card": 3,
+                    "values": [[0.3, 0.05, 0.9, 0.5],
+                               [0.4, 0.25, 0.08, 0.3],
+                               [0.3, 0.7, 0.02, 0.2]],
+                    "evidence": ["D", "I"],
+                    "evidence_card": [2, 2],
+                },
+                "L": {
+                    "variable_card": 2,
+                    "values": [[0.1, 0.4, 0.99],
+                               [0.9, 0.6, 0.01]],
+                    "evidence": ["G"],
+                    "evidence_card": [3],
+                },
+                "S": {
+                    "variable_card": 2,
+                    "values": [[0.95, 0.2],
+                               [0.05, 0.8]],
+                    "evidence": ["I"],
+                    "evidence_card": [2],
+                },
+            },
+            "query_variables": ["G"],
+            "evidence": {"D": 0, "I": 1},
+        },
+        "expected": {
+            "variables": sorted(list(result.variables)),
+            "values": [round(v, 10) for v in result.values.flatten().tolist()],
         },
     }
