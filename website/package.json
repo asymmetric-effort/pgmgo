@@ -1,6 +1,6 @@
 {
   "name": "pgmgo-website",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "pgmgo project website",
   "type": "module",
   "scripts": {
