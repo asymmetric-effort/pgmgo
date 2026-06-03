@@ -324,3 +324,631 @@ func TestNormalCDF_Values(t *testing.T) {
 		t.Errorf("expected CDF(10) near 1, got %f", normalCDF(10))
 	}
 }
+
+// ---------------------------------------------------------------------------
+// Additional coverage: crossFitResiduals success and error paths
+// ---------------------------------------------------------------------------
+
+func TestCrossFitResiduals_Success(t *testing.T) {
+	rng := rand.New(rand.NewSource(42))
+	n := 20
+	trainC := make([]float64, n)
+	trainT := make([]float64, n)
+	trainY := make([]float64, n)
+	for i := 0; i < n; i++ {
+		trainC[i] = rng.Float64()
+		trainT[i] = trainC[i] + rng.Float64()*0.5
+		trainY[i] = 2.0*trainT[i] + trainC[i] + rng.Float64()*0.1
+	}
+	trainData := makeDF(map[string][]float64{
+		"C": trainC, "T": trainT, "Y": trainY,
+	})
+	testC := []float64{0.5, 0.6, 0.7}
+	testT := []float64{0.8, 0.9, 1.0}
+	testY := []float64{2.5, 2.8, 3.1}
+	testData := makeDF(map[string][]float64{
+		"C": testC, "T": testT, "Y": testY,
+	})
+	yResid, tResid, err := crossFitResiduals(trainData, testData, "Y", "T", []string{"C"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(yResid) != 3 || len(tResid) != 3 {
+		t.Errorf("expected 3 residuals each, got %d and %d", len(yResid), len(tResid))
+	}
+}
+
+func TestCrossFitResiduals_MissingConfounderInTrain(t *testing.T) {
+	trainData := makeDF(map[string][]float64{
+		"Y": {1, 2, 3, 4, 5},
+		"T": {1, 2, 3, 4, 5},
+	})
+	testData := makeDF(map[string][]float64{
+		"Y": {6, 7},
+		"T": {6, 7},
+		"C": {6, 7},
+	})
+	_, _, err := crossFitResiduals(trainData, testData, "Y", "T", []string{"C"})
+	if err == nil {
+		t.Error("expected error for missing confounder in train data")
+	}
+}
+
+func TestCrossFitResiduals_MissingOutcomeInTrain(t *testing.T) {
+	trainData := makeDF(map[string][]float64{
+		"T": {1, 2, 3, 4, 5},
+		"C": {1, 2, 3, 4, 5},
+	})
+	testData := makeDF(map[string][]float64{
+		"Y": {6, 7},
+		"T": {6, 7},
+		"C": {6, 7},
+	})
+	_, _, err := crossFitResiduals(trainData, testData, "Y", "T", []string{"C"})
+	if err == nil {
+		t.Error("expected error for missing outcome in train data")
+	}
+}
+
+func TestCrossFitResiduals_MissingTreatmentInTrain(t *testing.T) {
+	trainData := makeDF(map[string][]float64{
+		"Y": {1, 2, 3, 4, 5},
+		"C": {1, 2, 3, 4, 5},
+	})
+	testData := makeDF(map[string][]float64{
+		"Y": {6, 7},
+		"T": {6, 7},
+		"C": {6, 7},
+	})
+	_, _, err := crossFitResiduals(trainData, testData, "Y", "T", []string{"C"})
+	if err == nil {
+		t.Error("expected error for missing treatment in train data")
+	}
+}
+
+func TestCrossFitResiduals_MissingConfounderInTest(t *testing.T) {
+	trainData := makeDF(map[string][]float64{
+		"Y": {1, 2, 3, 4, 5},
+		"T": {1, 2, 3, 4, 5},
+		"C": {1, 2, 3, 4, 5},
+	})
+	testData := makeDF(map[string][]float64{
+		"Y": {6, 7},
+		"T": {6, 7},
+	})
+	_, _, err := crossFitResiduals(trainData, testData, "Y", "T", []string{"C"})
+	if err == nil {
+		t.Error("expected error for missing confounder in test data")
+	}
+}
+
+func TestCrossFitResiduals_MissingOutcomeInTest(t *testing.T) {
+	trainData := makeDF(map[string][]float64{
+		"Y": {1, 2, 3, 4, 5},
+		"T": {1, 2, 3, 4, 5},
+		"C": {1, 2, 3, 4, 5},
+	})
+	testData := makeDF(map[string][]float64{
+		"T": {6, 7},
+		"C": {6, 7},
+	})
+	_, _, err := crossFitResiduals(trainData, testData, "Y", "T", []string{"C"})
+	if err == nil {
+		t.Error("expected error for missing outcome in test data")
+	}
+}
+
+func TestCrossFitResiduals_MissingTreatmentInTest(t *testing.T) {
+	trainData := makeDF(map[string][]float64{
+		"Y": {1, 2, 3, 4, 5},
+		"T": {1, 2, 3, 4, 5},
+		"C": {1, 2, 3, 4, 5},
+	})
+	testData := makeDF(map[string][]float64{
+		"Y": {6, 7},
+		"C": {6, 7},
+	})
+	_, _, err := crossFitResiduals(trainData, testData, "Y", "T", []string{"C"})
+	if err == nil {
+		t.Error("expected error for missing treatment in test data")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Additional coverage: DoubleML crossFit error propagation and den==0 path
+// ---------------------------------------------------------------------------
+
+func TestDoubleML_Fit_MoreFolds(t *testing.T) {
+	rng := rand.New(rand.NewSource(42))
+	n := 60
+	treatment := make([]float64, n)
+	outcome := make([]float64, n)
+	confounder := make([]float64, n)
+	for i := 0; i < n; i++ {
+		confounder[i] = rng.Float64()
+		treatment[i] = confounder[i] + rng.Float64()*0.5
+		outcome[i] = 2.0*treatment[i] + confounder[i] + rng.Float64()*0.1
+	}
+	df := makeDF(map[string][]float64{
+		"T": treatment,
+		"Y": outcome,
+		"C": confounder,
+	})
+	d := NewDoubleMLRegressor("T", "Y", []string{"C"})
+	d.SetNSplits(3)
+	err := d.Fit(df)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	ate := d.ATE()
+	if math.Abs(ate-2.0) > 1.0 {
+		t.Errorf("ATE too far from expected: %f", ate)
+	}
+}
+
+func TestDoubleML_Fit_CrossFitError(t *testing.T) {
+	// Missing confounder column => crossFitResiduals returns error
+	d := NewDoubleMLRegressor("T", "Y", []string{"C"})
+	df := makeDF(map[string][]float64{
+		"T": {1, 2, 3, 4, 5, 6, 7, 8},
+		"Y": {1, 2, 3, 4, 5, 6, 7, 8},
+	})
+	err := d.Fit(df)
+	if err == nil {
+		t.Error("expected error for missing confounder column")
+	}
+}
+
+func TestDoubleML_Fit_ZeroTreatmentResiduals(t *testing.T) {
+	// Treatment is perfectly predicted by confounders => residuals all zero => den==0
+	n := 20
+	treatment := make([]float64, n)
+	outcome := make([]float64, n)
+	confounder := make([]float64, n)
+	for i := 0; i < n; i++ {
+		confounder[i] = float64(i)
+		treatment[i] = 2.0 * float64(i) // perfectly linear
+		outcome[i] = float64(i) + 1.0
+	}
+	df := makeDF(map[string][]float64{
+		"T": treatment,
+		"Y": outcome,
+		"C": confounder,
+	})
+	d := NewDoubleMLRegressor("T", "Y", []string{"C"})
+	err := d.Fit(df)
+	if err == nil {
+		t.Error("expected error for zero treatment residuals")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Additional coverage: DoubleML Predict and CATE after multi-fold fit
+// ---------------------------------------------------------------------------
+
+func TestDoubleML_Predict_And_CATE(t *testing.T) {
+	rng := rand.New(rand.NewSource(42))
+	n := 100
+	treatment := make([]float64, n)
+	outcome := make([]float64, n)
+	confounder := make([]float64, n)
+	for i := 0; i < n; i++ {
+		confounder[i] = rng.Float64()
+		treatment[i] = confounder[i] + rng.Float64()*0.5
+		outcome[i] = 2.0*treatment[i] + confounder[i] + rng.Float64()*0.1
+	}
+	df := makeDF(map[string][]float64{
+		"T": treatment,
+		"Y": outcome,
+		"C": confounder,
+	})
+	d := NewDoubleMLRegressor("T", "Y", []string{"C"})
+	if err := d.Fit(df); err != nil {
+		t.Fatal(err)
+	}
+	preds, err := d.Predict(df)
+	if err != nil {
+		t.Fatalf("predict error: %v", err)
+	}
+	if len(preds) != n {
+		t.Errorf("expected %d predictions, got %d", n, len(preds))
+	}
+	cate, err := d.EstimateCate()
+	if err != nil {
+		t.Fatalf("CATE error: %v", err)
+	}
+	if len(cate) != n {
+		t.Errorf("expected %d CATE values, got %d", n, len(cate))
+	}
+	// Verify summary contains expected fields
+	s := d.Summary()
+	if len(s) == 0 {
+		t.Error("summary should not be empty")
+	}
+	// Verify SE and CI
+	se := d.SE()
+	if se <= 0 {
+		t.Errorf("SE should be positive, got %f", se)
+	}
+	lo, hi := d.ConfidenceInterval(0.05)
+	if lo >= hi {
+		t.Errorf("CI lower (%f) >= upper (%f)", lo, hi)
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Additional coverage: NaiveAdjustment error and additional paths
+// ---------------------------------------------------------------------------
+
+func TestNaiveAdjustment_Fit_MissingTreatmentColumn(t *testing.T) {
+	r := NewNaiveAdjustmentRegressor("T", "Y", []string{"C"})
+	df := makeDF(map[string][]float64{
+		"Y": {1, 2, 3},
+		"C": {1, 2, 3},
+	})
+	err := r.Fit(df)
+	if err == nil {
+		t.Error("expected error for missing treatment column")
+	}
+}
+
+func TestNaiveAdjustment_Fit_MissingOutcomeColumn(t *testing.T) {
+	r := NewNaiveAdjustmentRegressor("T", "Y", []string{"C"})
+	df := makeDF(map[string][]float64{
+		"T": {1, 2, 3},
+		"C": {1, 2, 3},
+	})
+	err := r.Fit(df)
+	if err == nil {
+		t.Error("expected error for missing outcome column")
+	}
+}
+
+func TestNaiveAdjustment_Predict_MissingColumn(t *testing.T) {
+	rng := rand.New(rand.NewSource(42))
+	n := 50
+	treatment := make([]float64, n)
+	outcome := make([]float64, n)
+	confounder := make([]float64, n)
+	for i := 0; i < n; i++ {
+		confounder[i] = rng.Float64()
+		treatment[i] = rng.Float64()
+		outcome[i] = 2.0*treatment[i] + confounder[i]
+	}
+	df := makeDF(map[string][]float64{
+		"T": treatment,
+		"Y": outcome,
+		"C": confounder,
+	})
+	r := NewNaiveAdjustmentRegressor("T", "Y", []string{"C"})
+	if err := r.Fit(df); err != nil {
+		t.Fatal(err)
+	}
+	badDF := makeDF(map[string][]float64{
+		"C": {1, 2},
+	})
+	_, err := r.Predict(badDF)
+	if err == nil {
+		t.Error("expected error for missing column in predict")
+	}
+}
+
+func TestNaiveAdjustment_Summary_Fitted(t *testing.T) {
+	rng := rand.New(rand.NewSource(42))
+	n := 50
+	treatment := make([]float64, n)
+	outcome := make([]float64, n)
+	confounder := make([]float64, n)
+	for i := 0; i < n; i++ {
+		confounder[i] = rng.Float64()
+		treatment[i] = rng.Float64()
+		outcome[i] = 2.0*treatment[i] + confounder[i]
+	}
+	df := makeDF(map[string][]float64{
+		"T": treatment,
+		"Y": outcome,
+		"C": confounder,
+	})
+	r := NewNaiveAdjustmentRegressor("T", "Y", []string{"C"})
+	if err := r.Fit(df); err != nil {
+		t.Fatal(err)
+	}
+	s := r.Summary()
+	if len(s) == 0 {
+		t.Error("summary should not be empty")
+	}
+	// Verify we can predict after fit
+	preds, err := r.Predict(df)
+	if err != nil {
+		t.Fatalf("predict error: %v", err)
+	}
+	if len(preds) != n {
+		t.Errorf("expected %d predictions, got %d", n, len(preds))
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Additional coverage: NaiveIV error and additional paths
+// ---------------------------------------------------------------------------
+
+func TestNaiveIV_Fit_MissingInstrumentColumn(t *testing.T) {
+	r := NewNaiveIVRegressor("T", "Y", []string{"Z"})
+	df := makeDF(map[string][]float64{
+		"T": {1, 2, 3},
+		"Y": {1, 2, 3},
+	})
+	err := r.Fit(df)
+	if err == nil {
+		t.Error("expected error for missing instrument column")
+	}
+}
+
+func TestNaiveIV_Fit_MissingTreatmentColumn(t *testing.T) {
+	r := NewNaiveIVRegressor("T", "Y", []string{"Z"})
+	df := makeDF(map[string][]float64{
+		"Y": {1, 2, 3},
+		"Z": {1, 2, 3},
+	})
+	err := r.Fit(df)
+	if err == nil {
+		t.Error("expected error for missing treatment column")
+	}
+}
+
+func TestNaiveIV_Fit_MissingOutcomeColumn(t *testing.T) {
+	r := NewNaiveIVRegressor("T", "Y", []string{"Z"})
+	df := makeDF(map[string][]float64{
+		"T": {1, 2, 3},
+		"Z": {1, 2, 3},
+	})
+	err := r.Fit(df)
+	if err == nil {
+		t.Error("expected error for missing outcome column")
+	}
+}
+
+func TestNaiveIV_Predict_MissingColumn(t *testing.T) {
+	rng := rand.New(rand.NewSource(42))
+	n := 50
+	instrument := make([]float64, n)
+	treatment := make([]float64, n)
+	outcome := make([]float64, n)
+	for i := 0; i < n; i++ {
+		instrument[i] = rng.Float64()
+		treatment[i] = instrument[i]*3 + rng.Float64()*0.1
+		outcome[i] = 2.0*treatment[i] + rng.Float64()*0.1
+	}
+	df := makeDF(map[string][]float64{
+		"T": treatment,
+		"Y": outcome,
+		"Z": instrument,
+	})
+	r := NewNaiveIVRegressor("T", "Y", []string{"Z"})
+	if err := r.Fit(df); err != nil {
+		t.Fatal(err)
+	}
+	badDF := makeDF(map[string][]float64{
+		"T": {1, 2},
+	})
+	_, err := r.Predict(badDF)
+	if err == nil {
+		t.Error("expected error for missing column in predict")
+	}
+}
+
+func TestNaiveIV_Summary_Fitted(t *testing.T) {
+	rng := rand.New(rand.NewSource(42))
+	n := 50
+	instrument := make([]float64, n)
+	treatment := make([]float64, n)
+	outcome := make([]float64, n)
+	for i := 0; i < n; i++ {
+		instrument[i] = rng.Float64()
+		treatment[i] = instrument[i]*3 + rng.Float64()*0.1
+		outcome[i] = 2.0*treatment[i] + rng.Float64()*0.1
+	}
+	df := makeDF(map[string][]float64{
+		"T": treatment,
+		"Y": outcome,
+		"Z": instrument,
+	})
+	r := NewNaiveIVRegressor("T", "Y", []string{"Z"})
+	if err := r.Fit(df); err != nil {
+		t.Fatal(err)
+	}
+	s := r.Summary()
+	if len(s) == 0 {
+		t.Error("summary should not be empty")
+	}
+	// Verify predict works
+	preds, err := r.Predict(df)
+	if err != nil {
+		t.Fatalf("predict error: %v", err)
+	}
+	if len(preds) != n {
+		t.Errorf("expected %d predictions, got %d", n, len(preds))
+	}
+	// Verify confidence interval
+	lo, hi := r.ConfidenceInterval(0.05)
+	if lo >= hi {
+		t.Errorf("CI lower (%f) >= upper (%f)", lo, hi)
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Additional coverage: FirstStageFStat edge cases
+// ---------------------------------------------------------------------------
+
+func TestNaiveIV_FirstStageFStat_NoInstruments(t *testing.T) {
+	// Create an IV regressor with empty instruments and manually set fitted=true
+	r := &NaiveIVRegressor{
+		fitted:      true,
+		nObs:        10,
+		instruments: []string{},
+		tVals:       make([]float64, 10),
+	}
+	f := r.FirstStageFStat()
+	if f != 0 {
+		t.Errorf("expected 0 for no instruments, got %f", f)
+	}
+}
+
+func TestNaiveIV_FirstStageFStat_InsufficientObs(t *testing.T) {
+	// n <= k+1 path
+	r := &NaiveIVRegressor{
+		fitted:          true,
+		nObs:            2,
+		instruments:     []string{"Z"},
+		tVals:           []float64{1, 2},
+		stage1Residuals: []float64{0.1, 0.2},
+	}
+	f := r.FirstStageFStat()
+	if f != 0 {
+		t.Errorf("expected 0 for insufficient obs, got %f", f)
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Additional coverage: extractColumnFloat64 error paths
+// ---------------------------------------------------------------------------
+
+func TestExtractColumnFloat64_MissingColumn(t *testing.T) {
+	df := makeDF(map[string][]float64{
+		"X": {1, 2, 3},
+	})
+	_, err := extractColumnFloat64(df, "NonExistent")
+	if err == nil {
+		t.Error("expected error for missing column")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Additional coverage: buildDesignMatrix error paths
+// ---------------------------------------------------------------------------
+
+func TestBuildDesignMatrix_MissingColumn(t *testing.T) {
+	df := makeDF(map[string][]float64{
+		"X": {1, 2, 3},
+	})
+	_, err := buildDesignMatrix(df, []string{"NonExistent"})
+	if err == nil {
+		t.Error("expected error for missing column")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Additional coverage: buildDesignMatrixNoIntercept error paths
+// ---------------------------------------------------------------------------
+
+func TestBuildDesignMatrixNoIntercept_MissingColumn(t *testing.T) {
+	df := makeDF(map[string][]float64{
+		"X": {1, 2, 3},
+	})
+	_, err := buildDesignMatrixNoIntercept(df, []string{"NonExistent"})
+	if err == nil {
+		t.Error("expected error for missing column")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Additional coverage: DoubleML Predict with missing column
+// ---------------------------------------------------------------------------
+
+func TestDoubleML_Predict_MissingColumn(t *testing.T) {
+	rng := rand.New(rand.NewSource(42))
+	n := 100
+	treatment := make([]float64, n)
+	outcome := make([]float64, n)
+	confounder := make([]float64, n)
+	for i := 0; i < n; i++ {
+		confounder[i] = rng.Float64()
+		treatment[i] = confounder[i] + rng.Float64()*0.5
+		outcome[i] = 2.0*treatment[i] + confounder[i] + rng.Float64()*0.1
+	}
+	df := makeDF(map[string][]float64{
+		"T": treatment,
+		"Y": outcome,
+		"C": confounder,
+	})
+	d := NewDoubleMLRegressor("T", "Y", []string{"C"})
+	if err := d.Fit(df); err != nil {
+		t.Fatal(err)
+	}
+	badDF := makeDF(map[string][]float64{
+		"C": {1, 2, 3},
+	})
+	_, err := d.Predict(badDF)
+	if err == nil {
+		t.Error("expected error for missing treatment column in predict")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Additional coverage: computeCoefficientSE with empty matrix and singular matrix
+// ---------------------------------------------------------------------------
+
+func TestComputeCoefficientSE_Empty(t *testing.T) {
+	se := computeCoefficientSE([][]float64{}, 1.0, 0)
+	if se != 0 {
+		t.Errorf("expected 0 for empty matrix, got %f", se)
+	}
+}
+
+func TestComputeCoefficientSE_SingularMatrix(t *testing.T) {
+	// X with collinear columns => X'X is singular => invertMatrix returns nil => SE = 0
+	X := [][]float64{
+		{1, 2, 4},
+		{1, 3, 6},
+		{1, 4, 8},
+	}
+	se := computeCoefficientSE(X, 1.0, 0)
+	if se != 0 {
+		t.Errorf("expected 0 for singular X'X, got %f", se)
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Additional coverage: invertMatrix singular
+// ---------------------------------------------------------------------------
+
+func TestInvertMatrix_Singular(t *testing.T) {
+	// Singular matrix: rows are identical
+	A := [][]float64{{1, 2}, {1, 2}}
+	inv := invertMatrix(A)
+	if inv != nil {
+		t.Error("expected nil for singular matrix")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Additional coverage: olsFit panics
+// ---------------------------------------------------------------------------
+
+func TestOlsFit_EmptyData(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("expected panic for empty data")
+		}
+	}()
+	olsFit([]float64{}, [][]float64{})
+}
+
+func TestOlsFit_RowWidthMismatch(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("expected panic for row width mismatch")
+		}
+	}()
+	olsFit([]float64{1, 2}, [][]float64{{1, 2}, {3}})
+}
+
+func TestSolveLinearSystem_Singular(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("expected panic for singular matrix")
+		}
+	}()
+	A := [][]float64{{0, 0}, {0, 0}}
+	b := []float64{1, 2}
+	solveLinearSystem(A, b)
+}

@@ -97,10 +97,11 @@ func solveLinearSystem(A [][]float64, b []float64) []float64 {
 }
 
 // extractColumnFloat64 extracts a named column from a DataFrame as []float64.
-func extractColumnFloat64(data *tabgo.DataFrame, name string) ([]float64, error) {
+func extractColumnFloat64(data *tabgo.DataFrame, name string) (result []float64, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			// will be caught by the caller through the error return
+			result = nil
+			err = fmt.Errorf("prediction: column %q: %v", name, r)
 		}
 	}()
 	col := data.Column(name)

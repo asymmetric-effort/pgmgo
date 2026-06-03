@@ -6,6 +6,7 @@ import { Home } from "./pages/Home";
 import { Docs } from "./pages/Docs";
 import { Cli } from "./pages/Cli";
 import { Api } from "./pages/Api";
+import { Tutorials } from "./pages/Tutorials";
 import "./styles.css";
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
           <Route path="/docs" component={Docs} />
           <Route path="/cli" component={Cli} />
           <Route path="/api" component={Api} />
+          <Route path="/tutorials" component={Tutorials} />
         </main>
         <Footer />
       </div>
