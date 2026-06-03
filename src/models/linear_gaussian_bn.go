@@ -10,9 +10,19 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/asymmetric-effort/pgmgo/lib/graphgo"
 	"github.com/asymmetric-effort/pgmgo/lib/tabgo"
 	"github.com/asymmetric-effort/pgmgo/src/factors"
 )
+
+// IndependenceAssertion represents a conditional independence statement
+// X _|_ Y | Z for use with IsIMap. Event1 and Event2 are the two variable
+// sets, and Given is the conditioning set.
+type IndependenceAssertion struct {
+	Event1 []string
+	Event2 []string
+	Given  []string
+}
 
 // LinearGaussianBayesianNetwork is a Bayesian network where every node has a
 // LinearGaussianCPD instead of a TabularCPD. It embeds *BayesianNetwork for
@@ -731,10 +741,99 @@ func (lgbn *LinearGaussianBayesianNetwork) ToMarkovModel() error {
 	return fmt.Errorf("models: ToMarkovModel is not applicable for continuous linear Gaussian networks; use ToJointGaussian instead")
 }
 
-// IsIMap is a stub that checks whether the network structure is an I-map
-// of the given data distribution.
-func (lgbn *LinearGaussianBayesianNetwork) IsIMap() (bool, error) {
-	return false, fmt.Errorf("models: IsIMap is not yet implemented for LinearGaussianBayesianNetwork")
+// IsIMap checks whether the network structure is an I-map of the given
+// independence assertions. A BN is an I-map if every independence implied
+// by its structure (via d-separation) is also present in the given set of
+// independencies. The method checks all pairs of non-adjacent nodes: for
+// each such pair (A, B), it uses the DAG's d-separation test with the
+// parents of A as the conditioning set, and verifies that the resulting
+// independence is contained in the provided assertions.
+func (lgbn *LinearGaussianBayesianNetwork) IsIMap(independencies []IndependenceAssertion) (bool, error) {
+	if err := lgbn.CheckModel(); err != nil {
+		return false, fmt.Errorf("models: IsIMap requires a valid model: %w", err)
+	}
+
+	nodes := lgbn.Nodes() // sorted
+	if len(nodes) == 0 {
+		return true, nil
+	}
+
+	// Build a DiGraph for d-separation testing.
+	dg := graphgo.NewDiGraph()
+	for _, n := range nodes {
+		dg.AddNode(n)
+	}
+	for _, e := range lgbn.Edges() {
+		dg.AddEdge(e[0], e[1])
+	}
+
+	// Build adjacency set for quick non-adjacency checks.
+	adjSet := make(map[string]map[string]bool)
+	for _, n := range nodes {
+		adjSet[n] = make(map[string]bool)
+	}
+	for _, e := range lgbn.Edges() {
+		adjSet[e[0]][e[1]] = true
+		adjSet[e[1]][e[0]] = true
+	}
+
+	// Build a lookup set from the provided independencies.
+	type indepKey struct {
+		a, b string
+		z    string // sorted conditioning set joined
+	}
+	givenSet := make(map[indepKey]bool)
+	for _, ia := range independencies {
+		for _, x := range ia.Event1 {
+			for _, y := range ia.Event2 {
+				a, b := x, y
+				if a > b {
+					a, b = b, a
+				}
+				given := make([]string, len(ia.Given))
+				copy(given, ia.Given)
+				sort.Strings(given)
+				givenSet[indepKey{a, b, strings.Join(given, ",")}] = true
+			}
+		}
+	}
+
+	// Check the local Markov property: for each node, it must be
+	// independent of all non-descendants given its parents.
+	for _, node := range nodes {
+		parents := lgbn.Parents(node)
+		zSet := make(map[string]bool, len(parents))
+		for _, p := range parents {
+			zSet[p] = true
+		}
+		nodeSet := map[string]bool{node: true}
+
+		// Check against every other non-adjacent node.
+		for _, other := range nodes {
+			if other == node || adjSet[node][other] {
+				continue
+			}
+
+			otherSet := map[string]bool{other: true}
+			if graphgo.DSeparation(dg, nodeSet, otherSet, zSet) {
+				// This independence is implied by the structure.
+				// Check if it's in the provided independencies.
+				a, b := node, other
+				if a > b {
+					a, b = b, a
+				}
+				condSorted := make([]string, len(parents))
+				copy(condSorted, parents)
+				sort.Strings(condSorted)
+				key := indepKey{a, b, strings.Join(condSorted, ",")}
+				if !givenSet[key] {
+					return false, nil
+				}
+			}
+		}
+	}
+
+	return true, nil
 }
 
 // GetRandom generates a random LinearGaussianBayesianNetwork with the given

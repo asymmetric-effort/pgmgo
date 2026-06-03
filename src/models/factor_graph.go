@@ -93,10 +93,55 @@ func (fg *FactorGraph) GetFactorsOf(variable string) []*factors.DiscreteFactor {
 	return result
 }
 
-// ToMarkovNetwork is a stub that will convert the factor graph to a Markov
-// network in the future. Currently returns nil.
-func (fg *FactorGraph) ToMarkovNetwork() error {
-	return nil
+// ToMarkovNetwork converts the factor graph to a Markov network.
+// For each factor, edges are added between all pairs of variables in its scope.
+// All factors are added to the resulting Markov network.
+func (fg *FactorGraph) ToMarkovNetwork() (*MarkovNetwork, error) {
+	if err := fg.CheckModel(); err != nil {
+		return nil, fmt.Errorf("models: ToMarkovNetwork: %w", err)
+	}
+
+	mn := NewMarkovNetwork()
+
+	// Add all variables as nodes.
+	for _, v := range fg.GetVariables() {
+		if err := mn.AddNode(v); err != nil {
+			return nil, fmt.Errorf("models: ToMarkovNetwork: %w", err)
+		}
+	}
+
+	// Track edges already added to avoid duplicate edge errors.
+	type edgePair struct{ a, b string }
+	added := make(map[edgePair]bool)
+
+	// For each factor, add edges between all pairs of variables in its scope.
+	for _, f := range fg.factorList {
+		vars := f.Variables()
+		for i := 0; i < len(vars); i++ {
+			for j := i + 1; j < len(vars); j++ {
+				a, b := vars[i], vars[j]
+				if a > b {
+					a, b = b, a
+				}
+				if added[edgePair{a, b}] {
+					continue
+				}
+				if err := mn.AddEdge(a, b); err != nil {
+					return nil, fmt.Errorf("models: ToMarkovNetwork: %w", err)
+				}
+				added[edgePair{a, b}] = true
+			}
+		}
+	}
+
+	// Add copies of all factors to the Markov network.
+	for _, f := range fg.factorList {
+		if err := mn.AddFactor(f.Copy()); err != nil {
+			return nil, fmt.Errorf("models: ToMarkovNetwork: %w", err)
+		}
+	}
+
+	return mn, nil
 }
 
 // CheckModel validates the factor graph:

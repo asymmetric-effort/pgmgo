@@ -284,8 +284,13 @@ func TestSEMToLisrel(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ToLisrel: %v", err)
 	}
-	if result != s {
-		t.Error("expected ToLisrel to return the same SEM")
+	// X is exogenous (no parents), so Phi should be 1x1.
+	if len(result["Phi"]) != 1 || len(result["Phi"][0]) != 1 {
+		t.Error("expected 1x1 Phi matrix for single exogenous variable")
+	}
+	// No endogenous variables, so B, Gamma, Psi should be empty.
+	if len(result["B"]) != 0 {
+		t.Error("expected empty B matrix for all-exogenous model")
 	}
 }
 
@@ -296,8 +301,8 @@ func TestSEMToStandardLisrel(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ToStandardLisrel: %v", err)
 	}
-	if result != s {
-		t.Error("expected ToStandardLisrel to return the same SEM")
+	if len(result["Phi"]) != 1 || len(result["Phi"][0]) != 1 {
+		t.Error("expected 1x1 Phi matrix for single exogenous variable")
 	}
 }
 

@@ -96,3 +96,33 @@ func TestStrSlice(t *testing.T) {
 		t.Errorf("Slice(0,3) = %v", vals)
 	}
 }
+
+func TestStrSliceNegativeStart(t *testing.T) {
+	// Slice(-3, 0) on "hello" -> "llo" (last 3 chars, end=0 with negative start means to end)
+	s := NewSeries("x", []any{"hello"})
+	result := s.Str().Slice(-3, 0)
+	vals := result.Values()
+	if vals[0] != "llo" {
+		t.Errorf("Slice(-3, 0) on 'hello' = %v, want 'llo'", vals[0])
+	}
+}
+
+func TestStrSliceNegativeEnd(t *testing.T) {
+	// Slice(0, -2) on "hello" -> "hel" (all but last 2)
+	s := NewSeries("x", []any{"hello"})
+	result := s.Str().Slice(0, -2)
+	vals := result.Values()
+	if vals[0] != "hel" {
+		t.Errorf("Slice(0, -2) on 'hello' = %v, want 'hel'", vals[0])
+	}
+}
+
+func TestStrSliceNegativeBoth(t *testing.T) {
+	// Slice(-3, -1) on "hello" -> "ll" (from index 2 to index 4)
+	s := NewSeries("x", []any{"hello"})
+	result := s.Str().Slice(-3, -1)
+	vals := result.Values()
+	if vals[0] != "ll" {
+		t.Errorf("Slice(-3, -1) on 'hello' = %v, want 'll'", vals[0])
+	}
+}

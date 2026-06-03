@@ -75,16 +75,100 @@ func Polygamma(n int, x float64) float64 {
 	return result
 }
 
-// Zeta computes the Riemann zeta function for real s > 1.
-// zeta(s) = sum_{k=1}^{inf} 1/k^s
-// For s <= 1, returns NaN (pole at s=1, analytic continuation not implemented).
-// Uses the Euler-Maclaurin formula for efficient computation.
-func Zeta(s float64) float64 {
-	if s <= 1 {
-		if s == 1 {
-			return math.Inf(1)
+// bernoulliNumber returns the nth Bernoulli number for small n.
+// B_0=1, B_1=-1/2, B_2=1/6, B_3=0, B_4=-1/30, ...
+func bernoulliNumber(n int) float64 {
+	// Precomputed Bernoulli numbers B_0 through B_20
+	bn := map[int]float64{
+		0: 1, 1: -0.5, 2: 1.0 / 6, 3: 0, 4: -1.0 / 30,
+		5: 0, 6: 1.0 / 42, 7: 0, 8: -1.0 / 30,
+		9: 0, 10: 5.0 / 66, 11: 0, 12: -691.0 / 2730,
+		13: 0, 14: 7.0 / 6, 15: 0, 16: -3617.0 / 510,
+		17: 0, 18: 43867.0 / 798, 19: 0, 20: -174611.0 / 330,
+	}
+	if v, ok := bn[n]; ok {
+		return v
+	}
+	return 0
+}
+
+// zetaBorwein computes zeta(s) using Borwein's method for the Dirichlet eta function.
+// Works for all s != 1. Particularly useful for 0 < s < 1 where Euler-Maclaurin needs s > 1.
+func zetaBorwein(s float64) float64 {
+	const n = 30
+	// Compute Borwein d_k coefficients:
+	// d_k = n * sum_{i=0}^{k} (n+i-1)! * 4^i / ((n-i)! * (2i)!)
+	d := make([]float64, n+1)
+	for k := 0; k <= n; k++ {
+		sum := 0.0
+		for i := 0; i <= k; i++ {
+			// (n+i-1)! * 4^i / ((n-i)! * (2i)!)
+			// Use lgamma for numerical stability
+			lnum, _ := math.Lgamma(float64(n + i))      // (n+i-1)!
+			lden1, _ := math.Lgamma(float64(n - i + 1)) // (n-i)!
+			lden2, _ := math.Lgamma(float64(2*i + 1))   // (2i)!
+			term := math.Exp(lnum - lden1 - lden2 + float64(i)*math.Ln2*2)
+			sum += term
 		}
-		return math.NaN()
+		d[k] = float64(n) * sum
+	}
+	dn := d[n]
+
+	// eta(s) = -1/d_n * sum_{k=0}^{n-1} (-1)^k * (d_k - d_n) / (k+1)^s
+	eta := 0.0
+	for k := 0; k < n; k++ {
+		sign := 1.0
+		if k%2 != 0 {
+			sign = -1.0
+		}
+		eta += sign * (d[k] - dn) / math.Pow(float64(k+1), s)
+	}
+	eta = -eta / dn
+
+	// zeta(s) = eta(s) / (1 - 2^(1-s))
+	return eta / (1 - math.Pow(2, 1-s))
+}
+
+// Zeta computes the Riemann zeta function for real s.
+// zeta(s) = sum_{k=1}^{inf} 1/k^s for s > 1.
+// For s <= 1, uses analytic continuation via the reflection formula.
+// Uses the Euler-Maclaurin formula for efficient computation when s > 1.
+func Zeta(s float64) float64 {
+	if s == 1 {
+		return math.Inf(1)
+	}
+
+	// Handle s = 0: known value zeta(0) = -1/2
+	if s == 0 {
+		return -0.5
+	}
+
+	// Handle negative integers: zeta(-n) = (-1)^n * B_{n+1} / (n+1)
+	if s < 0 && s == math.Floor(s) {
+		n := int(-s)
+		if n <= 19 { // we have Bernoulli numbers up to B_20
+			sign := 1.0
+			if n%2 != 0 {
+				sign = -1.0
+			}
+			return sign * bernoulliNumber(n+1) / float64(n+1)
+		}
+	}
+
+	// For s < 0 (non-integer), use the reflection formula:
+	// zeta(s) = 2^s * pi^(s-1) * sin(pi*s/2) * Gamma(1-s) * zeta(1-s)
+	// This maps s < 0 to 1-s > 1, which the Euler-Maclaurin code handles.
+	if s < 0 {
+		return math.Pow(2, s) * math.Pow(math.Pi, s-1) *
+			math.Sin(math.Pi*s/2) * math.Gamma(1-s) * Zeta(1-s)
+	}
+
+	// For 0 < s < 1, use the Dirichlet eta function with Borwein acceleration:
+	// zeta(s) = eta(s) / (1 - 2^(1-s))
+	// where eta(s) = sum_{k=0}^{n-1} (-1)^k * d_k / (k+1)^s / d_n
+	// with Borwein's d_k coefficients.
+	if s < 1 {
+		return zetaBorwein(s)
 	}
 
 	// Direct summation up to N, then Euler-Maclaurin correction for the tail.

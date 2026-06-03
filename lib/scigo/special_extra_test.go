@@ -122,9 +122,33 @@ func TestZeta(t *testing.T) {
 		t.Errorf("Zeta(1)=%v, want +Inf", Zeta(1))
 	}
 
-	// zeta(s) for s <= 0 should be NaN (not implemented)
-	if !math.IsNaN(Zeta(0.5)) {
-		t.Errorf("Zeta(0.5) should be NaN, got %v", Zeta(0.5))
+	// zeta(0) = -1/2
+	if !approxEqualSE(Zeta(0), -0.5, 1e-10) {
+		t.Errorf("Zeta(0)=%v, want -0.5", Zeta(0))
+	}
+
+	// zeta(-1) = -1/12
+	if !approxEqualSE(Zeta(-1), -1.0/12, 1e-10) {
+		t.Errorf("Zeta(-1)=%v, want %v", Zeta(-1), -1.0/12)
+	}
+
+	// zeta(-2) = 0
+	if !approxEqualSE(Zeta(-2), 0, 1e-10) {
+		t.Errorf("Zeta(-2)=%v, want 0", Zeta(-2))
+	}
+
+	// zeta(-3) = 1/120
+	if !approxEqualSE(Zeta(-3), 1.0/120, 1e-10) {
+		t.Errorf("Zeta(-3)=%v, want %v", Zeta(-3), 1.0/120)
+	}
+
+	// zeta(0.5) should be finite, approximately -1.4604
+	z05 := Zeta(0.5)
+	if math.IsNaN(z05) || math.IsInf(z05, 0) {
+		t.Errorf("Zeta(0.5) should be finite, got %v", z05)
+	}
+	if !approxEqualSE(z05, -1.4603545088095868, 1e-3) {
+		t.Errorf("Zeta(0.5)=%v, want ~-1.4604", z05)
 	}
 }
 

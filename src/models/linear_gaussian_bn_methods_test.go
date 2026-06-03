@@ -365,9 +365,17 @@ func TestLinearGaussianBN_ToMarkovModel(t *testing.T) {
 
 func TestLinearGaussianBN_IsIMap(t *testing.T) {
 	bn := buildLGChain(t)
-	_, err := bn.IsIMap()
-	if err == nil {
-		t.Error("expected 'not yet implemented' error")
+	// X -> Y -> Z chain: X _|_ Z | Y should hold.
+	// Provide that independence.
+	indeps := []IndependenceAssertion{
+		{Event1: []string{"X"}, Event2: []string{"Z"}, Given: []string{"Y"}},
+	}
+	result, err := bn.IsIMap(indeps)
+	if err != nil {
+		t.Fatalf("IsIMap: %v", err)
+	}
+	if !result {
+		t.Error("expected IsIMap to return true for chain with correct independence")
 	}
 }
 

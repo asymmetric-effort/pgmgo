@@ -155,9 +155,28 @@ func TestFactorGraphGetFactorsOfNonexistent(t *testing.T) {
 }
 
 func TestFactorGraphToMarkovNetwork(t *testing.T) {
-	fg := NewFactorGraph()
-	if err := fg.ToMarkovNetwork(); err != nil {
-		t.Errorf("ToMarkovNetwork stub should return nil, got %v", err)
+	fg := buildSimpleFactorGraph(t)
+	mn, err := fg.ToMarkovNetwork()
+	if err != nil {
+		t.Fatalf("ToMarkovNetwork: %v", err)
+	}
+	if mn == nil {
+		t.Fatal("ToMarkovNetwork returned nil")
+	}
+	// Should have 3 nodes (A, B, C).
+	nodes := mn.Nodes()
+	if len(nodes) != 3 {
+		t.Errorf("expected 3 nodes, got %d", len(nodes))
+	}
+	// Should have edges A-B and B-C from the two factors.
+	edges := mn.Edges()
+	if len(edges) < 2 {
+		t.Errorf("expected at least 2 edges, got %d", len(edges))
+	}
+	// Should have 2 factors.
+	fs := mn.GetFactors()
+	if len(fs) != 2 {
+		t.Errorf("expected 2 factors, got %d", len(fs))
 	}
 }
 

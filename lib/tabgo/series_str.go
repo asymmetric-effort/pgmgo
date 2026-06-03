@@ -145,7 +145,9 @@ func (sa *StrAccessor) EndsWith(suffix string) []bool {
 }
 
 // Slice returns a new Series with each string element sliced from start to end.
-// Negative indices are not supported. If end exceeds the string length, it is clamped.
+// Negative indices are supported (Python-style): -n means len-n.
+// If end is 0 and start is negative, end is treated as len (slice to end).
+// Indices beyond bounds are clamped.
 func (sa *StrAccessor) Slice(start, end int) *Series {
 	out := make([]any, len(sa.series.values))
 	for i, v := range sa.series.values {
@@ -154,17 +156,38 @@ func (sa *StrAccessor) Slice(start, end int) *Series {
 			continue
 		}
 		s := toString(v)
-		if start > len(s) {
-			start = len(s)
-		}
+		n := len(s)
+
+		// Resolve negative indices
+		st := start
 		e := end
-		if e > len(s) {
-			e = len(s)
+		if st < 0 {
+			st = n + st
 		}
-		if start > e {
+		if e < 0 {
+			e = n + e
+		} else if e == 0 && start < 0 {
+			e = n
+		}
+
+		// Clamp to bounds
+		if st < 0 {
+			st = 0
+		}
+		if st > n {
+			st = n
+		}
+		if e < 0 {
+			e = 0
+		}
+		if e > n {
+			e = n
+		}
+
+		if st >= e {
 			out[i] = ""
 		} else {
-			out[i] = s[start:e]
+			out[i] = s[st:e]
 		}
 	}
 	return &Series{name: sa.series.name, values: out}

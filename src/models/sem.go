@@ -730,19 +730,224 @@ func FromLisrel(spec string) (*SEM, error) {
 }
 
 // FromRAM creates an SEM from a RAM (Reticular Action Model) specification.
-// This is a simplified stub. It accepts the same syntax as FromLisrel.
+// It accepts the same syntax as FromLisrel.
 func FromRAM(spec string) (*SEM, error) {
 	return FromLisrel(spec)
 }
 
-// ToLisrel is a stub that converts the SEM to LISREL matrix representation.
-func (s *SEM) ToLisrel() (*SEM, error) {
-	return s, nil
+// ToLisrel converts the SEM to LISREL matrix representation.
+// Returns a map with keys "B" (Beta, structural coefficients among endogenous),
+// "Gamma" (effects of exogenous on endogenous), "Psi" (error covariances),
+// and "Phi" (exogenous covariances).
+// Variables are ordered alphabetically within their category.
+// Exogenous variables are those with no parents in the DAG (roots).
+func (s *SEM) ToLisrel() (map[string][][]float64, error) {
+	if err := s.CheckModel(); err != nil {
+		return nil, fmt.Errorf("models: ToLisrel: %w", err)
+	}
+
+	allVars := s.dag.Nodes() // sorted
+	if len(allVars) == 0 {
+		return map[string][][]float64{
+			"B":     nil,
+			"Gamma": nil,
+			"Psi":   nil,
+			"Phi":   nil,
+		}, nil
+	}
+
+	// Classify variables: exogenous (no parents) vs endogenous (has parents).
+	var exoVars, endoVars []string
+	for _, v := range allVars {
+		if len(s.dag.Parents(v)) == 0 {
+			exoVars = append(exoVars, v)
+		} else {
+			endoVars = append(endoVars, v)
+		}
+	}
+
+	nExo := len(exoVars)
+	nEndo := len(endoVars)
+
+	exoIdx := make(map[string]int, nExo)
+	for i, v := range exoVars {
+		exoIdx[v] = i
+	}
+	endoIdx := make(map[string]int, nEndo)
+	for i, v := range endoVars {
+		endoIdx[v] = i
+	}
+
+	// B: nEndo x nEndo — structural coefficients among endogenous variables.
+	// B[i][j] = coefficient of endogenous variable j in equation for endogenous variable i.
+	B := make([][]float64, nEndo)
+	for i := 0; i < nEndo; i++ {
+		B[i] = make([]float64, nEndo)
+	}
+
+	// Gamma: nEndo x nExo — effects of exogenous variables on endogenous variables.
+	gamma := make([][]float64, nEndo)
+	for i := 0; i < nEndo; i++ {
+		gamma[i] = make([]float64, nExo)
+	}
+
+	// Fill B and Gamma from equations.
+	for _, v := range endoVars {
+		eq := s.equations[v]
+		vi := endoIdx[v]
+		for j, p := range eq.Parents {
+			if pi, ok := endoIdx[p]; ok {
+				B[vi][pi] = eq.Coefficients[j]
+			} else if pi, ok := exoIdx[p]; ok {
+				gamma[vi][pi] = eq.Coefficients[j]
+			}
+		}
+	}
+
+	// Psi: nEndo x nEndo — diagonal matrix of error variances for endogenous variables.
+	psi := make([][]float64, nEndo)
+	for i := 0; i < nEndo; i++ {
+		psi[i] = make([]float64, nEndo)
+		eq := s.equations[endoVars[i]]
+		psi[i][i] = eq.Variance
+	}
+
+	// Phi: nExo x nExo — covariance matrix of exogenous variables.
+	// For a standard SEM with independent exogenous errors, Phi is diagonal
+	// with the error variances.
+	phi := make([][]float64, nExo)
+	for i := 0; i < nExo; i++ {
+		phi[i] = make([]float64, nExo)
+		eq := s.equations[exoVars[i]]
+		phi[i][i] = eq.Variance
+	}
+
+	return map[string][][]float64{
+		"B":     B,
+		"Gamma": gamma,
+		"Psi":   psi,
+		"Phi":   phi,
+	}, nil
 }
 
-// ToStandardLisrel is a stub that converts the SEM to standard LISREL form.
-func (s *SEM) ToStandardLisrel() (*SEM, error) {
-	return s, nil
+// ToStandardLisrel converts the SEM to standardized LISREL matrix representation.
+// The B matrix is scaled so that implied variances are 1 (standardized coefficients).
+// Returns the same keys as ToLisrel: "B", "Gamma", "Psi", "Phi".
+func (s *SEM) ToStandardLisrel() (map[string][][]float64, error) {
+	if err := s.CheckModel(); err != nil {
+		return nil, fmt.Errorf("models: ToStandardLisrel: %w", err)
+	}
+
+	allVars := s.dag.Nodes() // sorted
+	if len(allVars) == 0 {
+		return map[string][][]float64{
+			"B":     nil,
+			"Gamma": nil,
+			"Psi":   nil,
+			"Phi":   nil,
+		}, nil
+	}
+
+	// Compute implied covariance matrix.
+	sigma, err := s.ImpliedCovarianceMatrix()
+	if err != nil {
+		return nil, fmt.Errorf("models: ToStandardLisrel: %w", err)
+	}
+
+	n := len(allVars)
+	varIdx := make(map[string]int, n)
+	for i, v := range allVars {
+		varIdx[v] = i
+	}
+
+	// Compute standard deviations from implied variances.
+	sd := make(map[string]float64, n)
+	for _, v := range allVars {
+		vi := varIdx[v]
+		impliedVar := sigma[vi][vi]
+		if impliedVar <= 0 {
+			impliedVar = 1e-10
+		}
+		sd[v] = math.Sqrt(impliedVar)
+	}
+
+	// Classify variables.
+	var exoVars, endoVars []string
+	for _, v := range allVars {
+		if len(s.dag.Parents(v)) == 0 {
+			exoVars = append(exoVars, v)
+		} else {
+			endoVars = append(endoVars, v)
+		}
+	}
+
+	nExo := len(exoVars)
+	nEndo := len(endoVars)
+
+	exoIdx := make(map[string]int, nExo)
+	for i, v := range exoVars {
+		exoIdx[v] = i
+	}
+	endoIdx := make(map[string]int, nEndo)
+	for i, v := range endoVars {
+		endoIdx[v] = i
+	}
+
+	// Standardized B: B_std[i][j] = B[i][j] * sd(endoVars[j]) / sd(endoVars[i])
+	B := make([][]float64, nEndo)
+	for i := 0; i < nEndo; i++ {
+		B[i] = make([]float64, nEndo)
+	}
+
+	// Standardized Gamma: Gamma_std[i][j] = Gamma[i][j] * sd(exoVars[j]) / sd(endoVars[i])
+	gamma := make([][]float64, nEndo)
+	for i := 0; i < nEndo; i++ {
+		gamma[i] = make([]float64, nExo)
+	}
+
+	for _, v := range endoVars {
+		eq := s.equations[v]
+		vi := endoIdx[v]
+		sdV := sd[v]
+		for j, p := range eq.Parents {
+			sdP := sd[p]
+			stdCoeff := eq.Coefficients[j] * sdP / sdV
+			if pi, ok := endoIdx[p]; ok {
+				B[vi][pi] = stdCoeff
+			} else if pi, ok := exoIdx[p]; ok {
+				gamma[vi][pi] = stdCoeff
+			}
+		}
+	}
+
+	// Standardized Psi: Psi_std[i][i] = Psi[i][i] / impliedVar(endoVars[i])
+	psi := make([][]float64, nEndo)
+	for i := 0; i < nEndo; i++ {
+		psi[i] = make([]float64, nEndo)
+		eq := s.equations[endoVars[i]]
+		impliedVar := sd[endoVars[i]] * sd[endoVars[i]]
+		if impliedVar > 0 {
+			psi[i][i] = eq.Variance / impliedVar
+		}
+	}
+
+	// Standardized Phi: Phi_std[i][j] = Phi[i][j] / (sd(exoVars[i]) * sd(exoVars[j]))
+	// For independent exogenous variables, Phi is diagonal, so standardized Phi = I.
+	phi := make([][]float64, nExo)
+	for i := 0; i < nExo; i++ {
+		phi[i] = make([]float64, nExo)
+		sdI := sd[exoVars[i]]
+		if sdI > 0 {
+			phi[i][i] = s.equations[exoVars[i]].Variance / (sdI * sdI)
+		}
+	}
+
+	return map[string][][]float64{
+		"B":     B,
+		"Gamma": gamma,
+		"Psi":   psi,
+		"Phi":   phi,
+	}, nil
 }
 
 // ToSEMGraph returns the SEM itself, as it already is a SEM graph representation.
