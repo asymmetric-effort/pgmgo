@@ -31,28 +31,40 @@ func fixturesRoot() string {
 	return filepath.Join(filepath.Dir(filename), "..", "fixtures")
 }
 
+// loadFixtureData reads and parses a fixture file from the given absolute path.
+// It returns the parsed FixtureFile or an error.
+func loadFixtureData(fullPath string) (*FixtureFile, error) {
+	data, err := os.ReadFile(fullPath)
+	if err != nil {
+		return nil, err
+	}
+	var ff FixtureFile
+	if err := json.Unmarshal(data, &ff); err != nil {
+		return nil, err
+	}
+	return &ff, nil
+}
+
 // LoadFixtures loads all test cases from a fixture file for a given package.
 // The path is relative to tests/fixtures/, e.g., "models/fixtures.json".
-func LoadFixtures(t *testing.T, path string) *FixtureFile {
+func LoadFixtures(t testing.TB, path string) *FixtureFile {
 	t.Helper()
 
 	fullPath := filepath.Join(fixturesRoot(), path)
-	data, err := os.ReadFile(fullPath)
+	ff, err := loadFixtureData(fullPath)
 	if err != nil {
-		t.Skipf("fixture file not found: %s (run 'go generate' to create)", fullPath)
-		return nil
-	}
-
-	var ff FixtureFile
-	if err := json.Unmarshal(data, &ff); err != nil {
+		if os.IsNotExist(err) {
+			t.Skipf("fixture file not found: %s (run 'go generate' to create)", fullPath)
+			return nil
+		}
 		t.Fatalf("failed to parse fixture file %s: %v", path, err)
 	}
 
-	return &ff
+	return ff
 }
 
 // FindTestCase returns the test case with the given name, or skips the test.
-func (ff *FixtureFile) FindTestCase(t *testing.T, name string) *TestCase {
+func (ff *FixtureFile) FindTestCase(t testing.TB, name string) *TestCase {
 	t.Helper()
 
 	for i := range ff.TestCases {
@@ -65,18 +77,23 @@ func (ff *FixtureFile) FindTestCase(t *testing.T, name string) *TestCase {
 	return nil
 }
 
+// unmarshalRawJSON unmarshals a json.RawMessage into the given target.
+func unmarshalRawJSON(raw json.RawMessage, v any) error {
+	return json.Unmarshal(raw, v)
+}
+
 // UnmarshalInput unmarshals the test case input into the given struct.
-func (tc *TestCase) UnmarshalInput(t *testing.T, v any) {
+func (tc *TestCase) UnmarshalInput(t testing.TB, v any) {
 	t.Helper()
-	if err := json.Unmarshal(tc.Input, v); err != nil {
+	if err := unmarshalRawJSON(tc.Input, v); err != nil {
 		t.Fatalf("failed to unmarshal input for %q: %v", tc.Name, err)
 	}
 }
 
 // UnmarshalExpected unmarshals the test case expected output into the given struct.
-func (tc *TestCase) UnmarshalExpected(t *testing.T, v any) {
+func (tc *TestCase) UnmarshalExpected(t testing.TB, v any) {
 	t.Helper()
-	if err := json.Unmarshal(tc.Expected, v); err != nil {
+	if err := unmarshalRawJSON(tc.Expected, v); err != nil {
 		t.Fatalf("failed to unmarshal expected for %q: %v", tc.Name, err)
 	}
 }
