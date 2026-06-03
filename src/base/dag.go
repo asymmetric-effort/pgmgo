@@ -523,16 +523,184 @@ func (d *DAG) GetAncestralGraph(nodes []string) *DAG {
 	return result
 }
 
-// FromLavaan parses a DAG from Lavaan-style syntax. Returns an error as this
-// format is not yet supported.
-func FromLavaan(_ string) (*DAG, error) {
-	return nil, fmt.Errorf("base: Lavaan format parsing is not yet supported")
+// FromLavaan parses a DAG from lavaan-style syntax. Each line has the form
+// "Y ~ X1 + X2" meaning edges X1->Y and X2->Y. Blank lines and lines without
+// "~" are ignored.
+func FromLavaan(syntax string) (*DAG, error) {
+	if strings.TrimSpace(syntax) == "" {
+		return nil, fmt.Errorf("base: empty lavaan syntax")
+	}
+
+	d := NewDAG()
+	lines := strings.Split(syntax, "\n")
+	parsed := false
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" || !strings.Contains(line, "~") {
+			continue
+		}
+		parts := strings.SplitN(line, "~", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		child := strings.TrimSpace(parts[0])
+		if child == "" {
+			return nil, fmt.Errorf("base: empty child variable in lavaan line %q", line)
+		}
+		parentStr := strings.TrimSpace(parts[1])
+		if parentStr == "" {
+			return nil, fmt.Errorf("base: empty parent list in lavaan line %q", line)
+		}
+		parentTokens := strings.Split(parentStr, "+")
+		for _, tok := range parentTokens {
+			parent := strings.TrimSpace(tok)
+			if parent == "" {
+				continue
+			}
+			if !d.HasNode(parent) {
+				if err := d.AddNode(parent); err != nil {
+					return nil, err
+				}
+			}
+			if !d.HasNode(child) {
+				if err := d.AddNode(child); err != nil {
+					return nil, err
+				}
+			}
+			if err := d.AddEdge(parent, child); err != nil {
+				return nil, fmt.Errorf("base: failed to add edge %q -> %q: %w", parent, child, err)
+			}
+			parsed = true
+		}
+	}
+	if !parsed {
+		return nil, fmt.Errorf("base: no valid lavaan lines found")
+	}
+	return d, nil
 }
 
-// FromDagitty parses a DAG from Dagitty-style syntax. Returns an error as this
-// format is not yet supported.
-func FromDagitty(_ string) (*DAG, error) {
-	return nil, fmt.Errorf("base: Dagitty format parsing is not yet supported")
+// FromDagitty parses a DAG from dagitty-style syntax. The expected format is
+// "dag { X -> Y; Y -> Z }" or multiline with one edge per line/semicolon.
+func FromDagitty(syntax string) (*DAG, error) {
+	if strings.TrimSpace(syntax) == "" {
+		return nil, fmt.Errorf("base: empty dagitty syntax")
+	}
+
+	// Strip outer "dag {" and "}".
+	s := strings.TrimSpace(syntax)
+	if strings.HasPrefix(s, "dag") {
+		s = strings.TrimPrefix(s, "dag")
+		s = strings.TrimSpace(s)
+	}
+	s = strings.TrimPrefix(s, "{")
+	s = strings.TrimSuffix(s, "}")
+	s = strings.TrimSpace(s)
+
+	if s == "" {
+		return nil, fmt.Errorf("base: no edges found in dagitty syntax")
+	}
+
+	d := NewDAG()
+	// Split by semicolons and newlines.
+	s = strings.ReplaceAll(s, "\n", ";")
+	segments := strings.Split(s, ";")
+	parsed := false
+	for _, seg := range segments {
+		seg = strings.TrimSpace(seg)
+		if seg == "" {
+			continue
+		}
+		// Look for "->" tokens.
+		parts := strings.Split(seg, "->")
+		if len(parts) < 2 {
+			continue
+		}
+		for i := 0; i < len(parts)-1; i++ {
+			src := strings.TrimSpace(parts[i])
+			dst := strings.TrimSpace(parts[i+1])
+			if src == "" || dst == "" {
+				continue
+			}
+			if !d.HasNode(src) {
+				if err := d.AddNode(src); err != nil {
+					return nil, err
+				}
+			}
+			if !d.HasNode(dst) {
+				if err := d.AddNode(dst); err != nil {
+					return nil, err
+				}
+			}
+			if err := d.AddEdge(src, dst); err != nil {
+				return nil, fmt.Errorf("base: failed to add edge %q -> %q: %w", src, dst, err)
+			}
+			parsed = true
+		}
+	}
+	if !parsed {
+		return nil, fmt.Errorf("base: no valid edges found in dagitty syntax")
+	}
+	return d, nil
+}
+
+// OutDegreeIter returns a map from each node to its out-degree.
+func (d *DAG) OutDegreeIter() map[string]int {
+	result := make(map[string]int)
+	for _, n := range d.Nodes() {
+		result[n] = len(d.Children(n))
+	}
+	return result
+}
+
+// InDegreeIter returns a map from each node to its in-degree.
+func (d *DAG) InDegreeIter() map[string]int {
+	result := make(map[string]int)
+	for _, n := range d.Nodes() {
+		result[n] = len(d.Parents(n))
+	}
+	return result
+}
+
+// GetRandomDAG generates a random DAG with nNodes nodes (named "X0", "X1", ...)
+// and exactly nEdges edges. Edges are only added from lower-indexed to
+// higher-indexed nodes to guarantee acyclicity.
+func GetRandomDAG(nNodes, nEdges int, seed int64) (*DAG, error) {
+	if nNodes <= 0 {
+		return nil, fmt.Errorf("base: nNodes must be positive, got %d", nNodes)
+	}
+	maxEdges := nNodes * (nNodes - 1) / 2
+	if nEdges < 0 || nEdges > maxEdges {
+		return nil, fmt.Errorf("base: nEdges %d out of range [0, %d] for %d nodes", nEdges, maxEdges, nNodes)
+	}
+
+	rng := rand.New(rand.NewSource(seed))
+	d := NewDAG()
+
+	nodeNames := make([]string, nNodes)
+	for i := 0; i < nNodes; i++ {
+		nodeNames[i] = fmt.Sprintf("X%d", i)
+		_ = d.AddNode(nodeNames[i])
+	}
+
+	// Collect all possible edges (i < j guarantees DAG).
+	type edgePair struct{ i, j int }
+	allEdges := make([]edgePair, 0, maxEdges)
+	for i := 0; i < nNodes; i++ {
+		for j := i + 1; j < nNodes; j++ {
+			allEdges = append(allEdges, edgePair{i, j})
+		}
+	}
+
+	// Shuffle and pick the first nEdges.
+	rng.Shuffle(len(allEdges), func(i, j int) {
+		allEdges[i], allEdges[j] = allEdges[j], allEdges[i]
+	})
+	for k := 0; k < nEdges; k++ {
+		e := allEdges[k]
+		_ = d.AddEdge(nodeNames[e.i], nodeNames[e.j])
+	}
+
+	return d, nil
 }
 
 // ToGraphviz returns a Graphviz DOT representation of the DAG.

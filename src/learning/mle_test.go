@@ -431,6 +431,87 @@ func TestMLE_SmallData_Deterministic(t *testing.T) {
 	}
 }
 
+// ---------------------------------------------------------------------------
+// EstimatePotentials
+// ---------------------------------------------------------------------------
+
+func TestEstimatePotentials_Basic(t *testing.T) {
+	bn := models.NewBayesianNetwork()
+	_ = bn.AddNode("A")
+	_ = bn.AddNode("B")
+	_ = bn.AddEdge("A", "B")
+
+	data := tabgo.NewDataFrameFromRows(
+		[]string{"A", "B"},
+		[][]any{
+			{0, 0},
+			{0, 1},
+			{1, 0},
+			{1, 1},
+			{0, 0},
+			{0, 0},
+		},
+	)
+
+	mle := NewMLE(bn, data)
+	potentials, err := mle.EstimatePotentials()
+	if err != nil {
+		t.Fatalf("EstimatePotentials: %v", err)
+	}
+	if len(potentials) != 1 {
+		t.Fatalf("expected 1 factor (one edge), got %d", len(potentials))
+	}
+
+	// Factor should have variables A and B, cardinality [2, 2].
+	f := potentials[0]
+	vars := f.Variables()
+	if len(vars) != 2 {
+		t.Errorf("expected 2 variables, got %d", len(vars))
+	}
+
+	// Check counts: A=0,B=0 -> 3 times; A=0,B=1 -> 1; A=1,B=0 -> 1; A=1,B=1 -> 1
+	vals := f.Values().Data()
+	total := 0.0
+	for _, v := range vals {
+		total += v
+	}
+	if total != 6.0 {
+		t.Errorf("expected total count 6, got %f", total)
+	}
+}
+
+func TestEstimatePotentials_IsolatedNode(t *testing.T) {
+	bn := models.NewBayesianNetwork()
+	_ = bn.AddNode("X")
+
+	data := tabgo.NewDataFrameFromRows(
+		[]string{"X"},
+		[][]any{{0}, {1}, {0}},
+	)
+
+	mle := NewMLE(bn, data)
+	potentials, err := mle.EstimatePotentials()
+	if err != nil {
+		t.Fatalf("EstimatePotentials: %v", err)
+	}
+	if len(potentials) != 1 {
+		t.Fatalf("expected 1 unary factor, got %d", len(potentials))
+	}
+	vals := potentials[0].Values().Data()
+	// X=0 appears twice, X=1 appears once
+	if vals[0] != 2 || vals[1] != 1 {
+		t.Errorf("expected [2, 1], got %v", vals)
+	}
+}
+
+func TestEstimatePotentials_NilBN(t *testing.T) {
+	mle := NewMLE(nil, nil)
+	_, err := mle.EstimatePotentials()
+	if err == nil {
+		t.Error("expected error for nil BN")
+	}
+}
+
 func TestMaxVal(t *testing.T) {
 	if got := maxVal(nil); got != -1 {
 		t.Errorf("maxVal(nil) = %d, want -1", got)

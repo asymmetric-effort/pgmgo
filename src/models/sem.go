@@ -5,6 +5,7 @@ import (
 	"math"
 	"math/rand"
 	"sort"
+	"strings"
 
 	"github.com/asymmetric-effort/pgmgo/lib/graphgo"
 	"github.com/asymmetric-effort/pgmgo/lib/tabgo"
@@ -581,13 +582,61 @@ func (s *SEM) Moralize() *graphgo.Graph {
 	return graphgo.Moralize(dg)
 }
 
-// FromLavaan is a stub that parses lavaan model syntax into an SEM.
-// Full lavaan syntax parsing is not yet implemented.
+// FromLavaan parses lavaan model syntax into an SEM. Each line of the form
+// "Y ~ X1 + X2" creates an equation for Y with parents X1, X2, zero
+// coefficients, zero intercept, and unit variance. Blank lines and lines
+// without "~" are ignored.
 func FromLavaan(syntax string) (*SEM, error) {
-	if syntax == "" {
+	if strings.TrimSpace(syntax) == "" {
 		return nil, fmt.Errorf("models: empty lavaan syntax")
 	}
-	return nil, fmt.Errorf("models: FromLavaan is not yet implemented")
+
+	s := NewSEM()
+	lines := strings.Split(syntax, "\n")
+	parsed := false
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" || !strings.Contains(line, "~") {
+			continue
+		}
+		parts := strings.SplitN(line, "~", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		child := strings.TrimSpace(parts[0])
+		if child == "" {
+			return nil, fmt.Errorf("models: empty variable in lavaan line %q", line)
+		}
+		parentStr := strings.TrimSpace(parts[1])
+		if parentStr == "" {
+			// No parents: just an intercept equation.
+			if err := s.AddEquation(child, nil, nil, 0.0, 1.0); err != nil {
+				return nil, fmt.Errorf("models: %w", err)
+			}
+			parsed = true
+			continue
+		}
+
+		parentTokens := strings.Split(parentStr, "+")
+		var parents []string
+		for _, tok := range parentTokens {
+			p := strings.TrimSpace(tok)
+			if p != "" {
+				parents = append(parents, p)
+			}
+		}
+
+		coeffs := make([]float64, len(parents))
+		if err := s.AddEquation(child, parents, coeffs, 0.0, 1.0); err != nil {
+			return nil, fmt.Errorf("models: %w", err)
+		}
+		parsed = true
+	}
+
+	if !parsed {
+		return nil, fmt.Errorf("models: no valid lavaan lines found")
+	}
+	return s, nil
 }
 
 // FromGraph creates an SEM from a DAG. Each variable gets an equation with
@@ -608,14 +657,82 @@ func FromGraph(dag *base.DAG) (*SEM, error) {
 	return s, nil
 }
 
-// FromLisrel is a stub for creating an SEM from LISREL matrices.
-func FromLisrel() (*SEM, error) {
-	return nil, fmt.Errorf("models: FromLisrel is not yet implemented")
+// FromLisrel creates an SEM from a simplified LISREL matrix specification.
+// The syntax is a set of lines, each of the form:
+//
+//	variable: parent1=coeff1 parent2=coeff2 variance=v intercept=i
+//
+// If no parents are specified, the variable is exogenous. Variance defaults
+// to 1.0 and intercept defaults to 0.0 if not specified.
+func FromLisrel(spec string) (*SEM, error) {
+	if strings.TrimSpace(spec) == "" {
+		return nil, fmt.Errorf("models: empty LISREL specification")
+	}
+
+	s := NewSEM()
+	lines := strings.Split(spec, "\n")
+	parsed := false
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		colonIdx := strings.Index(line, ":")
+		if colonIdx < 0 {
+			continue
+		}
+		variable := strings.TrimSpace(line[:colonIdx])
+		if variable == "" {
+			continue
+		}
+		rest := strings.TrimSpace(line[colonIdx+1:])
+
+		var parents []string
+		var coeffs []float64
+		variance := 1.0
+		intercept := 0.0
+
+		if rest != "" {
+			tokens := strings.Fields(rest)
+			for _, tok := range tokens {
+				eqIdx := strings.Index(tok, "=")
+				if eqIdx < 0 {
+					continue
+				}
+				key := tok[:eqIdx]
+				valStr := tok[eqIdx+1:]
+				val := 0.0
+				_, err := fmt.Sscanf(valStr, "%f", &val)
+				if err != nil {
+					return nil, fmt.Errorf("models: invalid value %q in LISREL spec", valStr)
+				}
+				switch key {
+				case "variance":
+					variance = val
+				case "intercept":
+					intercept = val
+				default:
+					parents = append(parents, key)
+					coeffs = append(coeffs, val)
+				}
+			}
+		}
+
+		if err := s.AddEquation(variable, parents, coeffs, intercept, variance); err != nil {
+			return nil, fmt.Errorf("models: %w", err)
+		}
+		parsed = true
+	}
+	if !parsed {
+		return nil, fmt.Errorf("models: no valid LISREL lines found")
+	}
+	return s, nil
 }
 
-// FromRAM is a stub for creating an SEM from RAM (Reticular Action Model) matrices.
-func FromRAM() (*SEM, error) {
-	return nil, fmt.Errorf("models: FromRAM is not yet implemented")
+// FromRAM creates an SEM from a RAM (Reticular Action Model) specification.
+// This is a simplified stub. It accepts the same syntax as FromLisrel.
+func FromRAM(spec string) (*SEM, error) {
+	return FromLisrel(spec)
 }
 
 // ToLisrel is a stub that converts the SEM to LISREL matrix representation.

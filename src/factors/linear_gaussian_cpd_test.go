@@ -402,3 +402,65 @@ func TestPDF_IntegrationApprox(t *testing.T) {
 		t.Errorf("numerical integral of PDF = %f, want ~1.0", area)
 	}
 }
+
+// ---------------------------------------------------------------------------
+// GetRandomLinearGaussianCPD
+// ---------------------------------------------------------------------------
+
+func TestGetRandomLinearGaussianCPD_NoEvidence(t *testing.T) {
+	cpd, err := GetRandomLinearGaussianCPD("X", nil, 42)
+	if err != nil {
+		t.Fatalf("GetRandomLinearGaussianCPD: %v", err)
+	}
+	if cpd.Variable() != "X" {
+		t.Errorf("expected variable X, got %q", cpd.Variable())
+	}
+	if len(cpd.Betas()) != 0 {
+		t.Errorf("expected 0 betas, got %d", len(cpd.Betas()))
+	}
+	if cpd.Variance() <= 0 {
+		t.Errorf("expected positive variance, got %f", cpd.Variance())
+	}
+	if err := cpd.Validate(); err != nil {
+		t.Errorf("validation failed: %v", err)
+	}
+}
+
+func TestGetRandomLinearGaussianCPD_WithEvidence(t *testing.T) {
+	cpd, err := GetRandomLinearGaussianCPD("Y", []string{"X1", "X2"}, 99)
+	if err != nil {
+		t.Fatalf("GetRandomLinearGaussianCPD: %v", err)
+	}
+	if len(cpd.Betas()) != 2 {
+		t.Errorf("expected 2 betas, got %d", len(cpd.Betas()))
+	}
+	ev := cpd.Evidence()
+	if len(ev) != 2 || ev[0] != "X1" || ev[1] != "X2" {
+		t.Errorf("expected evidence [X1, X2], got %v", ev)
+	}
+}
+
+func TestGetRandomLinearGaussianCPD_Deterministic(t *testing.T) {
+	cpd1, _ := GetRandomLinearGaussianCPD("Z", []string{"A"}, 123)
+	cpd2, _ := GetRandomLinearGaussianCPD("Z", []string{"A"}, 123)
+	if cpd1.Mean() != cpd2.Mean() {
+		t.Errorf("means differ: %f vs %f", cpd1.Mean(), cpd2.Mean())
+	}
+	if cpd1.Variance() != cpd2.Variance() {
+		t.Errorf("variances differ: %f vs %f", cpd1.Variance(), cpd2.Variance())
+	}
+	b1 := cpd1.Betas()
+	b2 := cpd2.Betas()
+	for i := range b1 {
+		if b1[i] != b2[i] {
+			t.Errorf("beta[%d] differs: %f vs %f", i, b1[i], b2[i])
+		}
+	}
+}
+
+func TestGetRandomLinearGaussianCPD_EmptyVariable(t *testing.T) {
+	_, err := GetRandomLinearGaussianCPD("", nil, 1)
+	if err == nil {
+		t.Error("expected error for empty variable name")
+	}
+}

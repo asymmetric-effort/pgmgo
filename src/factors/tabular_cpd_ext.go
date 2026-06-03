@@ -7,6 +7,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/asymmetric-effort/pgmgo/lib/tabgo"
 )
 
 // GetValues returns the CPD values as a 2D slice where rows correspond to
@@ -450,4 +452,65 @@ func GetUniform(variable string, variableCard int, evidence []string, evidenceCa
 	}
 
 	return NewTabularCPD(variable, variableCard, vals, evidence, evidenceCard)
+}
+
+// ToDataFrame converts the CPD to a DataFrame. Each column corresponds to a
+// parent configuration (column header encodes the evidence combination).
+// Rows correspond to the variable states.
+func (cpd *TabularCPD) ToDataFrame() *tabgo.DataFrame {
+	vals := cpd.GetValues()
+
+	numParentConfigs := 1
+	for _, ec := range cpd.evidenceCard {
+		numParentConfigs *= ec
+	}
+
+	// Compute evidence strides for column headers.
+	evStrides := make([]int, len(cpd.evidence))
+	if len(cpd.evidence) > 0 {
+		evStrides[len(cpd.evidence)-1] = 1
+		for i := len(cpd.evidence) - 2; i >= 0; i-- {
+			evStrides[i] = evStrides[i+1] * cpd.evidenceCard[i+1]
+		}
+	}
+
+	// Build column names from evidence combinations.
+	colNames := make([]string, numParentConfigs)
+	for j := 0; j < numParentConfigs; j++ {
+		if len(cpd.evidence) == 0 {
+			colNames[j] = cpd.variable
+		} else {
+			parts := make([]string, len(cpd.evidence))
+			for ei, ev := range cpd.evidence {
+				state := (j / evStrides[ei]) % cpd.evidenceCard[ei]
+				parts[ei] = fmt.Sprintf("%s=%d", ev, state)
+			}
+			colNames[j] = strings.Join(parts, ",")
+		}
+	}
+
+	// Build rows: each row is one state of the child variable.
+	rows := make([][]any, cpd.variableCard)
+	for i := 0; i < cpd.variableCard; i++ {
+		row := make([]any, numParentConfigs)
+		for j := 0; j < numParentConfigs; j++ {
+			row[j] = vals[i][j]
+		}
+		rows[i] = row
+	}
+
+	return tabgo.NewDataFrameFromRows(colNames, rows)
+}
+
+// Repr returns a detailed string representation of the CPD, including
+// type information, variable, evidence, and cardinalities.
+func (cpd *TabularCPD) Repr() string {
+	var b strings.Builder
+	b.WriteString(fmt.Sprintf("TabularCPD(variable=%q, variableCard=%d", cpd.variable, cpd.variableCard))
+	if len(cpd.evidence) > 0 {
+		b.WriteString(fmt.Sprintf(", evidence=%v, evidenceCard=%v", cpd.evidence, cpd.evidenceCard))
+	}
+	b.WriteString(")\n")
+	b.WriteString(cpd.String())
+	return b.String()
 }

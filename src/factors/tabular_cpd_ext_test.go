@@ -489,6 +489,120 @@ func TestGetRandom_Deterministic(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
+// ToDataFrame
+// ---------------------------------------------------------------------------
+
+func TestTabularCPD_ToDataFrame_NoEvidence(t *testing.T) {
+	cpd, err := NewTabularCPD("A", 2,
+		[][]float64{{0.3}, {0.7}},
+		nil, nil,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	df := cpd.ToDataFrame()
+	if df == nil {
+		t.Fatal("ToDataFrame returned nil")
+	}
+	// Should have 1 column and 2 rows.
+	cols := df.Columns()
+	if len(cols) != 1 {
+		t.Errorf("expected 1 column, got %d", len(cols))
+	}
+	if df.Len() != 2 {
+		t.Errorf("expected 2 rows, got %d", df.Len())
+	}
+}
+
+func TestTabularCPD_ToDataFrame_WithEvidence(t *testing.T) {
+	cpd, err := NewTabularCPD("X", 2,
+		[][]float64{
+			{0.4, 0.9},
+			{0.6, 0.1},
+		},
+		[]string{"Y"}, []int{2},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	df := cpd.ToDataFrame()
+	if df == nil {
+		t.Fatal("ToDataFrame returned nil")
+	}
+	// Should have 2 columns (Y=0, Y=1) and 2 rows.
+	cols := df.Columns()
+	if len(cols) != 2 {
+		t.Errorf("expected 2 columns, got %d: %v", len(cols), cols)
+	}
+	if df.Len() != 2 {
+		t.Errorf("expected 2 rows, got %d", df.Len())
+	}
+}
+
+func TestTabularCPD_ToDataFrame_MultiEvidence(t *testing.T) {
+	cpd, err := NewTabularCPD("X", 2,
+		[][]float64{
+			{0.1, 0.2, 0.3, 0.4},
+			{0.9, 0.8, 0.7, 0.6},
+		},
+		[]string{"Y", "Z"}, []int{2, 2},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	df := cpd.ToDataFrame()
+	cols := df.Columns()
+	if len(cols) != 4 {
+		t.Errorf("expected 4 columns, got %d", len(cols))
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Repr
+// ---------------------------------------------------------------------------
+
+func TestTabularCPD_Repr_NoEvidence(t *testing.T) {
+	cpd, err := NewTabularCPD("A", 2,
+		[][]float64{{0.3}, {0.7}},
+		nil, nil,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := cpd.Repr()
+	if !strings.Contains(r, "TabularCPD(variable=\"A\"") {
+		t.Errorf("Repr missing header: %s", r)
+	}
+	if !strings.Contains(r, "variableCard=2") {
+		t.Errorf("Repr missing cardinality: %s", r)
+	}
+}
+
+func TestTabularCPD_Repr_WithEvidence(t *testing.T) {
+	cpd, err := NewTabularCPD("X", 2,
+		[][]float64{
+			{0.4, 0.9},
+			{0.6, 0.1},
+		},
+		[]string{"Y"}, []int{2},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := cpd.Repr()
+	if !strings.Contains(r, "evidence=") {
+		t.Errorf("Repr missing evidence: %s", r)
+	}
+	if !strings.Contains(r, "evidenceCard=") {
+		t.Errorf("Repr missing evidenceCard: %s", r)
+	}
+	// Should also contain the table from String()
+	if !strings.Contains(r, "X=0") {
+		t.Errorf("Repr missing table: %s", r)
+	}
+}
+
+// ---------------------------------------------------------------------------
 // Marginalize then Normalize round-trip
 // ---------------------------------------------------------------------------
 

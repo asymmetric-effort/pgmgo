@@ -3,6 +3,7 @@ package factors
 import (
 	"fmt"
 	"math"
+	"math/rand"
 	"strings"
 
 	"github.com/asymmetric-effort/pgmgo/lib/numgo"
@@ -144,6 +145,27 @@ func (cpd *LinearGaussianCPD) Copy() *LinearGaussianCPD {
 		variance: cpd.variance,
 		evidence: ev,
 	}
+}
+
+// GetRandomLinearGaussianCPD generates a random LinearGaussianCPD with a
+// random mean in [-5, 5], random betas in [-2, 2], and random variance in
+// (0, 5]. The seed controls the RNG.
+func GetRandomLinearGaussianCPD(variable string, evidence []string, seed int64) (*LinearGaussianCPD, error) {
+	if variable == "" {
+		return nil, fmt.Errorf("factors: variable name must not be empty")
+	}
+	rng := rand.New(rand.NewSource(seed))
+
+	mean := rng.Float64()*10 - 5 // [-5, 5]
+
+	betas := make([]float64, len(evidence))
+	for i := range betas {
+		betas[i] = rng.Float64()*4 - 2 // [-2, 2]
+	}
+
+	variance := rng.Float64()*4.9 + 0.1 // [0.1, 5.0]
+
+	return NewLinearGaussianCPD(variable, mean, betas, variance, evidence)
 }
 
 // String returns a human-readable representation of the LinearGaussianCPD.

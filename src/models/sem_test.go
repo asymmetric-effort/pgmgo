@@ -5,6 +5,8 @@ package models
 import (
 	"math"
 	"testing"
+
+	"github.com/asymmetric-effort/pgmgo/src/base"
 )
 
 func TestNewSEM(t *testing.T) {
@@ -247,5 +249,152 @@ func TestSEMImpliedCovarianceSymmetric(t *testing.T) {
 					i, j, cov[i][j], j, i, cov[j][i])
 			}
 		}
+	}
+}
+
+// ---------------------------------------------------------------------------
+// FromLavaan
+// ---------------------------------------------------------------------------
+
+func TestFromLavaan_Basic(t *testing.T) {
+	syntax := "Y ~ X1 + X2\nZ ~ Y"
+	s, err := FromLavaan(syntax)
+	if err != nil {
+		t.Fatalf("FromLavaan: %v", err)
+	}
+	vars := s.Variables()
+	if len(vars) != 4 {
+		t.Errorf("expected 4 variables, got %d: %v", len(vars), vars)
+	}
+	eq := s.GetEquation("Y")
+	if eq == nil {
+		t.Fatal("expected equation for Y")
+	}
+	if len(eq.Parents) != 2 {
+		t.Errorf("expected 2 parents for Y, got %d", len(eq.Parents))
+	}
+	// Coefficients should be zero (default).
+	for i, c := range eq.Coefficients {
+		if c != 0 {
+			t.Errorf("expected zero coefficient at %d, got %f", i, c)
+		}
+	}
+	if eq.Variance != 1.0 {
+		t.Errorf("expected variance 1.0, got %f", eq.Variance)
+	}
+}
+
+func TestFromLavaan_Empty(t *testing.T) {
+	_, err := FromLavaan("")
+	if err == nil {
+		t.Error("expected error for empty syntax")
+	}
+}
+
+func TestFromLavaan_NoValidLines(t *testing.T) {
+	_, err := FromLavaan("no tilde")
+	if err == nil {
+		t.Error("expected error for no valid lines")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// FromGraph
+// ---------------------------------------------------------------------------
+
+func TestFromGraph_Basic(t *testing.T) {
+	dag := base.NewDAG()
+	_ = dag.AddNode("X")
+	_ = dag.AddNode("Y")
+	_ = dag.AddEdge("X", "Y")
+
+	s, err := FromGraph(dag)
+	if err != nil {
+		t.Fatalf("FromGraph: %v", err)
+	}
+
+	eqY := s.GetEquation("Y")
+	if eqY == nil {
+		t.Fatal("expected equation for Y")
+	}
+	if len(eqY.Parents) != 1 || eqY.Parents[0] != "X" {
+		t.Errorf("expected parents [X], got %v", eqY.Parents)
+	}
+	if eqY.Variance != 1.0 {
+		t.Errorf("expected variance 1.0, got %f", eqY.Variance)
+	}
+	if eqY.Intercept != 0.0 {
+		t.Errorf("expected intercept 0.0, got %f", eqY.Intercept)
+	}
+}
+
+func TestFromGraph_NilDAG(t *testing.T) {
+	_, err := FromGraph(nil)
+	if err == nil {
+		t.Error("expected error for nil DAG")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// FromLisrel
+// ---------------------------------------------------------------------------
+
+func TestFromLisrel_Basic(t *testing.T) {
+	spec := "X: variance=2.0\nY: X=0.5 variance=1.0 intercept=1.0"
+	s, err := FromLisrel(spec)
+	if err != nil {
+		t.Fatalf("FromLisrel: %v", err)
+	}
+
+	eqX := s.GetEquation("X")
+	if eqX == nil {
+		t.Fatal("expected equation for X")
+	}
+	if eqX.Variance != 2.0 {
+		t.Errorf("expected X variance 2.0, got %f", eqX.Variance)
+	}
+
+	eqY := s.GetEquation("Y")
+	if eqY == nil {
+		t.Fatal("expected equation for Y")
+	}
+	if len(eqY.Parents) != 1 || eqY.Parents[0] != "X" {
+		t.Errorf("expected parents [X], got %v", eqY.Parents)
+	}
+	if eqY.Coefficients[0] != 0.5 {
+		t.Errorf("expected coefficient 0.5, got %f", eqY.Coefficients[0])
+	}
+	if eqY.Intercept != 1.0 {
+		t.Errorf("expected intercept 1.0, got %f", eqY.Intercept)
+	}
+}
+
+func TestFromLisrel_Empty(t *testing.T) {
+	_, err := FromLisrel("")
+	if err == nil {
+		t.Error("expected error for empty spec")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// FromRAM
+// ---------------------------------------------------------------------------
+
+func TestFromRAM_Basic(t *testing.T) {
+	spec := "X: variance=1.0\nY: X=0.7 variance=0.5"
+	s, err := FromRAM(spec)
+	if err != nil {
+		t.Fatalf("FromRAM: %v", err)
+	}
+	vars := s.Variables()
+	if len(vars) != 2 {
+		t.Errorf("expected 2 variables, got %d", len(vars))
+	}
+}
+
+func TestFromRAM_Empty(t *testing.T) {
+	_, err := FromRAM("")
+	if err == nil {
+		t.Error("expected error for empty spec")
 	}
 }

@@ -250,17 +250,128 @@ func TestGetAncestralGraph(t *testing.T) {
 	}
 }
 
-func TestFromLavaan(t *testing.T) {
-	_, err := FromLavaan("some syntax")
-	if err == nil {
-		t.Error("expected error from FromLavaan")
+func TestFromLavaan_Parsed(t *testing.T) {
+	syntax := "Y ~ X1 + X2\nZ ~ Y"
+	d, err := FromLavaan(syntax)
+	if err != nil {
+		t.Fatalf("FromLavaan: %v", err)
+	}
+	if !d.HasEdge("X1", "Y") || !d.HasEdge("X2", "Y") || !d.HasEdge("Y", "Z") {
+		t.Error("expected all edges from lavaan syntax")
 	}
 }
 
-func TestFromDagitty(t *testing.T) {
-	_, err := FromDagitty("some syntax")
+func TestFromLavaan_Empty(t *testing.T) {
+	_, err := FromLavaan("")
 	if err == nil {
-		t.Error("expected error from FromDagitty")
+		t.Error("expected error for empty lavaan syntax")
+	}
+}
+
+func TestFromLavaan_NoValidLines(t *testing.T) {
+	_, err := FromLavaan("no tilde here\njust text")
+	if err == nil {
+		t.Error("expected error for no valid lavaan lines")
+	}
+}
+
+func TestFromDagitty_Parsed(t *testing.T) {
+	syntax := "dag { X -> Y; Y -> Z }"
+	d, err := FromDagitty(syntax)
+	if err != nil {
+		t.Fatalf("FromDagitty: %v", err)
+	}
+	if !d.HasEdge("X", "Y") || !d.HasEdge("Y", "Z") {
+		t.Error("expected edges from dagitty syntax")
+	}
+}
+
+func TestFromDagitty_Empty(t *testing.T) {
+	_, err := FromDagitty("")
+	if err == nil {
+		t.Error("expected error for empty dagitty syntax")
+	}
+}
+
+func TestFromDagitty_Multiline(t *testing.T) {
+	syntax := "dag {\n  A -> B\n  B -> C\n}"
+	d, err := FromDagitty(syntax)
+	if err != nil {
+		t.Fatalf("FromDagitty multiline: %v", err)
+	}
+	if len(d.Edges()) != 2 {
+		t.Errorf("expected 2 edges, got %d", len(d.Edges()))
+	}
+}
+
+func TestOutDegreeIter(t *testing.T) {
+	d := buildStudentDAG(t)
+	out := d.OutDegreeIter()
+	// D has children: G
+	if out["D"] != 1 {
+		t.Errorf("expected D out-degree 1, got %d", out["D"])
+	}
+	// I has children: G, S
+	if out["I"] != 2 {
+		t.Errorf("expected I out-degree 2, got %d", out["I"])
+	}
+	// L is a leaf
+	if out["L"] != 0 {
+		t.Errorf("expected L out-degree 0, got %d", out["L"])
+	}
+}
+
+func TestInDegreeIter(t *testing.T) {
+	d := buildStudentDAG(t)
+	in := d.InDegreeIter()
+	// D is a root
+	if in["D"] != 0 {
+		t.Errorf("expected D in-degree 0, got %d", in["D"])
+	}
+	// G has parents: D, I
+	if in["G"] != 2 {
+		t.Errorf("expected G in-degree 2, got %d", in["G"])
+	}
+}
+
+func TestGetRandomDAG_Basic(t *testing.T) {
+	d, err := GetRandomDAG(5, 4, 42)
+	if err != nil {
+		t.Fatalf("GetRandomDAG: %v", err)
+	}
+	if len(d.Nodes()) != 5 {
+		t.Errorf("expected 5 nodes, got %d", len(d.Nodes()))
+	}
+	if len(d.Edges()) != 4 {
+		t.Errorf("expected 4 edges, got %d", len(d.Edges()))
+	}
+	_, err = d.TopologicalOrder()
+	if err != nil {
+		t.Errorf("random DAG is not a valid DAG: %v", err)
+	}
+}
+
+func TestGetRandomDAG_Deterministic(t *testing.T) {
+	d1, _ := GetRandomDAG(6, 5, 123)
+	d2, _ := GetRandomDAG(6, 5, 123)
+	edges1 := d1.Edges()
+	edges2 := d2.Edges()
+	if len(edges1) != len(edges2) {
+		t.Fatal("same seed should produce same DAG")
+	}
+	for i := range edges1 {
+		if edges1[i].Src != edges2[i].Src || edges1[i].Dst != edges2[i].Dst {
+			t.Errorf("edge %d differs", i)
+		}
+	}
+}
+
+func TestGetRandomDAG_InvalidArgs(t *testing.T) {
+	if _, err := GetRandomDAG(0, 0, 1); err == nil {
+		t.Error("expected error for nNodes=0")
+	}
+	if _, err := GetRandomDAG(3, 10, 1); err == nil {
+		t.Error("expected error for nEdges > maxEdges")
 	}
 }
 

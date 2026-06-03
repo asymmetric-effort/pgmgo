@@ -681,6 +681,66 @@ func TestGetStateProbabilityPartial(t *testing.T) {
 	}
 }
 
+// ---- TestGetRandomCPDs ----
+
+func TestGetRandomCPDs(t *testing.T) {
+	bn := NewBayesianNetwork()
+	_ = bn.AddNode("A")
+	_ = bn.AddNode("B")
+	_ = bn.AddNode("C")
+	_ = bn.AddEdge("A", "B")
+	_ = bn.AddEdge("A", "C")
+
+	if err := bn.GetRandomCPDs(2, 42); err != nil {
+		t.Fatalf("GetRandomCPDs: %v", err)
+	}
+
+	// Every node should have a CPD.
+	for _, node := range bn.Nodes() {
+		cpd := bn.GetCPD(node)
+		if cpd == nil {
+			t.Errorf("node %q has no CPD after GetRandomCPDs", node)
+		}
+	}
+
+	// The model should pass validation.
+	if err := bn.CheckModel(); err != nil {
+		t.Fatalf("CheckModel after GetRandomCPDs: %v", err)
+	}
+}
+
+func TestGetRandomCPDs_Deterministic(t *testing.T) {
+	bn1 := NewBayesianNetwork()
+	_ = bn1.AddNode("X")
+	_ = bn1.AddNode("Y")
+	_ = bn1.AddEdge("X", "Y")
+	_ = bn1.GetRandomCPDs(3, 99)
+
+	bn2 := NewBayesianNetwork()
+	_ = bn2.AddNode("X")
+	_ = bn2.AddNode("Y")
+	_ = bn2.AddEdge("X", "Y")
+	_ = bn2.GetRandomCPDs(3, 99)
+
+	for _, node := range bn1.Nodes() {
+		d1 := bn1.GetCPD(node).ToFactor().Values().Data()
+		d2 := bn2.GetCPD(node).ToFactor().Values().Data()
+		for i := range d1 {
+			if math.Abs(d1[i]-d2[i]) > 1e-12 {
+				t.Errorf("non-deterministic: node %q index %d: %f vs %f", node, i, d1[i], d2[i])
+			}
+		}
+	}
+}
+
+func TestGetRandomCPDs_InvalidStates(t *testing.T) {
+	bn := NewBayesianNetwork()
+	_ = bn.AddNode("X")
+	if err := bn.GetRandomCPDs(0, 1); err == nil {
+		t.Error("expected error for nStates=0")
+	}
+}
+
 // ---- Test helpers coverage ----
 
 func TestToIntConversions(t *testing.T) {

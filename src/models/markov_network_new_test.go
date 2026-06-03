@@ -403,3 +403,47 @@ func TestGetLocalIndependencies_BMiddleOfChain(t *testing.T) {
 		t.Errorf("expected no assertions for B (connected to all others), got %d", len(assertions))
 	}
 }
+
+// ---------------------------------------------------------------------------
+// States tests
+// ---------------------------------------------------------------------------
+
+func TestMarkovNetwork_States(t *testing.T) {
+	mn := buildTriangleMRF(t)
+	states := mn.States()
+	if len(states) != 3 {
+		t.Errorf("expected 3 entries, got %d", len(states))
+	}
+	for _, v := range []string{"A", "B", "C"} {
+		if states[v] != 2 {
+			t.Errorf("expected cardinality 2 for %q, got %d", v, states[v])
+		}
+	}
+}
+
+func TestMarkovNetwork_States_Empty(t *testing.T) {
+	mn := NewMarkovNetwork()
+	states := mn.States()
+	if len(states) != 0 {
+		t.Errorf("expected empty states, got %d entries", len(states))
+	}
+}
+
+func TestMarkovNetwork_States_MixedCardinality(t *testing.T) {
+	mn := NewMarkovNetwork()
+	mn.AddNode("A")
+	mn.AddNode("B")
+	mn.AddEdge("A", "B")
+
+	// Factor with different cardinalities: A=3, B=2
+	f, _ := factors.NewDiscreteFactor([]string{"A", "B"}, []int{3, 2}, []float64{1, 2, 3, 4, 5, 6})
+	mn.AddFactor(f)
+
+	states := mn.States()
+	if states["A"] != 3 {
+		t.Errorf("expected A cardinality 3, got %d", states["A"])
+	}
+	if states["B"] != 2 {
+		t.Errorf("expected B cardinality 2, got %d", states["B"])
+	}
+}

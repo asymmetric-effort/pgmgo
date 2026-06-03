@@ -247,6 +247,23 @@ func (mn *MarkovNetwork) ToJunctionTree() (*JunctionTree, error) {
 	}, nil
 }
 
+// States returns a map from each variable name to its cardinality, as
+// extracted from the factors in the network. Variables with no factors are
+// not included.
+func (mn *MarkovNetwork) States() map[string]int {
+	result := make(map[string]int)
+	for _, f := range mn.factorList {
+		vars := f.Variables()
+		card := f.Cardinality()
+		for i, v := range vars {
+			if _, ok := result[v]; !ok {
+				result[v] = card[i]
+			}
+		}
+	}
+	return result
+}
+
 // GetCardinality returns the cardinality of a node as determined from its
 // factors. Returns an error if no factor covers the node.
 func (mn *MarkovNetwork) GetCardinality(node string) (int, error) {

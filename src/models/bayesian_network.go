@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"math/rand"
 	"sort"
 
 	"github.com/asymmetric-effort/pgmgo/src/base"
@@ -176,6 +177,55 @@ func (bn *BayesianNetwork) Copy() *BayesianNetwork {
 		cpds:   newCPDs,
 		states: newStates,
 	}
+}
+
+// GetRandomCPDs generates random TabularCPDs for all nodes in the network
+// based on graph structure. Each node gets a CPD with the given number of
+// states. Columns are normalized to sum to 1. The seed controls the RNG.
+func (bn *BayesianNetwork) GetRandomCPDs(nStates int, seed int64) error {
+	if nStates <= 0 {
+		return fmt.Errorf("models: nStates must be positive, got %d", nStates)
+	}
+
+	rng := rand.New(rand.NewSource(seed))
+	nodes := bn.dag.Nodes()
+
+	for _, node := range nodes {
+		parents := bn.dag.Parents(node)
+		evidenceCard := make([]int, len(parents))
+		for i := range parents {
+			evidenceCard[i] = nStates
+		}
+
+		numParentConfigs := 1
+		for _, ec := range evidenceCard {
+			numParentConfigs *= ec
+		}
+
+		vals := make([][]float64, nStates)
+		for i := range vals {
+			vals[i] = make([]float64, numParentConfigs)
+		}
+
+		for j := 0; j < numParentConfigs; j++ {
+			sum := 0.0
+			for i := 0; i < nStates; i++ {
+				v := rng.Float64()
+				vals[i][j] = v
+				sum += v
+			}
+			for i := 0; i < nStates; i++ {
+				vals[i][j] /= sum
+			}
+		}
+
+		cpd, err := factors.NewTabularCPD(node, nStates, vals, parents, evidenceCard)
+		if err != nil {
+			return fmt.Errorf("models: failed to create random CPD for %q: %w", node, err)
+		}
+		bn.cpds[node] = cpd
+	}
+	return nil
 }
 
 // ToMarkovFactors converts all CPDs to discrete factors suitable for inference.

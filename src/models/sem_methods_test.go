@@ -223,9 +223,13 @@ func TestFromLavaan(t *testing.T) {
 		t.Error("expected error for empty syntax")
 	}
 
-	_, err = FromLavaan("y ~ x")
-	if err == nil {
-		t.Error("expected 'not yet implemented' error")
+	s, err := FromLavaan("y ~ x")
+	if err != nil {
+		t.Fatalf("expected FromLavaan to succeed for 'y ~ x', got: %v", err)
+	}
+	vars := s.Variables()
+	if len(vars) != 2 {
+		t.Errorf("expected 2 variables, got %d", len(vars))
 	}
 }
 
@@ -259,17 +263,17 @@ func TestFromGraphNil(t *testing.T) {
 	}
 }
 
-func TestFromLisrel(t *testing.T) {
-	_, err := FromLisrel()
+func TestFromLisrel_EmptySpec(t *testing.T) {
+	_, err := FromLisrel("")
 	if err == nil {
-		t.Error("expected 'not yet implemented' error")
+		t.Error("expected error for empty LISREL spec")
 	}
 }
 
-func TestFromRAM(t *testing.T) {
-	_, err := FromRAM()
+func TestFromRAM_EmptySpec(t *testing.T) {
+	_, err := FromRAM("")
 	if err == nil {
-		t.Error("expected 'not yet implemented' error")
+		t.Error("expected error for empty RAM spec")
 	}
 }
 
