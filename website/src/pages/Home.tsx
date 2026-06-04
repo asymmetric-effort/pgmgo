@@ -19,11 +19,13 @@ export function Home() {
         <h1>pgmgo</h1>
         <p class="hero-subtitle">Probabilistic Graphical Models in Go</p>
         <div class="badges">
-          <span class="badge">v0.0.28</span>
+          <span class="badge">v0.0.35</span>
           <span class="badge">Zero Dependencies</span>
           <span class="badge">Go</span>
           <span class="badge">MIT License</span>
-          <span class="badge">4,700+ Tests</span>
+          <span class="badge">~5,000 Tests</span>
+          <span class="badge">392 Cross-Validation Fixtures</span>
+          <span class="badge">24 Packages</span>
           <span class="badge">10 I/O Formats</span>
           <span class="badge">pgmpy-Inspired</span>
         </div>

@@ -21,8 +21,8 @@ export function Docs() {
           (linear algebra, statistics, graph algorithms, tabular data) are implemented from scratch in Go.
         </p>
         <p>
-          The current release is <strong>v0.0.28</strong> with over 4,700 tests covering inference,
-          learning, sampling, serialization, and cross-validation.
+          The current release is <strong>v0.0.35</strong> with approximately 5,000 tests and 392 cross-validation
+          fixtures covering inference, learning, sampling, serialization, and cross-validation across 24 packages.
         </p>
       </section>
 
@@ -307,7 +307,7 @@ fmt.Printf("Nodes: %d, Edges: %d\\n", len(bn.Nodes()), len(bn.Edges()))`}</code>
       <section class="section">
         <h2>Testing</h2>
         <p>
-          pgmgo has over 4,700 tests spanning unit tests, integration tests, and cross-validation tests.
+          pgmgo has approximately 5,000 tests and 392 cross-validation fixtures spanning unit tests, integration tests, and cross-validation tests across 24 packages.
         </p>
         <h3>Running Tests</h3>
         <pre><code>{`# Run all tests
