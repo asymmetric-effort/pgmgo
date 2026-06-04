@@ -77,7 +77,10 @@ main {
 .nav-brand img {
   height: 28px;
   width: 28px;
+  max-height: 28px;
+  max-width: 28px;
   border-radius: 4px;
+  object-fit: contain;
 }
 
 .nav-links {

@@ -7,7 +7,7 @@ export function Nav() {
     <nav class="nav">
       <div class="nav-inner">
         <Link to="/" class="nav-brand">
-          <img src="/docs/img/logo.png" alt="pgmgo logo" />
+          <img src="/docs/img/logo.png" alt="pgmgo logo" width="28" height="28" />
           pgmgo
         </Link>
         <div class="nav-links">

@@ -3,6 +3,7 @@
 package tests
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -161,5 +162,82 @@ func TestWebsiteCSS(t *testing.T) {
 		if !strings.Contains(css, check) {
 			t.Errorf("CSS missing %q", check)
 		}
+	}
+}
+
+// TestNavLogoConstraints verifies the nav bar logo is properly
+// size-constrained and will not blow up to full image dimensions.
+func TestNavLogoConstraints(t *testing.T) {
+	distDir := filepath.Join("..", "dist")
+	if _, err := os.Stat(distDir); os.IsNotExist(err) {
+		t.Skip("dist/ not found")
+	}
+
+	fs := http.FileServer(http.Dir(distDir))
+	server := httptest.NewServer(fs)
+	defer server.Close()
+
+	// Fetch the JS bundle which contains the rendered HTML templates
+	resp, _ := http.Get(server.URL + "/")
+	body, _ := io.ReadAll(resp.Body)
+	html := string(body)
+
+	re := regexp.MustCompile(`src="/assets/(index-[^"]+\.js)"`)
+	matches := re.FindStringSubmatch(html)
+	if len(matches) < 2 {
+		t.Fatal("can't find JS bundle URL")
+	}
+
+	jsResp, _ := http.Get(server.URL + "/assets/" + matches[1])
+	jsBody, _ := io.ReadAll(jsResp.Body)
+	js := string(jsBody)
+
+	// Verify the nav logo img has explicit width and height attributes <= 100px.
+	// Vite/specifyjs bundles attributes as backtick templates: width:`28`
+	// or double-quoted: width="28". Check both patterns.
+	widthRe := regexp.MustCompile("width[=:][`\"](\\d+)[`\"]")
+	heightRe := regexp.MustCompile("height[=:][`\"](\\d+)[`\"]")
+
+	wMatches := widthRe.FindAllStringSubmatch(js, -1)
+	hMatches := heightRe.FindAllStringSubmatch(js, -1)
+
+	if len(wMatches) == 0 {
+		t.Error("nav logo img missing explicit width attribute")
+	}
+	if len(hMatches) == 0 {
+		t.Error("nav logo img missing explicit height attribute")
+	}
+
+	for _, m := range wMatches {
+		val := 0
+		fmt.Sscanf(m[1], "%d", &val)
+		if val > 100 {
+			t.Errorf("img width=%d exceeds 100px limit", val)
+		}
+	}
+	for _, m := range hMatches {
+		val := 0
+		fmt.Sscanf(m[1], "%d", &val)
+		if val > 100 {
+			t.Errorf("img height=%d exceeds 100px limit", val)
+		}
+	}
+
+	// Verify CSS constrains the nav-brand img
+	cssRe := regexp.MustCompile(`href="/assets/(index-[^"]+\.css)"`)
+	cssMatches := cssRe.FindStringSubmatch(html)
+	if len(cssMatches) < 2 {
+		t.Fatal("no CSS bundle found")
+	}
+	cssResp, _ := http.Get(server.URL + "/assets/" + cssMatches[1])
+	cssBody, _ := io.ReadAll(cssResp.Body)
+	css := string(cssBody)
+
+	// CSS must contain max-height and max-width constraints for nav logo
+	if !strings.Contains(css, "max-height") {
+		t.Error("CSS missing max-height constraint for nav logo")
+	}
+	if !strings.Contains(css, "max-width") {
+		t.Error("CSS missing max-width constraint for nav logo")
 	}
 }
