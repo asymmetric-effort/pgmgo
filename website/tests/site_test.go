@@ -96,7 +96,7 @@ func TestWebsiteLinks(t *testing.T) {
 		"Docs":      {"Documentation", "Getting Started", "Library Packages", "Core Packages"},
 		"CLI":       {"CLI Reference", "validate", "query", "learn", "sample", "convert"},
 		"API":       {"API Reference", "BayesianNetwork", "VariableElimination", "Import Paths"},
-		"Tutorials": {"Tutorials", "Building Your First", "Learning Structure", "Causal Inference"},
+		"Tutorials": {"Tutorials", "Building Your First", "Learning from Data", "Causal Inference"},
 	}
 	for page, keywords := range pageContent {
 		for _, kw := range keywords {

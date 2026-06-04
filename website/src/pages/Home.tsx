@@ -1,9 +1,9 @@
-import { createElement, useHead } from "@asymmetric-effort/specifyjs";
+import { createElement, useHead, Link } from "@asymmetric-effort/specifyjs";
 
 export function Home() {
   useHead({
     title: "pgmgo — Probabilistic Graphical Models in Go",
-    description: "A zero-dependency Go library for probabilistic graphical models, similar to pgmpy.",
+    description: "A zero-dependency Go library for probabilistic graphical models, similar to pgmpy. Bayesian networks, Markov networks, causal inference, structure learning, and more.",
     canonical: "https://pgmgo.asymmetric-effort.com/",
     og: {
       title: "pgmgo — Probabilistic Graphical Models in Go",
@@ -18,22 +18,33 @@ export function Home() {
         <img src="/docs/img/logo.png" alt="pgmgo logo" class="hero-logo" />
         <h1>pgmgo</h1>
         <p class="hero-subtitle">Probabilistic Graphical Models in Go</p>
+        <p class="hero-description">
+          A zero-dependency Go library for Bayesian networks, Markov networks, causal inference,
+          structure learning, and probabilistic reasoning. Inspired by pgmpy, built entirely in Go.
+        </p>
         <div class="badges">
-          <span class="badge">v0.0.35</span>
+          <span class="badge">v0.0.37</span>
           <span class="badge">Zero Dependencies</span>
-          <span class="badge">Go</span>
+          <span class="badge">Go 1.21+</span>
           <span class="badge">MIT License</span>
           <span class="badge">~5,000 Tests</span>
           <span class="badge">392 Cross-Validation Fixtures</span>
           <span class="badge">24 Packages</span>
           <span class="badge">10 I/O Formats</span>
+          <span class="badge">25 Example Models</span>
+          <span class="badge">40 Built-in Datasets</span>
           <span class="badge">pgmpy-Inspired</span>
+        </div>
+        <div class="hero-actions">
+          <Link to="/docs" class="btn btn-primary">Get Started</Link>
+          <a href="https://github.com/asymmetric-effort/pgmgo" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">GitHub</a>
         </div>
       </section>
 
       <section class="section">
         <h2>Installation</h2>
         <pre><code>go get github.com/asymmetric-effort/pgmgo</code></pre>
+        <p>Requires Go 1.21 or later. No C dependencies, no cgo, no third-party modules.</p>
       </section>
 
       <section class="section">
@@ -79,6 +90,7 @@ func main() {
     )
     fmt.Println(result)
 }`}</code></pre>
+        <p>See the <Link to="/docs">documentation</Link> for complete getting-started guides, or jump to <Link to="/tutorials">tutorials</Link> for step-by-step walkthroughs.</p>
       </section>
 
       <section class="section">
@@ -93,12 +105,12 @@ func main() {
             <p>Variable Elimination, Belief Propagation, MPLP, Approximate Inference, Causal Inference (do-calculus), DBN Inference, and MAP queries.</p>
           </div>
           <div class="feature-card">
-            <h3>11+ Learning Algorithms</h3>
-            <p>MLE, BayesianEstimator, EM, HillClimb, PC, GES, ExhaustiveSearch, TreeSearch, MMHC, Expert-in-the-Loop, IV Estimator, SEM Estimator, Mirror Descent, and LLM-assisted learning.</p>
+            <h3>15+ Learning Algorithms</h3>
+            <p>MLE, BayesianEstimator, EM, HillClimb, PC, GES, ExhaustiveSearch, TreeSearch, MMHC, Expert-in-the-Loop, IV Estimator, SEM Estimator, Mirror Descent, LinearGaussianMLE, MarginalEstimator, and LLM-assisted learning.</p>
           </div>
           <div class="feature-card">
-            <h3>16+ CI Tests</h3>
-            <p>ChiSquare, G-squared, FisherZ, Pearsonr, GCM, Hotelling-Lawley, and more across discrete, continuous, multivariate, and tree-based categories.</p>
+            <h3>16 CI Tests</h3>
+            <p>ChiSquare, G-squared, FisherZ, Pearsonr, GCM, Hotelling-Lawley, PillaiBartlett, and more across discrete, continuous, multivariate, and tree-based categories.</p>
           </div>
           <div class="feature-card">
             <h3>13 Scoring Functions</h3>
@@ -113,8 +125,16 @@ func main() {
             <p>Built-in models including Asia, Alarm, Cancer, Student, Sachs, Insurance, Hailfinder, Hepar2, Pigs, and more. 13 with full CPDs, 12 structure-only.</p>
           </div>
           <div class="feature-card">
+            <h3>40 Built-in Datasets</h3>
+            <p>Ready-to-use CSV datasets for structure learning, parameter estimation, and benchmarking. Includes BN-specific, classic ML, and UCI repository datasets.</p>
+          </div>
+          <div class="feature-card">
             <h3>GPU Compute Backend</h3>
             <p>Optional GPU acceleration via the <code>lib/gpu</code> package for compute-intensive operations on large networks.</p>
+          </div>
+          <div class="feature-card">
+            <h3>Causal Inference</h3>
+            <p>Do-calculus interventional queries, back-door and front-door identification, ATE estimation with DoubleML, naive adjustment, and IV regression.</p>
           </div>
           <div class="feature-card">
             <h3>LLM Integration</h3>
@@ -122,9 +142,24 @@ func main() {
           </div>
           <div class="feature-card">
             <h3>Zero Dependencies</h3>
-            <p>Built entirely in Go with custom implementations of numpy (numgo), scipy (scigo), networkx (graphgo), and pandas (tabgo).</p>
+            <p>Built entirely in Go with custom implementations of numpy (numgo), scipy (scigo), networkx (graphgo), and pandas (tabgo). No cgo, no external libraries.</p>
           </div>
         </div>
+      </section>
+
+      <section class="section">
+        <h2>Why pgmgo?</h2>
+        <p>
+          pgmgo brings the power of probabilistic graphical models to the Go ecosystem. If you have used
+          pgmpy in Python, pgmgo provides a familiar API with the performance and deployment benefits of Go.
+          The zero-dependency design means you can build and deploy PGM applications without managing
+          native library installations, Python environments, or container images with scientific computing stacks.
+        </p>
+        <p>
+          Every numerical primitive -- linear algebra, statistical distributions, graph algorithms, tabular data
+          processing -- is implemented from scratch in pure Go. This means <code>go build</code> just works,
+          cross-compilation just works, and static binaries just work.
+        </p>
       </section>
     </div>
   );
