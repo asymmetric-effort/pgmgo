@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 .PHONY: all build test test-unit test-integration test-e2e lint fmt clean \
-        coverage website website-dev generate-fixtures verify-fixtures \
+        coverage website website-dev website-test generate-fixtures verify-fixtures \
         install-hooks install-skills
 
 SKILLS_VERSION := v0.0.28
@@ -74,6 +74,9 @@ website:
 
 website-dev:
 	cd website && node node_modules/.bin/vite
+
+website-test:
+	cd website && npx playwright test
 
 # --- Setup ---
 
