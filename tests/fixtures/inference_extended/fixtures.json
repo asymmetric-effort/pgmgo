@@ -1,0 +1,3466 @@
+{
+  "generator": "inference_extended",
+  "pgmpy_version": "1.1.2",
+  "test_cases": [
+    {
+      "description": "VE query P(D) with no evidence",
+      "expected": {
+        "values": [
+          0.6,
+          0.4
+        ],
+        "variables": [
+          "D"
+        ]
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {},
+        "query_variables": [
+          "D"
+        ]
+      },
+      "name": "ve_query_D_no_evidence"
+    },
+    {
+      "description": "VE query P(G) with no evidence",
+      "expected": {
+        "values": [
+          0.447,
+          0.2714,
+          0.2816
+        ],
+        "variables": [
+          "G"
+        ]
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {},
+        "query_variables": [
+          "G"
+        ]
+      },
+      "name": "ve_query_G_no_evidence"
+    },
+    {
+      "description": "VE query P(I) with no evidence",
+      "expected": {
+        "values": [
+          0.7,
+          0.3
+        ],
+        "variables": [
+          "I"
+        ]
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {},
+        "query_variables": [
+          "I"
+        ]
+      },
+      "name": "ve_query_I_no_evidence"
+    },
+    {
+      "description": "VE query P(L) with no evidence",
+      "expected": {
+        "values": [
+          0.432044,
+          0.567956
+        ],
+        "variables": [
+          "L"
+        ]
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {},
+        "query_variables": [
+          "L"
+        ]
+      },
+      "name": "ve_query_L_no_evidence"
+    },
+    {
+      "description": "VE query P(S) with no evidence",
+      "expected": {
+        "values": [
+          0.725,
+          0.275
+        ],
+        "variables": [
+          "S"
+        ]
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {},
+        "query_variables": [
+          "S"
+        ]
+      },
+      "name": "ve_query_S_no_evidence"
+    },
+    {
+      "description": "VE query P(G | D=0)",
+      "expected": {
+        "values": [
+          0.225,
+          0.355,
+          0.42
+        ],
+        "variables": [
+          "G"
+        ]
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {
+          "D": 0
+        },
+        "query_variables": [
+          "G"
+        ]
+      },
+      "name": "ve_query_G_given_D0"
+    },
+    {
+      "description": "VE query P(I | D=0)",
+      "expected": {
+        "values": [
+          0.7,
+          0.3
+        ],
+        "variables": [
+          "I"
+        ]
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {
+          "D": 0
+        },
+        "query_variables": [
+          "I"
+        ]
+      },
+      "name": "ve_query_I_given_D0"
+    },
+    {
+      "description": "VE query P(L | D=0)",
+      "expected": {
+        "values": [
+          0.5803,
+          0.4197
+        ],
+        "variables": [
+          "L"
+        ]
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {
+          "D": 0
+        },
+        "query_variables": [
+          "L"
+        ]
+      },
+      "name": "ve_query_L_given_D0"
+    },
+    {
+      "description": "VE query P(S | D=0)",
+      "expected": {
+        "values": [
+          0.725,
+          0.275
+        ],
+        "variables": [
+          "S"
+        ]
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {
+          "D": 0
+        },
+        "query_variables": [
+          "S"
+        ]
+      },
+      "name": "ve_query_S_given_D0"
+    },
+    {
+      "description": "VE MAP(G | {'D': 0, 'I': 0})",
+      "expected": {
+        "map_assignment": {
+          "G": 1
+        }
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {
+          "D": 0,
+          "I": 0
+        },
+        "query_variables": [
+          "G"
+        ]
+      },
+      "name": "ve_map_G_given_D0_I0"
+    },
+    {
+      "description": "VE MAP(G | {'D': 1, 'I': 0})",
+      "expected": {
+        "map_assignment": {
+          "G": 0
+        }
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {
+          "D": 1,
+          "I": 0
+        },
+        "query_variables": [
+          "G"
+        ]
+      },
+      "name": "ve_map_G_given_D1_I0"
+    },
+    {
+      "description": "VE MAP(G | {'D': 0, 'I': 1})",
+      "expected": {
+        "map_assignment": {
+          "G": 2
+        }
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {
+          "D": 0,
+          "I": 1
+        },
+        "query_variables": [
+          "G"
+        ]
+      },
+      "name": "ve_map_G_given_D0_I1"
+    },
+    {
+      "description": "VE MAP(G | {'D': 1, 'I': 1})",
+      "expected": {
+        "map_assignment": {
+          "G": 0
+        }
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {
+          "D": 1,
+          "I": 1
+        },
+        "query_variables": [
+          "G"
+        ]
+      },
+      "name": "ve_map_G_given_D1_I1"
+    },
+    {
+      "description": "VE MAP(L | {'G': 0})",
+      "expected": {
+        "map_assignment": {
+          "L": 1
+        }
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {
+          "G": 0
+        },
+        "query_variables": [
+          "L"
+        ]
+      },
+      "name": "ve_map_L_given_G0"
+    },
+    {
+      "description": "VE MAP(L | {'G': 1})",
+      "expected": {
+        "map_assignment": {
+          "L": 1
+        }
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {
+          "G": 1
+        },
+        "query_variables": [
+          "L"
+        ]
+      },
+      "name": "ve_map_L_given_G1"
+    },
+    {
+      "description": "VE MAP(L | {'G': 2})",
+      "expected": {
+        "map_assignment": {
+          "L": 0
+        }
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {
+          "G": 2
+        },
+        "query_variables": [
+          "L"
+        ]
+      },
+      "name": "ve_map_L_given_G2"
+    },
+    {
+      "description": "VE MAP(G,L | {'D': 0, 'I': 0})",
+      "expected": {
+        "map_assignment": {
+          "G": 2,
+          "L": 0
+        }
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {
+          "D": 0,
+          "I": 0
+        },
+        "query_variables": [
+          "G",
+          "L"
+        ]
+      },
+      "name": "ve_map_G_L_given_D0_I0"
+    },
+    {
+      "description": "VE MAP(S | {'I': 0})",
+      "expected": {
+        "map_assignment": {
+          "S": 0
+        }
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {
+          "I": 0
+        },
+        "query_variables": [
+          "S"
+        ]
+      },
+      "name": "ve_map_S_given_I0"
+    },
+    {
+      "description": "VE MAP(S | {'I': 1})",
+      "expected": {
+        "map_assignment": {
+          "S": 1
+        }
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {
+          "I": 1
+        },
+        "query_variables": [
+          "S"
+        ]
+      },
+      "name": "ve_map_S_given_I1"
+    },
+    {
+      "description": "BP query P(G | {'D': 0, 'I': 1}) matches VE",
+      "expected": {
+        "bp_values": [
+          0.05,
+          0.25,
+          0.7
+        ],
+        "variables": [
+          "G"
+        ],
+        "ve_values": [
+          0.05,
+          0.25,
+          0.7
+        ]
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {
+          "D": 0,
+          "I": 1
+        },
+        "query_variables": [
+          "G"
+        ]
+      },
+      "name": "bp_vs_ve_G_given_D0_I1"
+    },
+    {
+      "description": "BP query P(L | {'I': 0}) matches VE",
+      "expected": {
+        "bp_values": [
+          0.34892,
+          0.65108
+        ],
+        "variables": [
+          "L"
+        ],
+        "ve_values": [
+          0.34892,
+          0.65108
+        ]
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {
+          "I": 0
+        },
+        "query_variables": [
+          "L"
+        ]
+      },
+      "name": "bp_vs_ve_L_given_I0"
+    },
+    {
+      "description": "BP query P(S | {}) matches VE",
+      "expected": {
+        "bp_values": [
+          0.725,
+          0.275
+        ],
+        "variables": [
+          "S"
+        ],
+        "ve_values": [
+          0.725,
+          0.275
+        ]
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {},
+        "query_variables": [
+          "S"
+        ]
+      },
+      "name": "bp_vs_ve_S_given_none"
+    },
+    {
+      "description": "BP query P(D | {'G': 1}) matches VE",
+      "expected": {
+        "bp_values": [
+          0.7848194547,
+          0.2151805453
+        ],
+        "variables": [
+          "D"
+        ],
+        "ve_values": [
+          0.7848194547,
+          0.2151805453
+        ]
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {
+          "G": 1
+        },
+        "query_variables": [
+          "D"
+        ]
+      },
+      "name": "bp_vs_ve_D_given_G1"
+    },
+    {
+      "description": "ApproxInference P(G | D=0, I=1) with 100k samples",
+      "expected": {
+        "approx_values": [
+          0.24902,
+          0.70118,
+          0.0498
+        ],
+        "exact_values": [
+          0.05,
+          0.25,
+          0.7
+        ],
+        "tolerance": 0.05
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "evidence": {
+          "D": 0,
+          "I": 1
+        },
+        "n_samples": 100000,
+        "query_variables": [
+          "G"
+        ]
+      },
+      "name": "approx_inference_marginal"
+    },
+    {
+      "description": "CausalInference ATE(D, G, [0,1]) on student BN",
+      "expected": {
+        "ate": -0.901,
+        "do_d0_values": [
+          0.225,
+          0.355,
+          0.42
+        ],
+        "do_d1_values": [
+          0.78,
+          0.146,
+          0.074
+        ]
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "outcome": "G",
+        "treatment": "D",
+        "treatment_values": [
+          0,
+          1
+        ]
+      },
+      "name": "causal_ate_d_g"
+    },
+    {
+      "description": "CausalInference backdoor adjustment sets for D->G",
+      "expected": {
+        "adjustment_sets": []
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "outcome": "G",
+        "treatment": "D"
+      },
+      "name": "causal_backdoor_d_g"
+    }
+  ]
+}

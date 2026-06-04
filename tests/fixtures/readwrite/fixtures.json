@@ -1,0 +1,130 @@
+{
+  "generator": "readwrite",
+  "pgmpy_version": "1.1.2",
+  "test_cases": [
+    {
+      "description": "Write student BN to BIF, read back, verify structure",
+      "expected": {
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "nodes": [
+          "D",
+          "G",
+          "I",
+          "L",
+          "S"
+        ],
+        "num_cpds": 5,
+        "num_edges": 4,
+        "num_nodes": 5
+      },
+      "input": {
+        "bif_content": "network unknown {\n}\nvariable D {\n    type discrete [ 2 ] { d0, d1 };\n}\nvariable G {\n    type discrete [ 3 ] { g0, g1, g2 };\n}\nvariable I {\n    type discrete [ 2 ] { i0, i1 };\n}\nvariable L {\n    type discrete [ 2 ] { l0, l1 };\n}\nvariable S {\n    type discrete [ 2 ] { s0, s1 };\n}\nprobability ( D ) {\n    table 0.6, 0.4 ;\n}\nprobability ( G | D, I ) {\n    ( d0, i0 ) 0.3, 0.4, 0.3;\n    ( d0, i1 ) 0.05, 0.25, 0.7;\n    ( d1, i0 ) 0.9, 0.08, 0.02;\n    ( d1, i1 ) 0.5, 0.3, 0.2;\n\n}\nprobability ( I ) {\n    table 0.7, 0.3 ;\n}\nprobability ( L | G ) {\n    ( g0 ) 0.1, 0.9;\n    ( g1 ) 0.4, 0.6;\n    ( g2 ) 0.99, 0.01;\n\n}\nprobability ( S | I ) {\n    ( i0 ) 0.95, 0.05;\n    ( i1 ) 0.2, 0.8;\n\n}\n",
+        "original_edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "original_nodes": [
+          "D",
+          "G",
+          "I",
+          "L",
+          "S"
+        ]
+      },
+      "name": "bif_roundtrip"
+    },
+    {
+      "description": "Write student BN to XMLBIF, read back, verify structure",
+      "expected": {
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "nodes": [
+          "D",
+          "G",
+          "I",
+          "L",
+          "S"
+        ],
+        "num_cpds": 5,
+        "num_edges": 4,
+        "num_nodes": 5
+      },
+      "input": {
+        "original_edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "original_nodes": [
+          "D",
+          "G",
+          "I",
+          "L",
+          "S"
+        ],
+        "xmlbif_content": "<?xml version='1.0' encoding='utf-8'?>\n<BIF VERSION=\"0.3\">\n  <NETWORK>\n    <NAME>UNTITLED</NAME>\n    <VARIABLE TYPE=\"nature\">\n      <NAME>D</NAME>\n      <OUTCOME>d0</OUTCOME>\n      <OUTCOME>d1</OUTCOME>\n      <PROPERTY />\n    </VARIABLE>\n    <VARIABLE TYPE=\"nature\">\n      <NAME>G</NAME>\n      <OUTCOME>g0</OUTCOME>\n      <OUTCOME>g1</OUTCOME>\n      <OUTCOME>g2</OUTCOME>\n      <PROPERTY />\n    </VARIABLE>\n    <VARIABLE TYPE=\"nature\">\n      <NAME>I</NAME>\n      <OUTCOME>i0</OUTCOME>\n      <OUTCOME>i1</OUTCOME>\n      <PROPERTY />\n    </VARIABLE>\n    <VARIABLE TYPE=\"nature\">\n      <NAME>L</NAME>\n      <OUTCOME>l0</OUTCOME>\n      <OUTCOME>l1</OUTCOME>\n      <PROPERTY />\n    </VARIABLE>\n    <VARIABLE TYPE=\"nature\">\n      <NAME>S</NAME>\n      <OUTCOME>s0</OUTCOME>\n      <OUTCOME>s1</OUTCOME>\n      <PROPERTY />\n    </VARIABLE>\n    <DEFINITION>\n      <FOR>D</FOR>\n      <TABLE>0.6 0.4 </TABLE>\n    </DEFINITION>\n    <DEFINITION>\n      <FOR>G</FOR>\n      <GIVEN>D</GIVEN>\n      <GIVEN>I</GIVEN>\n      <TABLE>0.3 0.4 0.3 0.05 0.25 0.7 0.9 0.08 0.02 0.5 0.3 0.2 </TABLE>\n    </DEFINITION>\n    <DEFINITION>\n      <FOR>I</FOR>\n      <TABLE>0.7 0.3 </TABLE>\n    </DEFINITION>\n    <DEFINITION>\n      <FOR>L</FOR>\n      <GIVEN>G</GIVEN>\n      <TABLE>0.1 0.9 0.4 0.6 0.99 0.01 </TABLE>\n    </DEFINITION>\n    <DEFINITION>\n      <FOR>S</FOR>\n      <GIVEN>I</GIVEN>\n      <TABLE>0.95 0.05 0.2 0.8 </TABLE>\n    </DEFINITION>\n  </NETWORK>\n</BIF>\n"
+      },
+      "name": "xmlbif_roundtrip"
+    }
+  ]
+}

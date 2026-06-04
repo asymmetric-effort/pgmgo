@@ -1,0 +1,241 @@
+{
+  "generator": "prediction",
+  "pgmpy_version": "1.1.2",
+  "test_cases": [
+    {
+      "description": "ATE(D, L) on student BN via do-calculus",
+      "expected": {
+        "ate": 0.37064,
+        "do_d0_values": [
+          0.5803,
+          0.4197
+        ],
+        "do_d1_values": [
+          0.20966,
+          0.79034
+        ]
+      },
+      "input": {
+        "cpds": {
+          "D": {
+            "values": [
+              [
+                0.6
+              ],
+              [
+                0.4
+              ]
+            ],
+            "variable_card": 2
+          },
+          "G": {
+            "evidence": [
+              "D",
+              "I"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.3,
+                0.05,
+                0.9,
+                0.5
+              ],
+              [
+                0.4,
+                0.25,
+                0.08,
+                0.3
+              ],
+              [
+                0.3,
+                0.7,
+                0.02,
+                0.2
+              ]
+            ],
+            "variable_card": 3
+          },
+          "I": {
+            "values": [
+              [
+                0.7
+              ],
+              [
+                0.3
+              ]
+            ],
+            "variable_card": 2
+          },
+          "L": {
+            "evidence": [
+              "G"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "values": [
+              [
+                0.1,
+                0.4,
+                0.99
+              ],
+              [
+                0.9,
+                0.6,
+                0.01
+              ]
+            ],
+            "variable_card": 2
+          },
+          "S": {
+            "evidence": [
+              "I"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.95,
+                0.2
+              ],
+              [
+                0.05,
+                0.8
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "D",
+            "G"
+          ],
+          [
+            "I",
+            "G"
+          ],
+          [
+            "G",
+            "L"
+          ],
+          [
+            "I",
+            "S"
+          ]
+        ],
+        "outcome": "L",
+        "treatment": "D",
+        "treatment_values": [
+          0,
+          1
+        ]
+      },
+      "name": "causal_ate_d_l"
+    },
+    {
+      "description": "ATE(X, Y) on confounded graph X<-Z->Y, X->Y",
+      "expected": {
+        "ate": 0.35,
+        "backdoor_adjustment_sets": [
+          [
+            "Z"
+          ]
+        ],
+        "do_x0_values": [
+          0.75,
+          0.25
+        ],
+        "do_x1_values": [
+          0.4,
+          0.6
+        ]
+      },
+      "input": {
+        "cpds": {
+          "X": {
+            "evidence": [
+              "Z"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "values": [
+              [
+                0.8,
+                0.3
+              ],
+              [
+                0.2,
+                0.7
+              ]
+            ],
+            "variable_card": 2
+          },
+          "Y": {
+            "evidence": [
+              "X",
+              "Z"
+            ],
+            "evidence_card": [
+              2,
+              2
+            ],
+            "values": [
+              [
+                0.9,
+                0.6,
+                0.7,
+                0.1
+              ],
+              [
+                0.1,
+                0.4,
+                0.3,
+                0.9
+              ]
+            ],
+            "variable_card": 2
+          },
+          "Z": {
+            "values": [
+              [
+                0.5
+              ],
+              [
+                0.5
+              ]
+            ],
+            "variable_card": 2
+          }
+        },
+        "edges": [
+          [
+            "Z",
+            "X"
+          ],
+          [
+            "Z",
+            "Y"
+          ],
+          [
+            "X",
+            "Y"
+          ]
+        ],
+        "outcome": "Y",
+        "treatment": "X",
+        "treatment_values": [
+          0,
+          1
+        ]
+      },
+      "name": "causal_ate_confounded"
+    }
+  ]
+}
