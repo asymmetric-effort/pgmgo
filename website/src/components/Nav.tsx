@@ -6,7 +6,10 @@ export function Nav() {
   return (
     <nav class="nav">
       <div class="nav-inner">
-        <Link to="/" class="nav-brand">pgmgo</Link>
+        <Link to="/" class="nav-brand">
+          <img src="/docs/img/logo.png" alt="pgmgo logo" />
+          pgmgo
+        </Link>
         <div class="nav-links">
           <Link to="/" class={pathname === "/" ? "active" : ""}>Home</Link>
           <Link to="/docs" class={pathname === "/docs" ? "active" : ""}>Docs</Link>

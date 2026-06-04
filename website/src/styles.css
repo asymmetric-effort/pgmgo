@@ -46,44 +46,55 @@ main {
 .nav {
   position: sticky;
   top: 0;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
   z-index: 100;
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border);
 }
 
 .nav-inner {
   max-width: 960px;
   margin: 0 auto;
-  padding: 0 24px;
-  height: 56px;
+  padding: 0.75rem 1.5rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 2rem;
 }
 
 .nav-brand {
-  font-size: 20px;
   font-weight: 700;
+  font-size: 1.25rem;
   color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   text-decoration: none;
+}
+
+.nav-brand:hover {
+  text-decoration: none;
+}
+
+.nav-brand img {
+  height: 28px;
+  width: 28px;
+  border-radius: 4px;
 }
 
 .nav-links {
   display: flex;
-  gap: 24px;
+  gap: 1.5rem;
 }
 
 .nav-links a {
   color: var(--text-muted);
+  font-size: 0.9rem;
   text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  transition: color 0.2s;
 }
 
 .nav-links a:hover,
 .nav-links a.active {
   color: var(--primary);
+  text-decoration: none;
 }
 
 /* Footer */
