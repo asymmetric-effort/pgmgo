@@ -1,4 +1,5 @@
 import { createElement, useHead, Link } from "@asymmetric-effort/specifyjs";
+import { ScrollLink } from "../components/ScrollLink";
 
 export function Tutorials() {
   useHead({
@@ -13,7 +14,7 @@ export function Tutorials() {
 
       <nav class="page-toc">
         <strong>Tutorials:</strong>{" "}
-        <a href="#tutorial-1">1. First Bayesian Network</a> | <a href="#tutorial-2">2. Probabilistic Inference</a> | <a href="#tutorial-3">3. Learning from Data</a> | <a href="#tutorial-4">4. Causal Inference</a> | <a href="#tutorial-5">5. File Formats</a> | <a href="#tutorial-6">6. Sampling</a> | <a href="#tutorial-7">7. Advanced Models</a> | <a href="#tutorial-8">8. Internal Libraries</a>
+        <ScrollLink to="tutorial-1">1. First Bayesian Network</ScrollLink> | <ScrollLink to="tutorial-2">2. Probabilistic Inference</ScrollLink> | <ScrollLink to="tutorial-3">3. Learning from Data</ScrollLink> | <ScrollLink to="tutorial-4">4. Causal Inference</ScrollLink> | <ScrollLink to="tutorial-5">5. File Formats</ScrollLink> | <ScrollLink to="tutorial-6">6. Sampling</ScrollLink> | <ScrollLink to="tutorial-7">7. Advanced Models</ScrollLink> | <ScrollLink to="tutorial-8">8. Internal Libraries</ScrollLink>
       </nav>
 
       {/* ============================================================ */}
@@ -237,9 +238,9 @@ Model saved to wetgrass.bif`}</code></pre>
           Now that you can build and query a Bayesian network, explore:
         </p>
         <ul>
-          <li><a href="#tutorial-2">Tutorial 2</a>: Different inference methods (VE, BP, approximate)</li>
-          <li><a href="#tutorial-3">Tutorial 3</a>: Learning structure and parameters from data</li>
-          <li><a href="#tutorial-4">Tutorial 4</a>: Causal inference with do-calculus</li>
+          <li><ScrollLink to="tutorial-2">Tutorial 2</ScrollLink>: Different inference methods (VE, BP, approximate)</li>
+          <li><ScrollLink to="tutorial-3">Tutorial 3</ScrollLink>: Learning structure and parameters from data</li>
+          <li><ScrollLink to="tutorial-4">Tutorial 4</ScrollLink>: Causal inference with do-calculus</li>
         </ul>
       </section>
 
@@ -256,7 +257,7 @@ Model saved to wetgrass.bif`}</code></pre>
 
         <h3>Prerequisites</h3>
         <ul>
-          <li>Completed <a href="#tutorial-1">Tutorial 1</a></li>
+          <li>Completed <ScrollLink to="tutorial-1">Tutorial 1</ScrollLink></li>
           <li>Understanding of conditional probability and Bayes' theorem</li>
         </ul>
 
@@ -443,8 +444,8 @@ Approx P(Dyspnea | Smoker=yes): [~0.30 ~0.70]`}</code></pre>
 
         <h3>What's Next</h3>
         <ul>
-          <li><a href="#tutorial-3">Tutorial 3</a>: Learn models from data instead of specifying them manually</li>
-          <li><a href="#tutorial-4">Tutorial 4</a>: Causal inference -- observation vs. intervention</li>
+          <li><ScrollLink to="tutorial-3">Tutorial 3</ScrollLink>: Learn models from data instead of specifying them manually</li>
+          <li><ScrollLink to="tutorial-4">Tutorial 4</ScrollLink>: Causal inference -- observation vs. intervention</li>
         </ul>
       </section>
 
@@ -461,7 +462,7 @@ Approx P(Dyspnea | Smoker=yes): [~0.30 ~0.70]`}</code></pre>
 
         <h3>Prerequisites</h3>
         <ul>
-          <li>Completed <a href="#tutorial-1">Tutorial 1</a> and <a href="#tutorial-2">Tutorial 2</a></li>
+          <li>Completed <ScrollLink to="tutorial-1">Tutorial 1</ScrollLink> and <ScrollLink to="tutorial-2">Tutorial 2</ScrollLink></li>
           <li>CSV data file with discrete observations</li>
         </ul>
 
@@ -647,8 +648,8 @@ func main() {
 
         <h3>What's Next</h3>
         <ul>
-          <li><a href="#tutorial-4">Tutorial 4</a>: Causal inference on the learned model</li>
-          <li><a href="#tutorial-6">Tutorial 6</a>: Generating data via sampling</li>
+          <li><ScrollLink to="tutorial-4">Tutorial 4</ScrollLink>: Causal inference on the learned model</li>
+          <li><ScrollLink to="tutorial-6">Tutorial 6</ScrollLink>: Generating data via sampling</li>
         </ul>
       </section>
 
@@ -665,7 +666,7 @@ func main() {
 
         <h3>Prerequisites</h3>
         <ul>
-          <li>Completed <a href="#tutorial-1">Tutorial 1</a> and <a href="#tutorial-2">Tutorial 2</a></li>
+          <li>Completed <ScrollLink to="tutorial-1">Tutorial 1</ScrollLink> and <ScrollLink to="tutorial-2">Tutorial 2</ScrollLink></li>
           <li>Basic understanding of causation vs. correlation</li>
         </ul>
 
@@ -847,8 +848,8 @@ $ pgmgo do model.bif --intervention Tar=1 --query Cancer --evidence Smoking=0`}<
 
         <h3>What's Next</h3>
         <ul>
-          <li><a href="#tutorial-5">Tutorial 5</a>: Working with different file formats</li>
-          <li><a href="#tutorial-7">Tutorial 7</a>: Advanced model types (SEMs, Markov networks)</li>
+          <li><ScrollLink to="tutorial-5">Tutorial 5</ScrollLink>: Working with different file formats</li>
+          <li><ScrollLink to="tutorial-7">Tutorial 7</ScrollLink>: Advanced model types (SEMs, Markov networks)</li>
         </ul>
       </section>
 
@@ -864,7 +865,7 @@ $ pgmgo do model.bif --intervention Tar=1 --query Cancer --evidence Smoking=0`}<
 
         <h3>Prerequisites</h3>
         <ul>
-          <li>Completed <a href="#tutorial-1">Tutorial 1</a></li>
+          <li>Completed <ScrollLink to="tutorial-1">Tutorial 1</ScrollLink></li>
           <li>A BIF file (or create one in Tutorial 1)</li>
         </ul>
 
@@ -1031,8 +1032,8 @@ jsonOut.Close()`}</code></pre>
 
         <h3>What's Next</h3>
         <ul>
-          <li><a href="#tutorial-6">Tutorial 6</a>: Sampling data from models</li>
-          <li><a href="#tutorial-8">Tutorial 8</a>: Using internal libraries for data processing</li>
+          <li><ScrollLink to="tutorial-6">Tutorial 6</ScrollLink>: Sampling data from models</li>
+          <li><ScrollLink to="tutorial-8">Tutorial 8</ScrollLink>: Using internal libraries for data processing</li>
         </ul>
       </section>
 
@@ -1049,7 +1050,7 @@ jsonOut.Close()`}</code></pre>
 
         <h3>Prerequisites</h3>
         <ul>
-          <li>Completed <a href="#tutorial-1">Tutorial 1</a></li>
+          <li>Completed <ScrollLink to="tutorial-1">Tutorial 1</ScrollLink></li>
           <li>Basic understanding of Monte Carlo methods</li>
         </ul>
 
@@ -1220,8 +1221,8 @@ $ pgmgo sample --model asia.bif --n 2000 --method gibbs --evidence Smoker=1 --ou
 
         <h3>What's Next</h3>
         <ul>
-          <li><a href="#tutorial-3">Tutorial 3</a>: Use sampled data for structure learning</li>
-          <li><a href="#tutorial-7">Tutorial 7</a>: Advanced model types</li>
+          <li><ScrollLink to="tutorial-3">Tutorial 3</ScrollLink>: Use sampled data for structure learning</li>
+          <li><ScrollLink to="tutorial-7">Tutorial 7</ScrollLink>: Advanced model types</li>
         </ul>
       </section>
 
@@ -1427,7 +1428,7 @@ lgbn.SetCPD("Z", factors.NewLinearGaussianCPD(
 
         <h3>What's Next</h3>
         <ul>
-          <li><a href="#tutorial-8">Tutorial 8</a>: Using the internal libraries (numgo, scigo, graphgo, tabgo) directly</li>
+          <li><ScrollLink to="tutorial-8">Tutorial 8</ScrollLink>: Using the internal libraries (numgo, scigo, graphgo, tabgo) directly</li>
           <li><Link to="/api">API Reference</Link>: Full type and method documentation</li>
         </ul>
       </section>

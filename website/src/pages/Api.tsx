@@ -1,4 +1,5 @@
 import { createElement, useHead, Link } from "@asymmetric-effort/specifyjs";
+import { ScrollLink } from "../components/ScrollLink";
 
 export function Api() {
   useHead({
@@ -13,7 +14,7 @@ export function Api() {
 
       <nav class="page-toc">
         <strong>Packages:</strong>{" "}
-        <a href="#import-paths">Import Paths</a> | <a href="#api-models">Models</a> | <a href="#api-factors">Factors</a> | <a href="#api-inference">Inference</a> | <a href="#api-sampling">Sampling</a> | <a href="#api-learning">Learning</a> | <a href="#api-ci-tests">CI Tests</a> | <a href="#api-structure-score">Structure Scores</a> | <a href="#api-identification">Identification</a> | <a href="#api-prediction">Prediction</a> | <a href="#api-metrics">Metrics</a> | <a href="#api-readwrite">Readwrite</a> | <a href="#api-base">Base</a> | <a href="#api-independencies">Independencies</a> | <a href="#api-config">Config</a> | <a href="#api-utils">Utils</a> | <a href="#api-numgo">numgo</a> | <a href="#api-scigo">scigo</a> | <a href="#api-graphgo">graphgo</a> | <a href="#api-tabgo">tabgo</a> | <a href="#api-gpu">gpu</a> | <a href="#api-example-models">example_models</a>
+        <ScrollLink to="import-paths">Import Paths</ScrollLink> | <ScrollLink to="api-models">Models</ScrollLink> | <ScrollLink to="api-factors">Factors</ScrollLink> | <ScrollLink to="api-inference">Inference</ScrollLink> | <ScrollLink to="api-sampling">Sampling</ScrollLink> | <ScrollLink to="api-learning">Learning</ScrollLink> | <ScrollLink to="api-ci-tests">CI Tests</ScrollLink> | <ScrollLink to="api-structure-score">Structure Scores</ScrollLink> | <ScrollLink to="api-identification">Identification</ScrollLink> | <ScrollLink to="api-prediction">Prediction</ScrollLink> | <ScrollLink to="api-metrics">Metrics</ScrollLink> | <ScrollLink to="api-readwrite">Readwrite</ScrollLink> | <ScrollLink to="api-base">Base</ScrollLink> | <ScrollLink to="api-independencies">Independencies</ScrollLink> | <ScrollLink to="api-config">Config</ScrollLink> | <ScrollLink to="api-utils">Utils</ScrollLink> | <ScrollLink to="api-numgo">numgo</ScrollLink> | <ScrollLink to="api-scigo">scigo</ScrollLink> | <ScrollLink to="api-graphgo">graphgo</ScrollLink> | <ScrollLink to="api-tabgo">tabgo</ScrollLink> | <ScrollLink to="api-gpu">gpu</ScrollLink> | <ScrollLink to="api-example-models">example_models</ScrollLink>
       </nav>
 
       {/* ============================================================ */}

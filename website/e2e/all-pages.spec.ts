@@ -15,6 +15,11 @@ for (const pagePath of pages) {
     // Check internal links resolve
     for (const href of links) {
       if (!href) continue;
+
+      // ScrollLink uses javascript:void(0) with onClick for in-page scrolling.
+      // These are not navigation links, so skip them in broken-link checking.
+      if (href === 'javascript:void(0)') continue;
+
       if (href.startsWith('#/') || href.startsWith('/#/')) {
         // Navigate and verify page loads
         const url = href.startsWith('#') ? '/' + href : href;

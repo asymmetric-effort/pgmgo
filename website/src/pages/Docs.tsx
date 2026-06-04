@@ -1,4 +1,5 @@
 import { createElement, useHead, Link } from "@asymmetric-effort/specifyjs";
+import { ScrollLink } from "../components/ScrollLink";
 
 export function Docs() {
   useHead({
@@ -13,7 +14,7 @@ export function Docs() {
 
       <nav class="page-toc">
         <strong>On this page:</strong>{" "}
-        <a href="#overview">Overview</a> | <a href="#installation">Installation</a> | <a href="#getting-started">Getting Started</a> | <a href="#architecture">Architecture</a> | <a href="#library-packages">Library Packages</a> | <a href="#core-packages">Core Packages</a> | <a href="#cli-reference">CLI Reference</a> | <a href="#file-formats">File Formats</a> | <a href="#example-models">Example Models</a> | <a href="#datasets">Datasets</a> | <a href="#testing">Testing</a> | <a href="#configuration">Configuration</a> | <a href="#contributing">Contributing</a>
+        <ScrollLink to="overview">Overview</ScrollLink> | <ScrollLink to="installation">Installation</ScrollLink> | <ScrollLink to="getting-started">Getting Started</ScrollLink> | <ScrollLink to="architecture">Architecture</ScrollLink> | <ScrollLink to="library-packages">Library Packages</ScrollLink> | <ScrollLink to="core-packages">Core Packages</ScrollLink> | <ScrollLink to="cli-reference">CLI Reference</ScrollLink> | <ScrollLink to="file-formats">File Formats</ScrollLink> | <ScrollLink to="example-models">Example Models</ScrollLink> | <ScrollLink to="datasets">Datasets</ScrollLink> | <ScrollLink to="testing">Testing</ScrollLink> | <ScrollLink to="configuration">Configuration</ScrollLink> | <ScrollLink to="contributing">Contributing</ScrollLink>
       </nav>
 
       {/* ============================================================ */}
@@ -810,7 +811,7 @@ fmt.Printf("Chi-square=%.3f, p=%.4f, independent=%v\\n", statistic, pValue, inde
         <p>
           Import: <code>github.com/asymmetric-effort/pgmgo/src/readwrite</code>
         </p>
-        <p>See the <a href="#file-formats">File Formats</a> section below for details on each format.</p>
+        <p>See the <ScrollLink to="file-formats">File Formats</ScrollLink> section below for details on each format.</p>
         <table>
           <thead>
             <tr><th>Functions</th><th>Format</th></tr>
@@ -833,7 +834,7 @@ fmt.Printf("Chi-square=%.3f, p=%.4f, independent=%v\\n", statistic, pValue, inde
         <p>
           Import: <code>github.com/asymmetric-effort/pgmgo/src/config</code>
         </p>
-        <p>See the <a href="#configuration">Configuration</a> section below.</p>
+        <p>See the <ScrollLink to="configuration">Configuration</ScrollLink> section below.</p>
 
         <h3>utils -- Shared Utilities</h3>
         <p>
