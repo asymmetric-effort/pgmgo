@@ -602,7 +602,7 @@ func TestCrossVal_Cdist(t *testing.T) {
 	for i := range result {
 		for j := range result[i] {
 			assertClose(t, "Cdist["+strconv.Itoa(i)+"]["+strconv.Itoa(j)+"]",
-				result[i][j], fix.Result[i][j], 1e-12)
+				result[i][j], fix.Result[i][j], 1e-9)
 		}
 	}
 }

@@ -32,11 +32,21 @@ def main():
         "test_cases": cases,
     }
 
+    def _round_floats(obj):
+        """Round floats to 12 significant digits for cross-platform reproducibility."""
+        if isinstance(obj, float):
+            return float(f"{obj:.12g}")
+        if isinstance(obj, dict):
+            return {k: _round_floats(v) for k, v in obj.items()}
+        if isinstance(obj, (list, tuple)):
+            return [_round_floats(x) for x in obj]
+        return obj
+
     out_dir = os.path.join(args.output, "numgo")
     os.makedirs(out_dir, exist_ok=True)
     out_file = os.path.join(out_dir, "fixtures.json")
     with open(out_file, "w") as f:
-        json.dump(data, f, indent=2, sort_keys=True, default=str)
+        json.dump(_round_floats(data), f, indent=2, sort_keys=True, default=str)
 
     print(f"numgo: wrote {len(cases)} test cases to {out_file}")
 

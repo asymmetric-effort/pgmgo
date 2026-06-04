@@ -286,10 +286,21 @@ fixtures["cdist_euclidean"] = {
 # ---------------------------------------------------------------------------
 
 import os
+
+def _round_floats(obj):
+    """Round floats to 12 significant digits for cross-platform reproducibility."""
+    if isinstance(obj, float):
+        return float(f"{obj:.12g}")
+    if isinstance(obj, dict):
+        return {k: _round_floats(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_round_floats(x) for x in obj]
+    return obj
+
 script_dir = os.path.dirname(os.path.abspath(__file__))
 output_path = os.path.join(script_dir, "..", "..", "fixtures", "scigo", "fixtures.json")
 os.makedirs(os.path.dirname(output_path), exist_ok=True)
 with open(output_path, "w") as f:
-    json.dump(fixtures, f, indent=2, sort_keys=True)
+    json.dump(_round_floats(fixtures), f, indent=2, sort_keys=True)
 
 print(f"Wrote {len(fixtures)} fixture groups to {output_path}")
