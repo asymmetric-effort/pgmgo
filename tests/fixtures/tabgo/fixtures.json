@@ -1,0 +1,4418 @@
+{
+  "generator": "tabgo",
+  "pgmpy_version": "1.1.2",
+  "test_cases": [
+    {
+      "category": "creation",
+      "expected": {
+        "columns": [
+          "A",
+          "B",
+          "C"
+        ],
+        "empty": false,
+        "ndim": 2,
+        "shape": [
+          3,
+          3
+        ],
+        "size": 9,
+        "values": {
+          "A": [
+            1,
+            2,
+            3
+          ],
+          "B": [
+            1.5,
+            2.5,
+            3.5
+          ],
+          "C": [
+            "x",
+            "y",
+            "z"
+          ]
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1,
+            2,
+            3
+          ],
+          "B": [
+            1.5,
+            2.5,
+            3.5
+          ],
+          "C": [
+            "x",
+            "y",
+            "z"
+          ]
+        }
+      },
+      "name": "creation_from_dict_mixed"
+    },
+    {
+      "category": "creation",
+      "expected": {
+        "columns": [
+          "A",
+          "B"
+        ],
+        "shape": [
+          2,
+          2
+        ],
+        "values": {
+          "A": [
+            10,
+            30
+          ],
+          "B": [
+            20,
+            40
+          ]
+        }
+      },
+      "input": {
+        "column_names": [
+          "A",
+          "B"
+        ],
+        "records": [
+          {
+            "A": 10,
+            "B": 20
+          },
+          {
+            "A": 30,
+            "B": 40
+          }
+        ]
+      },
+      "name": "creation_from_records"
+    },
+    {
+      "category": "creation",
+      "expected": {
+        "empty": true,
+        "ndim": 2,
+        "shape": [
+          0,
+          0
+        ],
+        "size": 0
+      },
+      "input": {},
+      "name": "creation_empty"
+    },
+    {
+      "category": "creation",
+      "expected": {
+        "columns": [
+          "X"
+        ],
+        "shape": [
+          4,
+          1
+        ],
+        "values": {
+          "X": [
+            10,
+            20,
+            30,
+            40
+          ]
+        }
+      },
+      "input": {
+        "columns": {
+          "X": [
+            10,
+            20,
+            30,
+            40
+          ]
+        }
+      },
+      "name": "creation_single_column"
+    },
+    {
+      "category": "creation",
+      "expected": {
+        "columns": [
+          "A",
+          "B",
+          "C"
+        ],
+        "shape": [
+          1,
+          3
+        ],
+        "values": {
+          "A": [
+            1
+          ],
+          "B": [
+            2
+          ],
+          "C": [
+            3
+          ]
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1
+          ],
+          "B": [
+            2
+          ],
+          "C": [
+            3
+          ]
+        }
+      },
+      "name": "creation_single_row"
+    },
+    {
+      "category": "creation",
+      "expected": {
+        "non_null_counts": {
+          "A": 2,
+          "B": 2,
+          "C": 2
+        },
+        "null_counts": {
+          "A": 1,
+          "B": 1,
+          "C": 1
+        },
+        "shape": [
+          3,
+          3
+        ]
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            null,
+            3.0
+          ],
+          "B": [
+            null,
+            2.0,
+            3.0
+          ],
+          "C": [
+            1.0,
+            2.0,
+            null
+          ]
+        }
+      },
+      "name": "creation_with_nulls"
+    },
+    {
+      "category": "creation",
+      "expected": {
+        "columns": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E"
+        ],
+        "shape": [
+          2,
+          5
+        ],
+        "size": 10,
+        "values": {
+          "A": [
+            1,
+            2
+          ],
+          "B": [
+            3,
+            4
+          ],
+          "C": [
+            5,
+            6
+          ],
+          "D": [
+            7,
+            8
+          ],
+          "E": [
+            9,
+            10
+          ]
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1,
+            2
+          ],
+          "B": [
+            3,
+            4
+          ],
+          "C": [
+            5,
+            6
+          ],
+          "D": [
+            7,
+            8
+          ],
+          "E": [
+            9,
+            10
+          ]
+        }
+      },
+      "name": "creation_wide"
+    },
+    {
+      "category": "creation",
+      "expected": {
+        "non_null_counts": {
+          "A": 3,
+          "B": 0
+        },
+        "null_counts": {
+          "A": 0,
+          "B": 3
+        },
+        "shape": [
+          3,
+          2
+        ]
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            2.0,
+            3.0
+          ],
+          "B": [
+            null,
+            null,
+            null
+          ]
+        }
+      },
+      "name": "creation_all_nulls_column"
+    },
+    {
+      "category": "creation",
+      "expected": {
+        "shape": [
+          10,
+          2
+        ],
+        "values": {
+          "X": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "Y": [
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2,
+            1
+          ]
+        }
+      },
+      "input": {
+        "columns": {
+          "X": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "Y": [
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2,
+            1
+          ]
+        }
+      },
+      "name": "creation_numeric_range"
+    },
+    {
+      "category": "creation",
+      "expected": {
+        "shape": [
+          3,
+          1
+        ],
+        "values": {
+          "A": [
+            0.30000000000000004,
+            0.3333333333333333,
+            1e-15
+          ]
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            0.30000000000000004,
+            0.3333333333333333,
+            1e-15
+          ]
+        }
+      },
+      "name": "creation_float_precision"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "sum": {
+          "A": 15.0,
+          "B": 150.0,
+          "C": 17.5
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "B": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ],
+          "C": [
+            1.5,
+            2.5,
+            3.5,
+            4.5,
+            5.5
+          ]
+        }
+      },
+      "name": "agg_sum"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "mean": {
+          "A": 3.0,
+          "B": 30.0,
+          "C": 3.5
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "B": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ],
+          "C": [
+            1.5,
+            2.5,
+            3.5,
+            4.5,
+            5.5
+          ]
+        }
+      },
+      "name": "agg_mean"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "std": {
+          "A": 1.5811388300841898,
+          "B": 15.811388300841896,
+          "C": 1.5811388300841898
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "B": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ],
+          "C": [
+            1.5,
+            2.5,
+            3.5,
+            4.5,
+            5.5
+          ]
+        }
+      },
+      "name": "agg_std"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "var": {
+          "A": 2.5,
+          "B": 250.0,
+          "C": 2.5
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "B": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ],
+          "C": [
+            1.5,
+            2.5,
+            3.5,
+            4.5,
+            5.5
+          ]
+        }
+      },
+      "name": "agg_var"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "min": {
+          "A": 1.0,
+          "B": 10.0,
+          "C": 1.5
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "B": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ],
+          "C": [
+            1.5,
+            2.5,
+            3.5,
+            4.5,
+            5.5
+          ]
+        }
+      },
+      "name": "agg_min"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "max": {
+          "A": 5.0,
+          "B": 50.0,
+          "C": 5.5
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "B": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ],
+          "C": [
+            1.5,
+            2.5,
+            3.5,
+            4.5,
+            5.5
+          ]
+        }
+      },
+      "name": "agg_max"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "median": {
+          "A": 3.0,
+          "B": 30.0,
+          "C": 3.5
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "B": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ],
+          "C": [
+            1.5,
+            2.5,
+            3.5,
+            4.5,
+            5.5
+          ]
+        }
+      },
+      "name": "agg_median"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "count": {
+          "A": 5,
+          "B": 5,
+          "C": 5
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "B": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ],
+          "C": [
+            1.5,
+            2.5,
+            3.5,
+            4.5,
+            5.5
+          ]
+        }
+      },
+      "name": "agg_count"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "describe": {
+          "A": {
+            "25%": 2.0,
+            "50%": 3.0,
+            "75%": 4.0,
+            "count": 5.0,
+            "max": 5.0,
+            "mean": 3.0,
+            "min": 1.0,
+            "std": 1.5811388300841898
+          },
+          "B": {
+            "25%": 20.0,
+            "50%": 30.0,
+            "75%": 40.0,
+            "count": 5.0,
+            "max": 50.0,
+            "mean": 30.0,
+            "min": 10.0,
+            "std": 15.811388300841896
+          },
+          "C": {
+            "25%": 2.5,
+            "50%": 3.5,
+            "75%": 4.5,
+            "count": 5.0,
+            "max": 5.5,
+            "mean": 3.5,
+            "min": 1.5,
+            "std": 1.5811388300841898
+          }
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "B": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ],
+          "C": [
+            1.5,
+            2.5,
+            3.5,
+            4.5,
+            5.5
+          ]
+        }
+      },
+      "name": "agg_describe"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "sum": {
+          "A": 9.0,
+          "B": 120.0
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            null,
+            3.0,
+            null,
+            5.0
+          ],
+          "B": [
+            10.0,
+            20.0,
+            null,
+            40.0,
+            50.0
+          ]
+        }
+      },
+      "name": "agg_sum_nan"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "mean": {
+          "A": 3.0,
+          "B": 30.0
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            null,
+            3.0,
+            null,
+            5.0
+          ],
+          "B": [
+            10.0,
+            20.0,
+            null,
+            40.0,
+            50.0
+          ]
+        }
+      },
+      "name": "agg_mean_nan"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "count": {
+          "A": 3,
+          "B": 4
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            null,
+            3.0,
+            null,
+            5.0
+          ],
+          "B": [
+            10.0,
+            20.0,
+            null,
+            40.0,
+            50.0
+          ]
+        }
+      },
+      "name": "agg_count_nan"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "std": {
+          "A": 2.0,
+          "B": 18.257418583505537
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            null,
+            3.0,
+            null,
+            5.0
+          ],
+          "B": [
+            10.0,
+            20.0,
+            null,
+            40.0,
+            50.0
+          ]
+        }
+      },
+      "name": "agg_std_nan"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "var": {
+          "A": 4.0,
+          "B": 333.3333333333333
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            null,
+            3.0,
+            null,
+            5.0
+          ],
+          "B": [
+            10.0,
+            20.0,
+            null,
+            40.0,
+            50.0
+          ]
+        }
+      },
+      "name": "agg_var_nan"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "min": {
+          "A": 1.0,
+          "B": 10.0
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            null,
+            3.0,
+            null,
+            5.0
+          ],
+          "B": [
+            10.0,
+            20.0,
+            null,
+            40.0,
+            50.0
+          ]
+        }
+      },
+      "name": "agg_min_nan"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "max": {
+          "A": 5.0,
+          "B": 50.0
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            null,
+            3.0,
+            null,
+            5.0
+          ],
+          "B": [
+            10.0,
+            20.0,
+            null,
+            40.0,
+            50.0
+          ]
+        }
+      },
+      "name": "agg_max_nan"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "median": {
+          "A": 3.0,
+          "B": 30.0
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            null,
+            3.0,
+            null,
+            5.0
+          ],
+          "B": [
+            10.0,
+            20.0,
+            null,
+            40.0,
+            50.0
+          ]
+        }
+      },
+      "name": "agg_median_nan"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "describe": {
+          "A": {
+            "25%": 2.0,
+            "50%": 3.0,
+            "75%": 4.0,
+            "count": 3.0,
+            "max": 5.0,
+            "mean": 3.0,
+            "min": 1.0,
+            "std": 2.0
+          },
+          "B": {
+            "25%": 17.5,
+            "50%": 30.0,
+            "75%": 42.5,
+            "count": 4.0,
+            "max": 50.0,
+            "mean": 30.0,
+            "min": 10.0,
+            "std": 18.257418583505537
+          }
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            null,
+            3.0,
+            null,
+            5.0
+          ],
+          "B": [
+            10.0,
+            20.0,
+            null,
+            40.0,
+            50.0
+          ]
+        }
+      },
+      "name": "agg_describe_nan"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "median": {
+          "A": 2.5,
+          "B": 25.0
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "B": [
+            10,
+            20,
+            30,
+            40
+          ]
+        }
+      },
+      "name": "agg_median_even"
+    },
+    {
+      "category": "aggregation",
+      "expected": {
+        "count": {
+          "A": 1,
+          "B": 1
+        },
+        "max": {
+          "A": 42.0,
+          "B": 3.14
+        },
+        "mean": {
+          "A": 42.0,
+          "B": 3.14
+        },
+        "min": {
+          "A": 42.0,
+          "B": 3.14
+        },
+        "sum": {
+          "A": 42.0,
+          "B": 3.14
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            42.0
+          ],
+          "B": [
+            3.14
+          ]
+        }
+      },
+      "name": "agg_single_element"
+    },
+    {
+      "category": "groupby",
+      "expected": {
+        "result": {
+          "Score": {
+            "A": 3.0,
+            "B": 7.0,
+            "C": 5.0
+          },
+          "Value": {
+            "A": 30,
+            "B": 70,
+            "C": 50
+          }
+        }
+      },
+      "input": {
+        "columns": {
+          "Group": [
+            "A",
+            "A",
+            "B",
+            "B",
+            "C"
+          ],
+          "Score": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "Value": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ]
+        },
+        "group_by": [
+          "Group"
+        ],
+        "value_columns": [
+          "Value",
+          "Score"
+        ]
+      },
+      "name": "groupby_sum"
+    },
+    {
+      "category": "groupby",
+      "expected": {
+        "result": {
+          "Score": {
+            "A": 1.5,
+            "B": 3.5,
+            "C": 5.0
+          },
+          "Value": {
+            "A": 15.0,
+            "B": 35.0,
+            "C": 50.0
+          }
+        }
+      },
+      "input": {
+        "columns": {
+          "Group": [
+            "A",
+            "A",
+            "B",
+            "B",
+            "C"
+          ],
+          "Score": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "Value": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ]
+        },
+        "group_by": [
+          "Group"
+        ],
+        "value_columns": [
+          "Value",
+          "Score"
+        ]
+      },
+      "name": "groupby_mean"
+    },
+    {
+      "category": "groupby",
+      "expected": {
+        "result": {
+          "Score": {
+            "A": 0.7071067811865476,
+            "B": 0.7071067811865476,
+            "C": null
+          },
+          "Value": {
+            "A": 7.0710678118654755,
+            "B": 7.0710678118654755,
+            "C": null
+          }
+        }
+      },
+      "input": {
+        "columns": {
+          "Group": [
+            "A",
+            "A",
+            "B",
+            "B",
+            "C"
+          ],
+          "Score": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "Value": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ]
+        },
+        "group_by": [
+          "Group"
+        ],
+        "value_columns": [
+          "Value",
+          "Score"
+        ]
+      },
+      "name": "groupby_std"
+    },
+    {
+      "category": "groupby",
+      "expected": {
+        "result": {
+          "Score": {
+            "A": 2,
+            "B": 2,
+            "C": 1
+          },
+          "Value": {
+            "A": 2,
+            "B": 2,
+            "C": 1
+          }
+        }
+      },
+      "input": {
+        "columns": {
+          "Group": [
+            "A",
+            "A",
+            "B",
+            "B",
+            "C"
+          ],
+          "Score": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "Value": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ]
+        },
+        "group_by": [
+          "Group"
+        ],
+        "value_columns": [
+          "Value",
+          "Score"
+        ]
+      },
+      "name": "groupby_count"
+    },
+    {
+      "category": "groupby",
+      "expected": {
+        "result": {
+          "Score": {
+            "A": 1.0,
+            "B": 3.0,
+            "C": 5.0
+          },
+          "Value": {
+            "A": 10,
+            "B": 30,
+            "C": 50
+          }
+        }
+      },
+      "input": {
+        "columns": {
+          "Group": [
+            "A",
+            "A",
+            "B",
+            "B",
+            "C"
+          ],
+          "Score": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "Value": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ]
+        },
+        "group_by": [
+          "Group"
+        ],
+        "value_columns": [
+          "Value",
+          "Score"
+        ]
+      },
+      "name": "groupby_min"
+    },
+    {
+      "category": "groupby",
+      "expected": {
+        "result": {
+          "Score": {
+            "A": 2.0,
+            "B": 4.0,
+            "C": 5.0
+          },
+          "Value": {
+            "A": 20,
+            "B": 40,
+            "C": 50
+          }
+        }
+      },
+      "input": {
+        "columns": {
+          "Group": [
+            "A",
+            "A",
+            "B",
+            "B",
+            "C"
+          ],
+          "Score": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "Value": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ]
+        },
+        "group_by": [
+          "Group"
+        ],
+        "value_columns": [
+          "Value",
+          "Score"
+        ]
+      },
+      "name": "groupby_max"
+    },
+    {
+      "category": "groupby",
+      "expected": {
+        "result": {
+          "Score": {
+            "A": 1.5,
+            "B": 3.5,
+            "C": 5.0
+          },
+          "Value": {
+            "A": 15.0,
+            "B": 35.0,
+            "C": 50.0
+          }
+        }
+      },
+      "input": {
+        "columns": {
+          "Group": [
+            "A",
+            "A",
+            "B",
+            "B",
+            "C"
+          ],
+          "Score": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "Value": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ]
+        },
+        "group_by": [
+          "Group"
+        ],
+        "value_columns": [
+          "Value",
+          "Score"
+        ]
+      },
+      "name": "groupby_median"
+    },
+    {
+      "category": "groupby",
+      "expected": {
+        "result": {
+          "Score": {
+            "A": 1.0,
+            "B": 3.0,
+            "C": 5.0
+          },
+          "Value": {
+            "A": 10,
+            "B": 30,
+            "C": 50
+          }
+        }
+      },
+      "input": {
+        "columns": {
+          "Group": [
+            "A",
+            "A",
+            "B",
+            "B",
+            "C"
+          ],
+          "Score": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "Value": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ]
+        },
+        "group_by": [
+          "Group"
+        ],
+        "value_columns": [
+          "Value",
+          "Score"
+        ]
+      },
+      "name": "groupby_first"
+    },
+    {
+      "category": "groupby",
+      "expected": {
+        "result": {
+          "Score": {
+            "A": 2.0,
+            "B": 4.0,
+            "C": 5.0
+          },
+          "Value": {
+            "A": 20,
+            "B": 40,
+            "C": 50
+          }
+        }
+      },
+      "input": {
+        "columns": {
+          "Group": [
+            "A",
+            "A",
+            "B",
+            "B",
+            "C"
+          ],
+          "Score": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "Value": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ]
+        },
+        "group_by": [
+          "Group"
+        ],
+        "value_columns": [
+          "Value",
+          "Score"
+        ]
+      },
+      "name": "groupby_last"
+    },
+    {
+      "category": "groupby",
+      "expected": {
+        "result": {
+          "A": 2,
+          "B": 2,
+          "C": 1
+        }
+      },
+      "input": {
+        "columns": {
+          "Group": [
+            "A",
+            "A",
+            "B",
+            "B",
+            "C"
+          ],
+          "Score": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "Value": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ]
+        },
+        "group_by": [
+          "Group"
+        ],
+        "value_columns": [
+          "Value",
+          "Score"
+        ]
+      },
+      "name": "groupby_size"
+    },
+    {
+      "category": "groupby",
+      "expected": {
+        "result": {
+          "A|x": 1,
+          "A|y": 2,
+          "B|x": 3,
+          "B|y": 4
+        }
+      },
+      "input": {
+        "columns": {
+          "Group": [
+            "A",
+            "A",
+            "B",
+            "B"
+          ],
+          "Sub": [
+            "x",
+            "y",
+            "x",
+            "y"
+          ],
+          "Val": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "group_by": [
+          "Group",
+          "Sub"
+        ],
+        "value_columns": [
+          "Val"
+        ]
+      },
+      "name": "groupby_multi_sum"
+    },
+    {
+      "category": "groupby",
+      "expected": {
+        "result": {
+          "A|x": 1.0,
+          "A|y": 2.0,
+          "B|x": 3.0,
+          "B|y": 4.0
+        }
+      },
+      "input": {
+        "columns": {
+          "Group": [
+            "A",
+            "A",
+            "B",
+            "B"
+          ],
+          "Sub": [
+            "x",
+            "y",
+            "x",
+            "y"
+          ],
+          "Val": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "group_by": [
+          "Group",
+          "Sub"
+        ],
+        "value_columns": [
+          "Val"
+        ]
+      },
+      "name": "groupby_multi_mean"
+    },
+    {
+      "category": "groupby",
+      "expected": {
+        "result": {
+          "Score": {
+            "A": 0.5,
+            "B": 0.5,
+            "C": null
+          },
+          "Value": {
+            "A": 50.0,
+            "B": 50.0,
+            "C": null
+          }
+        }
+      },
+      "input": {
+        "columns": {
+          "Group": [
+            "A",
+            "A",
+            "B",
+            "B",
+            "C"
+          ],
+          "Score": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "Value": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ]
+        },
+        "group_by": [
+          "Group"
+        ],
+        "value_columns": [
+          "Value",
+          "Score"
+        ]
+      },
+      "name": "groupby_var"
+    },
+    {
+      "category": "groupby",
+      "expected": {
+        "group_C_count": 1,
+        "group_C_mean_Value": 50.0,
+        "group_C_sum_Value": 50
+      },
+      "input": {
+        "columns": {
+          "Group": [
+            "A",
+            "A",
+            "B",
+            "B",
+            "C"
+          ],
+          "Score": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "Value": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ]
+        },
+        "group_by": [
+          "Group"
+        ],
+        "value_columns": [
+          "Value",
+          "Score"
+        ]
+      },
+      "name": "groupby_single_member"
+    },
+    {
+      "category": "groupby",
+      "expected": {
+        "ngroups": 3
+      },
+      "input": {
+        "columns": {
+          "Group": [
+            "A",
+            "A",
+            "B",
+            "B",
+            "C"
+          ],
+          "Score": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "Value": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ]
+        },
+        "group_by": [
+          "Group"
+        ],
+        "value_columns": [
+          "Value",
+          "Score"
+        ]
+      },
+      "name": "groupby_ngroups"
+    },
+    {
+      "category": "merge",
+      "expected": {
+        "result": {
+          "id": [
+            2,
+            3
+          ],
+          "name": [
+            "b",
+            "c"
+          ],
+          "score": [
+            90,
+            80
+          ]
+        },
+        "shape": [
+          2,
+          3
+        ]
+      },
+      "input": {
+        "how": "inner",
+        "left": {
+          "column_order": [
+            "id",
+            "name"
+          ],
+          "columns": {
+            "id": [
+              1,
+              2,
+              3
+            ],
+            "name": [
+              "a",
+              "b",
+              "c"
+            ]
+          }
+        },
+        "on": [
+          "id"
+        ],
+        "right": {
+          "column_order": [
+            "id",
+            "score"
+          ],
+          "columns": {
+            "id": [
+              2,
+              3,
+              4
+            ],
+            "score": [
+              90,
+              80,
+              70
+            ]
+          }
+        }
+      },
+      "name": "merge_inner"
+    },
+    {
+      "category": "merge",
+      "expected": {
+        "result": {
+          "id": [
+            1,
+            2,
+            3
+          ],
+          "name": [
+            "a",
+            "b",
+            "c"
+          ],
+          "score": [
+            null,
+            90.0,
+            80.0
+          ]
+        },
+        "shape": [
+          3,
+          3
+        ]
+      },
+      "input": {
+        "how": "left",
+        "left": {
+          "column_order": [
+            "id",
+            "name"
+          ],
+          "columns": {
+            "id": [
+              1,
+              2,
+              3
+            ],
+            "name": [
+              "a",
+              "b",
+              "c"
+            ]
+          }
+        },
+        "on": [
+          "id"
+        ],
+        "right": {
+          "column_order": [
+            "id",
+            "score"
+          ],
+          "columns": {
+            "id": [
+              2,
+              3,
+              4
+            ],
+            "score": [
+              90,
+              80,
+              70
+            ]
+          }
+        }
+      },
+      "name": "merge_left"
+    },
+    {
+      "category": "merge",
+      "expected": {
+        "result": {
+          "id": [
+            2,
+            3,
+            4
+          ],
+          "name": [
+            "b",
+            "c",
+            null
+          ],
+          "score": [
+            90,
+            80,
+            70
+          ]
+        },
+        "shape": [
+          3,
+          3
+        ]
+      },
+      "input": {
+        "how": "right",
+        "left": {
+          "column_order": [
+            "id",
+            "name"
+          ],
+          "columns": {
+            "id": [
+              1,
+              2,
+              3
+            ],
+            "name": [
+              "a",
+              "b",
+              "c"
+            ]
+          }
+        },
+        "on": [
+          "id"
+        ],
+        "right": {
+          "column_order": [
+            "id",
+            "score"
+          ],
+          "columns": {
+            "id": [
+              2,
+              3,
+              4
+            ],
+            "score": [
+              90,
+              80,
+              70
+            ]
+          }
+        }
+      },
+      "name": "merge_right"
+    },
+    {
+      "category": "merge",
+      "expected": {
+        "result": {
+          "id": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "name": [
+            "a",
+            "b",
+            "c",
+            null
+          ],
+          "score": [
+            null,
+            90.0,
+            80.0,
+            70.0
+          ]
+        },
+        "shape": [
+          4,
+          3
+        ]
+      },
+      "input": {
+        "how": "outer",
+        "left": {
+          "column_order": [
+            "id",
+            "name"
+          ],
+          "columns": {
+            "id": [
+              1,
+              2,
+              3
+            ],
+            "name": [
+              "a",
+              "b",
+              "c"
+            ]
+          }
+        },
+        "on": [
+          "id"
+        ],
+        "right": {
+          "column_order": [
+            "id",
+            "score"
+          ],
+          "columns": {
+            "id": [
+              2,
+              3,
+              4
+            ],
+            "score": [
+              90,
+              80,
+              70
+            ]
+          }
+        }
+      },
+      "name": "merge_outer"
+    },
+    {
+      "category": "merge",
+      "expected": {
+        "result": {
+          "id": [
+            1,
+            1,
+            2,
+            2
+          ],
+          "score": [
+            10,
+            10,
+            20,
+            30
+          ],
+          "val": [
+            "a",
+            "b",
+            "c",
+            "c"
+          ]
+        },
+        "shape": [
+          4,
+          3
+        ]
+      },
+      "input": {
+        "how": "inner",
+        "left": {
+          "column_order": [
+            "id",
+            "val"
+          ],
+          "columns": {
+            "id": [
+              1,
+              1,
+              2
+            ],
+            "val": [
+              "a",
+              "b",
+              "c"
+            ]
+          }
+        },
+        "on": [
+          "id"
+        ],
+        "right": {
+          "column_order": [
+            "id",
+            "score"
+          ],
+          "columns": {
+            "id": [
+              1,
+              2,
+              2
+            ],
+            "score": [
+              10,
+              20,
+              30
+            ]
+          }
+        }
+      },
+      "name": "merge_dup_inner"
+    },
+    {
+      "category": "merge",
+      "expected": {
+        "result": {
+          "id": [
+            1,
+            1,
+            2,
+            2
+          ],
+          "score": [
+            10,
+            10,
+            20,
+            30
+          ],
+          "val": [
+            "a",
+            "b",
+            "c",
+            "c"
+          ]
+        },
+        "shape": [
+          4,
+          3
+        ]
+      },
+      "input": {
+        "how": "left",
+        "left": {
+          "column_order": [
+            "id",
+            "val"
+          ],
+          "columns": {
+            "id": [
+              1,
+              1,
+              2
+            ],
+            "val": [
+              "a",
+              "b",
+              "c"
+            ]
+          }
+        },
+        "on": [
+          "id"
+        ],
+        "right": {
+          "column_order": [
+            "id",
+            "score"
+          ],
+          "columns": {
+            "id": [
+              1,
+              2,
+              2
+            ],
+            "score": [
+              10,
+              20,
+              30
+            ]
+          }
+        }
+      },
+      "name": "merge_dup_left"
+    },
+    {
+      "category": "merge",
+      "expected": {
+        "result": {
+          "id": [
+            1,
+            1,
+            2,
+            2
+          ],
+          "score": [
+            10,
+            10,
+            20,
+            30
+          ],
+          "val": [
+            "a",
+            "b",
+            "c",
+            "c"
+          ]
+        },
+        "shape": [
+          4,
+          3
+        ]
+      },
+      "input": {
+        "how": "outer",
+        "left": {
+          "column_order": [
+            "id",
+            "val"
+          ],
+          "columns": {
+            "id": [
+              1,
+              1,
+              2
+            ],
+            "val": [
+              "a",
+              "b",
+              "c"
+            ]
+          }
+        },
+        "on": [
+          "id"
+        ],
+        "right": {
+          "column_order": [
+            "id",
+            "score"
+          ],
+          "columns": {
+            "id": [
+              1,
+              2,
+              2
+            ],
+            "score": [
+              10,
+              20,
+              30
+            ]
+          }
+        }
+      },
+      "name": "merge_dup_outer"
+    },
+    {
+      "category": "merge",
+      "expected": {
+        "shape": [
+          0,
+          3
+        ]
+      },
+      "input": {
+        "how": "inner",
+        "left": {
+          "column_order": [
+            "id",
+            "name"
+          ],
+          "columns": {
+            "id": [
+              1,
+              2
+            ],
+            "name": [
+              "a",
+              "b"
+            ]
+          }
+        },
+        "on": [
+          "id"
+        ],
+        "right": {
+          "column_order": [
+            "id",
+            "score"
+          ],
+          "columns": {
+            "id": [
+              3,
+              4
+            ],
+            "score": [
+              90,
+              80
+            ]
+          }
+        }
+      },
+      "name": "merge_no_overlap_inner"
+    },
+    {
+      "category": "merge",
+      "expected": {
+        "result": {
+          "id": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "name": [
+            "a",
+            "b",
+            null,
+            null
+          ],
+          "score": [
+            null,
+            null,
+            90.0,
+            80.0
+          ]
+        },
+        "shape": [
+          4,
+          3
+        ]
+      },
+      "input": {
+        "how": "outer",
+        "left": {
+          "column_order": [
+            "id",
+            "name"
+          ],
+          "columns": {
+            "id": [
+              1,
+              2
+            ],
+            "name": [
+              "a",
+              "b"
+            ]
+          }
+        },
+        "on": [
+          "id"
+        ],
+        "right": {
+          "column_order": [
+            "id",
+            "score"
+          ],
+          "columns": {
+            "id": [
+              3,
+              4
+            ],
+            "score": [
+              90,
+              80
+            ]
+          }
+        }
+      },
+      "name": "merge_no_overlap_outer"
+    },
+    {
+      "category": "merge",
+      "expected": {
+        "result": {
+          "id": [
+            1,
+            2,
+            3
+          ],
+          "name": [
+            "a",
+            "b",
+            "c"
+          ],
+          "score": [
+            100,
+            200,
+            300
+          ]
+        },
+        "shape": [
+          3,
+          3
+        ]
+      },
+      "input": {
+        "how": "inner",
+        "left": {
+          "column_order": [
+            "id",
+            "name"
+          ],
+          "columns": {
+            "id": [
+              1,
+              2,
+              3
+            ],
+            "name": [
+              "a",
+              "b",
+              "c"
+            ]
+          }
+        },
+        "on": [
+          "id"
+        ],
+        "right": {
+          "column_order": [
+            "id",
+            "score"
+          ],
+          "columns": {
+            "id": [
+              1,
+              2,
+              3
+            ],
+            "score": [
+              100,
+              200,
+              300
+            ]
+          }
+        }
+      },
+      "name": "merge_complete_overlap"
+    },
+    {
+      "category": "concat",
+      "expected": {
+        "result": {
+          "A": [
+            1,
+            2,
+            5,
+            6
+          ],
+          "B": [
+            3,
+            4,
+            7,
+            8
+          ]
+        },
+        "shape": [
+          4,
+          2
+        ]
+      },
+      "input": {
+        "frames": [
+          {
+            "columns": {
+              "A": [
+                1,
+                2
+              ],
+              "B": [
+                3,
+                4
+              ]
+            }
+          },
+          {
+            "columns": {
+              "A": [
+                5,
+                6
+              ],
+              "B": [
+                7,
+                8
+              ]
+            }
+          }
+        ]
+      },
+      "name": "concat_vertical"
+    },
+    {
+      "category": "concat",
+      "expected": {
+        "result": {
+          "A": [
+            1,
+            2,
+            5,
+            6,
+            9,
+            10
+          ],
+          "B": [
+            3,
+            4,
+            7,
+            8,
+            11,
+            12
+          ]
+        },
+        "shape": [
+          6,
+          2
+        ]
+      },
+      "input": {
+        "frames": [
+          {
+            "columns": {
+              "A": [
+                1,
+                2
+              ],
+              "B": [
+                3,
+                4
+              ]
+            }
+          },
+          {
+            "columns": {
+              "A": [
+                5,
+                6
+              ],
+              "B": [
+                7,
+                8
+              ]
+            }
+          },
+          {
+            "columns": {
+              "A": [
+                9,
+                10
+              ],
+              "B": [
+                11,
+                12
+              ]
+            }
+          }
+        ]
+      },
+      "name": "concat_vertical_three"
+    },
+    {
+      "category": "concat",
+      "expected": {
+        "result": {
+          "A": [
+            1,
+            2,
+            3
+          ],
+          "B": [
+            4,
+            5,
+            6
+          ]
+        },
+        "shape": [
+          3,
+          2
+        ]
+      },
+      "input": {
+        "axis": 1,
+        "frames": [
+          {
+            "columns": {
+              "A": [
+                1,
+                2,
+                3
+              ]
+            }
+          },
+          {
+            "columns": {
+              "B": [
+                4,
+                5,
+                6
+              ]
+            }
+          }
+        ]
+      },
+      "name": "concat_horizontal"
+    },
+    {
+      "category": "concat",
+      "expected": {
+        "result": {
+          "A": [
+            1,
+            2,
+            3
+          ],
+          "B": [
+            4,
+            5,
+            6
+          ],
+          "C": [
+            7,
+            8,
+            9
+          ]
+        },
+        "shape": [
+          3,
+          3
+        ]
+      },
+      "input": {
+        "axis": 1,
+        "frames": [
+          {
+            "columns": {
+              "A": [
+                1,
+                2,
+                3
+              ]
+            }
+          },
+          {
+            "columns": {
+              "B": [
+                4,
+                5,
+                6
+              ]
+            }
+          },
+          {
+            "columns": {
+              "C": [
+                7,
+                8,
+                9
+              ]
+            }
+          }
+        ]
+      },
+      "name": "concat_horizontal_three"
+    },
+    {
+      "category": "concat",
+      "expected": {
+        "result": {
+          "A": [
+            1,
+            3
+          ],
+          "B": [
+            2,
+            4
+          ]
+        },
+        "shape": [
+          2,
+          2
+        ]
+      },
+      "input": {
+        "frames": [
+          {
+            "columns": {
+              "A": [
+                1
+              ],
+              "B": [
+                2
+              ]
+            }
+          },
+          {
+            "columns": {
+              "A": [
+                3
+              ],
+              "B": [
+                4
+              ]
+            }
+          }
+        ]
+      },
+      "name": "concat_vertical_single_rows"
+    },
+    {
+      "category": "sorting",
+      "expected": {
+        "result": {
+          "A": [
+            1,
+            1,
+            3,
+            4,
+            5
+          ],
+          "B": [
+            20,
+            40,
+            10,
+            30,
+            50
+          ]
+        }
+      },
+      "input": {
+        "ascending": true,
+        "by": "A",
+        "columns": {
+          "A": [
+            3,
+            1,
+            4,
+            1,
+            5
+          ],
+          "B": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ]
+        }
+      },
+      "name": "sort_ascending"
+    },
+    {
+      "category": "sorting",
+      "expected": {
+        "result": {
+          "A": [
+            5,
+            4,
+            3,
+            1,
+            1
+          ],
+          "B": [
+            50,
+            30,
+            10,
+            20,
+            40
+          ]
+        }
+      },
+      "input": {
+        "ascending": false,
+        "by": "A",
+        "columns": {
+          "A": [
+            3,
+            1,
+            4,
+            1,
+            5
+          ],
+          "B": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ]
+        }
+      },
+      "name": "sort_descending"
+    },
+    {
+      "category": "sorting",
+      "expected": {
+        "result": {
+          "A": [
+            5,
+            1,
+            4,
+            1,
+            3
+          ],
+          "B": [
+            50,
+            40,
+            30,
+            20,
+            10
+          ]
+        }
+      },
+      "input": {
+        "ascending": false,
+        "by": "B",
+        "columns": {
+          "A": [
+            3,
+            1,
+            4,
+            1,
+            5
+          ],
+          "B": [
+            10,
+            20,
+            30,
+            40,
+            50
+          ]
+        }
+      },
+      "name": "sort_by_B_desc"
+    },
+    {
+      "category": "sorting",
+      "expected": {
+        "result": {
+          "A": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "B": [
+            5,
+            4,
+            3,
+            2,
+            1
+          ]
+        }
+      },
+      "input": {
+        "ascending": true,
+        "by": "A",
+        "columns": {
+          "A": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "B": [
+            5,
+            4,
+            3,
+            2,
+            1
+          ]
+        }
+      },
+      "name": "sort_already_sorted"
+    },
+    {
+      "category": "sorting",
+      "expected": {
+        "result": {
+          "A": [
+            0.58,
+            1.41,
+            1.62,
+            2.72,
+            3.14
+          ],
+          "B": [
+            5,
+            2,
+            4,
+            3,
+            1
+          ]
+        }
+      },
+      "input": {
+        "ascending": true,
+        "by": "A",
+        "columns": {
+          "A": [
+            3.14,
+            1.41,
+            2.72,
+            1.62,
+            0.58
+          ],
+          "B": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        }
+      },
+      "name": "sort_floats"
+    },
+    {
+      "category": "missing",
+      "expected": {
+        "num_rows": 0,
+        "shape": [
+          0,
+          3
+        ]
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            null,
+            3.0
+          ],
+          "B": [
+            null,
+            2.0,
+            3.0
+          ],
+          "C": [
+            1.0,
+            2.0,
+            null
+          ]
+        }
+      },
+      "name": "missing_dropna"
+    },
+    {
+      "category": "missing",
+      "expected": {
+        "num_rows": 3,
+        "shape": [
+          3,
+          3
+        ]
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            null,
+            3.0
+          ],
+          "B": [
+            null,
+            2.0,
+            3.0
+          ],
+          "C": [
+            1.0,
+            2.0,
+            null
+          ]
+        }
+      },
+      "name": "missing_dropna_all"
+    },
+    {
+      "category": "missing",
+      "expected": {
+        "result": {
+          "A": [
+            1.0,
+            0.0,
+            3.0
+          ],
+          "B": [
+            0.0,
+            2.0,
+            3.0
+          ],
+          "C": [
+            1.0,
+            2.0,
+            0.0
+          ]
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            null,
+            3.0
+          ],
+          "B": [
+            null,
+            2.0,
+            3.0
+          ],
+          "C": [
+            1.0,
+            2.0,
+            null
+          ]
+        }
+      },
+      "name": "missing_fillna_zero"
+    },
+    {
+      "category": "missing",
+      "expected": {
+        "result": {
+          "A": [
+            1.0,
+            -1.0,
+            3.0
+          ],
+          "B": [
+            -1.0,
+            2.0,
+            3.0
+          ],
+          "C": [
+            1.0,
+            2.0,
+            -1.0
+          ]
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            null,
+            3.0
+          ],
+          "B": [
+            null,
+            2.0,
+            3.0
+          ],
+          "C": [
+            1.0,
+            2.0,
+            null
+          ]
+        }
+      },
+      "name": "missing_fillna_neg1"
+    },
+    {
+      "category": "missing",
+      "expected": {
+        "result": {
+          "A": [
+            false,
+            true,
+            false
+          ],
+          "B": [
+            true,
+            false,
+            false
+          ],
+          "C": [
+            false,
+            false,
+            true
+          ]
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            null,
+            3.0
+          ],
+          "B": [
+            null,
+            2.0,
+            3.0
+          ],
+          "C": [
+            1.0,
+            2.0,
+            null
+          ]
+        }
+      },
+      "name": "missing_isna"
+    },
+    {
+      "category": "missing",
+      "expected": {
+        "count": {
+          "A": 2,
+          "B": 2,
+          "C": 2
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            null,
+            3.0
+          ],
+          "B": [
+            null,
+            2.0,
+            3.0
+          ],
+          "C": [
+            1.0,
+            2.0,
+            null
+          ]
+        }
+      },
+      "name": "missing_count"
+    },
+    {
+      "category": "missing",
+      "expected": {
+        "result": {
+          "A": [
+            1.0,
+            99.9,
+            3.0
+          ],
+          "B": [
+            99.9,
+            2.0,
+            3.0
+          ],
+          "C": [
+            1.0,
+            2.0,
+            99.9
+          ]
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            null,
+            3.0
+          ],
+          "B": [
+            null,
+            2.0,
+            3.0
+          ],
+          "C": [
+            1.0,
+            2.0,
+            null
+          ]
+        }
+      },
+      "name": "missing_fillna_99"
+    },
+    {
+      "category": "missing",
+      "expected": {
+        "num_rows": 2,
+        "shape": [
+          2,
+          2
+        ]
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            null,
+            3.0
+          ],
+          "B": [
+            1.0,
+            null,
+            3.0
+          ]
+        }
+      },
+      "name": "missing_dropna_all_nan_row"
+    },
+    {
+      "category": "reshape",
+      "expected": {
+        "result": {
+          "id": [
+            "a",
+            "b",
+            "c",
+            "a",
+            "b",
+            "c"
+          ],
+          "value": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "variable": [
+            "X",
+            "X",
+            "X",
+            "Y",
+            "Y",
+            "Y"
+          ]
+        },
+        "shape": [
+          6,
+          3
+        ]
+      },
+      "input": {
+        "column_order": [
+          "id",
+          "X",
+          "Y"
+        ],
+        "columns": {
+          "X": [
+            1,
+            2,
+            3
+          ],
+          "Y": [
+            4,
+            5,
+            6
+          ],
+          "id": [
+            "a",
+            "b",
+            "c"
+          ]
+        },
+        "id_vars": [
+          "id"
+        ],
+        "value_vars": [
+          "X",
+          "Y"
+        ]
+      },
+      "name": "reshape_melt"
+    },
+    {
+      "category": "reshape",
+      "expected": {
+        "result": {
+          "id": [
+            "a",
+            "b",
+            "a",
+            "b",
+            "a",
+            "b"
+          ],
+          "value": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "variable": [
+            "X",
+            "X",
+            "Y",
+            "Y",
+            "Z",
+            "Z"
+          ]
+        },
+        "shape": [
+          6,
+          3
+        ]
+      },
+      "input": {
+        "column_order": [
+          "id",
+          "X",
+          "Y",
+          "Z"
+        ],
+        "columns": {
+          "X": [
+            1,
+            2
+          ],
+          "Y": [
+            3,
+            4
+          ],
+          "Z": [
+            5,
+            6
+          ],
+          "id": [
+            "a",
+            "b"
+          ]
+        },
+        "id_vars": [
+          "id"
+        ],
+        "value_vars": [
+          "X",
+          "Y",
+          "Z"
+        ]
+      },
+      "name": "reshape_melt_three"
+    },
+    {
+      "category": "reshape",
+      "expected": {
+        "result": {
+          "x": [
+            1.0,
+            3.0
+          ],
+          "y": [
+            2.0,
+            4.0
+          ]
+        }
+      },
+      "input": {
+        "aggfunc": "mean",
+        "columns": {
+          "Col": [
+            "x",
+            "y",
+            "x",
+            "y"
+          ],
+          "Row": [
+            "A",
+            "A",
+            "B",
+            "B"
+          ],
+          "Val": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "index": "Row",
+        "pivot_columns": "Col",
+        "values": "Val"
+      },
+      "name": "reshape_pivot_mean"
+    },
+    {
+      "category": "reshape",
+      "expected": {
+        "result": {
+          "x": [
+            1,
+            3
+          ],
+          "y": [
+            2,
+            4
+          ]
+        }
+      },
+      "input": {
+        "aggfunc": "sum",
+        "columns": {
+          "Col": [
+            "x",
+            "y",
+            "x",
+            "y"
+          ],
+          "Row": [
+            "A",
+            "A",
+            "B",
+            "B"
+          ],
+          "Val": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "index": "Row",
+        "pivot_columns": "Col",
+        "values": "Val"
+      },
+      "name": "reshape_pivot_sum"
+    },
+    {
+      "category": "reshape",
+      "expected": {
+        "result": {
+          "x": {
+            "a": 2,
+            "b": 1
+          },
+          "y": {
+            "a": 1,
+            "b": 1
+          }
+        }
+      },
+      "input": {
+        "col": "C",
+        "columns": {
+          "C": [
+            "x",
+            "y",
+            "x",
+            "y",
+            "x"
+          ],
+          "R": [
+            "a",
+            "a",
+            "b",
+            "b",
+            "a"
+          ]
+        },
+        "row": "R"
+      },
+      "name": "reshape_crosstab"
+    },
+    {
+      "category": "reshape",
+      "expected": {
+        "result": {
+          "x": [
+            1,
+            1
+          ],
+          "y": [
+            1,
+            1
+          ]
+        }
+      },
+      "input": {
+        "aggfunc": "count",
+        "columns": {
+          "Col": [
+            "x",
+            "y",
+            "x",
+            "y"
+          ],
+          "Row": [
+            "A",
+            "A",
+            "B",
+            "B"
+          ],
+          "Val": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "index": "Row",
+        "pivot_columns": "Col",
+        "values": "Val"
+      },
+      "name": "reshape_pivot_count"
+    },
+    {
+      "category": "reshape",
+      "expected": {
+        "result": {
+          "x": [
+            1,
+            3
+          ],
+          "y": [
+            2,
+            4
+          ]
+        }
+      },
+      "input": {
+        "aggfunc": "min",
+        "columns": {
+          "Col": [
+            "x",
+            "y",
+            "x",
+            "y"
+          ],
+          "Row": [
+            "A",
+            "A",
+            "B",
+            "B"
+          ],
+          "Val": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "index": "Row",
+        "pivot_columns": "Col",
+        "values": "Val"
+      },
+      "name": "reshape_pivot_min"
+    },
+    {
+      "category": "reshape",
+      "expected": {
+        "result": {
+          "x": [
+            1,
+            3
+          ],
+          "y": [
+            2,
+            4
+          ]
+        }
+      },
+      "input": {
+        "aggfunc": "max",
+        "columns": {
+          "Col": [
+            "x",
+            "y",
+            "x",
+            "y"
+          ],
+          "Row": [
+            "A",
+            "A",
+            "B",
+            "B"
+          ],
+          "Val": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "index": "Row",
+        "pivot_columns": "Col",
+        "values": "Val"
+      },
+      "name": "reshape_pivot_max"
+    },
+    {
+      "category": "statistics",
+      "expected": {
+        "result": {
+          "A": {
+            "A": 1.0,
+            "B": -1.0,
+            "C": 1.0
+          },
+          "B": {
+            "A": -1.0,
+            "B": 1.0,
+            "C": -1.0
+          },
+          "C": {
+            "A": 1.0,
+            "B": -1.0,
+            "C": 1.0
+          }
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "B": [
+            5.0,
+            4.0,
+            3.0,
+            2.0,
+            1.0
+          ],
+          "C": [
+            2.0,
+            4.0,
+            6.0,
+            8.0,
+            10.0
+          ]
+        }
+      },
+      "name": "stats_corr"
+    },
+    {
+      "category": "statistics",
+      "expected": {
+        "result": {
+          "A": {
+            "A": 2.5,
+            "B": -2.5,
+            "C": 5.0
+          },
+          "B": {
+            "A": -2.5,
+            "B": 2.5,
+            "C": -5.0
+          },
+          "C": {
+            "A": 5.0,
+            "B": -5.0,
+            "C": 10.0
+          }
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "B": [
+            5.0,
+            4.0,
+            3.0,
+            2.0,
+            1.0
+          ],
+          "C": [
+            2.0,
+            4.0,
+            6.0,
+            8.0,
+            10.0
+          ]
+        }
+      },
+      "name": "stats_cov"
+    },
+    {
+      "category": "statistics",
+      "expected": {
+        "result": {
+          "A": [
+            1.0,
+            3.0,
+            6.0,
+            10.0,
+            15.0
+          ],
+          "B": [
+            5.0,
+            9.0,
+            12.0,
+            14.0,
+            15.0
+          ],
+          "C": [
+            2.0,
+            6.0,
+            12.0,
+            20.0,
+            30.0
+          ]
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "B": [
+            5.0,
+            4.0,
+            3.0,
+            2.0,
+            1.0
+          ],
+          "C": [
+            2.0,
+            4.0,
+            6.0,
+            8.0,
+            10.0
+          ]
+        }
+      },
+      "name": "stats_cumsum"
+    },
+    {
+      "category": "statistics",
+      "expected": {
+        "result": {
+          "A": [
+            null,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "B": [
+            null,
+            -1.0,
+            -1.0,
+            -1.0,
+            -1.0
+          ],
+          "C": [
+            null,
+            2.0,
+            2.0,
+            2.0,
+            2.0
+          ]
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "B": [
+            5.0,
+            4.0,
+            3.0,
+            2.0,
+            1.0
+          ],
+          "C": [
+            2.0,
+            4.0,
+            6.0,
+            8.0,
+            10.0
+          ]
+        }
+      },
+      "name": "stats_diff"
+    },
+    {
+      "category": "statistics",
+      "expected": {
+        "result": {
+          "A": [
+            null,
+            1.0,
+            0.5,
+            0.33333333333333326,
+            0.25
+          ],
+          "B": [
+            null,
+            -0.19999999999999996,
+            -0.25,
+            -0.33333333333333337,
+            -0.5
+          ],
+          "C": [
+            null,
+            1.0,
+            0.5,
+            0.33333333333333326,
+            0.25
+          ]
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "B": [
+            5.0,
+            4.0,
+            3.0,
+            2.0,
+            1.0
+          ],
+          "C": [
+            2.0,
+            4.0,
+            6.0,
+            8.0,
+            10.0
+          ]
+        }
+      },
+      "name": "stats_pct_change"
+    },
+    {
+      "category": "statistics",
+      "expected": {
+        "result": {
+          "A": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "B": [
+            5.0,
+            4.0,
+            3.0,
+            2.0,
+            1.0
+          ],
+          "C": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ]
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "B": [
+            5.0,
+            4.0,
+            3.0,
+            2.0,
+            1.0
+          ],
+          "C": [
+            2.0,
+            4.0,
+            6.0,
+            8.0,
+            10.0
+          ]
+        }
+      },
+      "name": "stats_rank"
+    },
+    {
+      "category": "statistics",
+      "expected": {
+        "diagonal": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "B": [
+            5.0,
+            4.0,
+            3.0,
+            2.0,
+            1.0
+          ],
+          "C": [
+            2.0,
+            4.0,
+            6.0,
+            8.0,
+            10.0
+          ]
+        }
+      },
+      "name": "stats_corr_diagonal"
+    },
+    {
+      "category": "statistics",
+      "expected": {
+        "AB": -1.0,
+        "AC": 1.0,
+        "BA": -1.0,
+        "CA": 1.0
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "B": [
+            5.0,
+            4.0,
+            3.0,
+            2.0,
+            1.0
+          ],
+          "C": [
+            2.0,
+            4.0,
+            6.0,
+            8.0,
+            10.0
+          ]
+        }
+      },
+      "name": "stats_corr_symmetry"
+    },
+    {
+      "category": "statistics",
+      "expected": {
+        "result": {
+          "A": [
+            1.0,
+            2.5,
+            2.5,
+            4.5,
+            4.5
+          ]
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            2.0,
+            2.0,
+            3.0,
+            3.0
+          ]
+        }
+      },
+      "name": "stats_rank_ties"
+    },
+    {
+      "category": "statistics",
+      "expected": {
+        "result": {
+          "A": [
+            10.0,
+            30.0,
+            60.0
+          ],
+          "B": [
+            1.0,
+            2.0,
+            3.0
+          ]
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            10.0,
+            20.0,
+            30.0
+          ],
+          "B": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "name": "stats_cumsum_specific"
+    },
+    {
+      "category": "series",
+      "expected": {
+        "result": {
+          "1": 2,
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1,
+          "6": 1,
+          "9": 1
+        }
+      },
+      "input": {
+        "values": [
+          3,
+          1,
+          4,
+          1,
+          5,
+          9,
+          2,
+          6
+        ]
+      },
+      "name": "series_value_counts"
+    },
+    {
+      "category": "series",
+      "expected": {
+        "count": 7,
+        "result_sorted": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          9
+        ]
+      },
+      "input": {
+        "values": [
+          3,
+          1,
+          4,
+          1,
+          5,
+          9,
+          2,
+          6
+        ]
+      },
+      "name": "series_unique"
+    },
+    {
+      "category": "series",
+      "expected": {
+        "result": 7
+      },
+      "input": {
+        "values": [
+          3,
+          1,
+          4,
+          1,
+          5,
+          9,
+          2,
+          6
+        ]
+      },
+      "name": "series_nunique"
+    },
+    {
+      "category": "series",
+      "expected": {
+        "result": {
+          "25%": 1.75,
+          "50%": 3.5,
+          "75%": 5.25,
+          "count": 8.0,
+          "max": 9.0,
+          "mean": 3.875,
+          "min": 1.0,
+          "std": 2.748376143938713
+        }
+      },
+      "input": {
+        "values": [
+          3.0,
+          1.0,
+          4.0,
+          1.0,
+          5.0,
+          9.0,
+          2.0,
+          6.0
+        ]
+      },
+      "name": "series_describe"
+    },
+    {
+      "category": "series",
+      "expected": {
+        "count": 8,
+        "max": 9.0,
+        "mean": 3.875,
+        "median": 3.5,
+        "min": 1.0,
+        "std": 2.748376143938713,
+        "sum": 31.0,
+        "var": 7.553571428571429
+      },
+      "input": {
+        "values": [
+          3.0,
+          1.0,
+          4.0,
+          1.0,
+          5.0,
+          9.0,
+          2.0,
+          6.0
+        ]
+      },
+      "name": "series_aggregations"
+    },
+    {
+      "category": "series",
+      "expected": {
+        "result": [
+          1.0,
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0,
+          6.0,
+          9.0
+        ]
+      },
+      "input": {
+        "values": [
+          3.0,
+          1.0,
+          4.0,
+          1.0,
+          5.0,
+          9.0,
+          2.0,
+          6.0
+        ]
+      },
+      "name": "series_sort_asc"
+    },
+    {
+      "category": "series",
+      "expected": {
+        "result": [
+          3.0,
+          2.0,
+          4.0,
+          2.0,
+          5.0,
+          7.0,
+          2.0,
+          6.0
+        ]
+      },
+      "input": {
+        "lower": 2.0,
+        "upper": 7.0,
+        "values": [
+          3.0,
+          1.0,
+          4.0,
+          1.0,
+          5.0,
+          9.0,
+          2.0,
+          6.0
+        ]
+      },
+      "name": "series_clip"
+    },
+    {
+      "category": "series",
+      "expected": {
+        "result": [
+          3.0,
+          1.0,
+          4.0,
+          1.0,
+          5.0,
+          9.0,
+          2.0,
+          6.0
+        ]
+      },
+      "input": {
+        "values": [
+          -3.0,
+          -1.0,
+          4.0,
+          -1.0,
+          5.0,
+          -9.0,
+          2.0,
+          -6.0
+        ]
+      },
+      "name": "series_abs"
+    },
+    {
+      "category": "series",
+      "expected": {
+        "result": [
+          3.1,
+          2.7,
+          1.4,
+          1.6
+        ]
+      },
+      "input": {
+        "decimals": 1,
+        "values": [
+          3.14159,
+          2.71828,
+          1.41421,
+          1.61803
+        ]
+      },
+      "name": "series_round"
+    },
+    {
+      "category": "series",
+      "expected": {
+        "result": [
+          4.0,
+          1.5,
+          5.0,
+          1.5,
+          6.0,
+          8.0,
+          3.0,
+          7.0
+        ]
+      },
+      "input": {
+        "values": [
+          3.0,
+          1.0,
+          4.0,
+          1.0,
+          5.0,
+          9.0,
+          2.0,
+          6.0
+        ]
+      },
+      "name": "series_rank"
+    },
+    {
+      "category": "csv",
+      "expected": {
+        "csv_string": "A,B\n1,4.5\n2,5.5\n3,6.5\n",
+        "roundtrip_shape": [
+          3,
+          2
+        ],
+        "roundtrip_values": {
+          "A": [
+            1,
+            2,
+            3
+          ],
+          "B": [
+            4.5,
+            5.5,
+            6.5
+          ]
+        }
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1,
+            2,
+            3
+          ],
+          "B": [
+            4.5,
+            5.5,
+            6.5
+          ]
+        }
+      },
+      "name": "csv_roundtrip_basic"
+    },
+    {
+      "category": "csv",
+      "expected": {
+        "csv_string": "A,B\n1.0,\n,2.0\n3.0,3.0\n",
+        "has_nan": true
+      },
+      "input": {
+        "columns": {
+          "A": [
+            1.0,
+            null,
+            3.0
+          ],
+          "B": [
+            null,
+            2.0,
+            3.0
+          ]
+        }
+      },
+      "name": "csv_roundtrip_nan"
+    },
+    {
+      "category": "csv",
+      "expected": {
+        "csv_string": "X,Y\n1,1.5\n2,2.5\n3,3.5\n",
+        "roundtrip_shape": [
+          3,
+          2
+        ],
+        "roundtrip_values": {
+          "X": [
+            1,
+            2,
+            3
+          ],
+          "Y": [
+            1.5,
+            2.5,
+            3.5
+          ]
+        }
+      },
+      "input": {
+        "columns": {
+          "X": [
+            1,
+            2,
+            3
+          ],
+          "Y": [
+            1.5,
+            2.5,
+            3.5
+          ]
+        }
+      },
+      "name": "csv_roundtrip_mixed"
+    }
+  ]
+}
