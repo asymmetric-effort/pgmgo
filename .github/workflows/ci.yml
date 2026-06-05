@@ -227,3 +227,17 @@ jobs:
           body=$(curl -s https://pgmgo.asymmetric-effort.com/sitemap.xml)
           echo "$body" | grep -q "pgmgo.asymmetric-effort.com" || { echo "Sitemap missing URLs"; exit 1; }
           echo "sitemap.xml verified"
+
+  # Stage 4: Index on Go module proxy (tagged versions only)
+  index-go-proxy:
+    name: Index Go Module
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Poke Go module proxy
+        run: |
+          echo "Indexing ${{ github.ref_name }} on proxy.golang.org..."
+          curl -sf "https://proxy.golang.org/github.com/asymmetric-effort/pgmgo/@v/${{ github.ref_name }}.info"
+          echo ""
+          echo "Indexed successfully."
