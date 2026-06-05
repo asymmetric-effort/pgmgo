@@ -83,7 +83,7 @@ func RollingZscore(s *Series, window int) *Series {
 		}
 		m := mean(w)
 		sd := stddev(w)
-		if sd == 0 {
+		if sd < 1e-12 {
 			data[i] = 0.0
 		} else {
 			data[i] = (toFloat64(vals[i]) - m) / sd

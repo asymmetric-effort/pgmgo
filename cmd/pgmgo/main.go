@@ -63,7 +63,7 @@ func (d *dataFrameColumnLookup) Column(name string) *tabgo.Series {
 	return d.df.Column(name)
 }
 
-const version = "0.0.25"
+const version = "0.0.45"
 
 func main() {
 	os.Exit(run(os.Args))

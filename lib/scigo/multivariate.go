@@ -8,10 +8,10 @@ import (
 
 // MultivariateNormal represents a multivariate normal distribution.
 type MultivariateNormal struct {
-	mean []float64
-	cov  [][]float64
+	mean  []float64
+	cov   [][]float64
 	cholL [][]float64 // Lower-triangular Cholesky factor: cov = L * L^T
-	dim  int
+	dim   int
 }
 
 // NewMultivariateNormal creates a MultivariateNormal distribution from a mean

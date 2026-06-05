@@ -3,6 +3,8 @@ package numgo
 import (
 	"fmt"
 	"math"
+
+	"github.com/asymmetric-effort/pgmgo/lib/numgo/internal/blas"
 )
 
 // Dot computes the dot product of two arrays.
@@ -14,9 +16,14 @@ func Dot(a, b *NDArray) (*NDArray, error) {
 		if a.shape[0] != b.shape[0] {
 			return nil, fmt.Errorf("numgo.Dot: 1D shapes mismatch: %d vs %d", a.shape[0], b.shape[0])
 		}
-		sum := 0.0
-		for i := 0; i < a.shape[0]; i++ {
-			sum += a.data[i] * b.data[i]
+		n := a.shape[0]
+		var sum float64
+		if blas.UseBLAS(1, n) {
+			sum = blas.Ddot(n, a.data, 1, b.data, 1)
+		} else {
+			for i := 0; i < n; i++ {
+				sum += a.data[i] * b.data[i]
+			}
 		}
 		return NewNDArray([]int{1}, []float64{sum}), nil
 	}
@@ -52,13 +59,24 @@ func Matmul(a, b *NDArray) (*NDArray, error) {
 		return nil, fmt.Errorf("numgo.Matmul: inner dimensions mismatch: %d vs %d", k1, k2)
 	}
 	data := make([]float64, m*n)
-	for i := 0; i < m; i++ {
-		for j := 0; j < n; j++ {
-			sum := 0.0
-			for l := 0; l < k1; l++ {
-				sum += a.Get(i, l) * b.Get(l, j)
+	minDim := m
+	if n < minDim {
+		minDim = n
+	}
+	if k1 < minDim {
+		minDim = k1
+	}
+	if blas.UseBLAS(3, minDim) {
+		blas.Dgemm(false, false, m, n, k1, 1.0, a.data, k1, b.data, n, 0.0, data, n)
+	} else {
+		for i := 0; i < m; i++ {
+			for j := 0; j < n; j++ {
+				sum := 0.0
+				for l := 0; l < k1; l++ {
+					sum += a.Get(i, l) * b.Get(l, j)
+				}
+				data[i*n+j] = sum
 			}
-			data[i*n+j] = sum
 		}
 	}
 	return NewNDArray([]int{m, n}, data), nil
@@ -146,6 +164,9 @@ func Tensordot(a, b *NDArray, axes int) (*NDArray, error) {
 
 // Solve solves the linear system Ax = b via Gaussian elimination with partial pivoting.
 // a must be a square 2D matrix, b must be a 1D or 2D array.
+//
+// For large systems (n >= Level2Threshold), uses LU factorization with BLAS
+// triangular solve (Dtrsv) for better cache performance.
 func Solve(a, b *NDArray) (*NDArray, error) {
 	if a.Ndim() != 2 || a.shape[0] != a.shape[1] {
 		return nil, fmt.Errorf("numgo.Solve: a must be a square 2D matrix")
@@ -156,48 +177,10 @@ func Solve(a, b *NDArray) (*NDArray, error) {
 		if b.shape[0] != n {
 			return nil, fmt.Errorf("numgo.Solve: dimension mismatch: a is %dx%d, b has %d elements", n, n, b.shape[0])
 		}
-		// Augmented matrix [A|b].
-		aug := make([][]float64, n)
-		for i := 0; i < n; i++ {
-			aug[i] = make([]float64, n+1)
-			for j := 0; j < n; j++ {
-				aug[i][j] = a.Get(i, j)
-			}
-			aug[i][n] = b.data[i]
+		if blas.UseBLAS(2, n) {
+			return solveBLAS(a, b)
 		}
-		// Forward elimination with partial pivoting.
-		for col := 0; col < n; col++ {
-			// Find pivot.
-			maxVal := math.Abs(aug[col][col])
-			maxRow := col
-			for row := col + 1; row < n; row++ {
-				if math.Abs(aug[row][col]) > maxVal {
-					maxVal = math.Abs(aug[row][col])
-					maxRow = row
-				}
-			}
-			if maxVal < 1e-14 {
-				return nil, fmt.Errorf("numgo.Solve: singular matrix")
-			}
-			aug[col], aug[maxRow] = aug[maxRow], aug[col]
-			// Eliminate below.
-			for row := col + 1; row < n; row++ {
-				factor := aug[row][col] / aug[col][col]
-				for j := col; j <= n; j++ {
-					aug[row][j] -= factor * aug[col][j]
-				}
-			}
-		}
-		// Back substitution.
-		x := make([]float64, n)
-		for i := n - 1; i >= 0; i-- {
-			x[i] = aug[i][n]
-			for j := i + 1; j < n; j++ {
-				x[i] -= aug[i][j] * x[j]
-			}
-			x[i] /= aug[i][i]
-		}
-		return NewNDArray([]int{n}, x), nil
+		return solveNaive(a, b)
 	}
 
 	if b.Ndim() == 2 {
@@ -224,6 +207,111 @@ func Solve(a, b *NDArray) (*NDArray, error) {
 	}
 
 	return nil, fmt.Errorf("numgo.Solve: b must be 1D or 2D")
+}
+
+// solveNaive solves Ax = b using Gaussian elimination (the original path).
+func solveNaive(a, b *NDArray) (*NDArray, error) {
+	n := a.shape[0]
+	// Augmented matrix [A|b].
+	aug := make([][]float64, n)
+	for i := 0; i < n; i++ {
+		aug[i] = make([]float64, n+1)
+		for j := 0; j < n; j++ {
+			aug[i][j] = a.Get(i, j)
+		}
+		aug[i][n] = b.data[i]
+	}
+	// Forward elimination with partial pivoting.
+	for col := 0; col < n; col++ {
+		maxVal := math.Abs(aug[col][col])
+		maxRow := col
+		for row := col + 1; row < n; row++ {
+			if math.Abs(aug[row][col]) > maxVal {
+				maxVal = math.Abs(aug[row][col])
+				maxRow = row
+			}
+		}
+		if maxVal < 1e-14 {
+			return nil, fmt.Errorf("numgo.Solve: singular matrix")
+		}
+		aug[col], aug[maxRow] = aug[maxRow], aug[col]
+		for row := col + 1; row < n; row++ {
+			factor := aug[row][col] / aug[col][col]
+			for j := col; j <= n; j++ {
+				aug[row][j] -= factor * aug[col][j]
+			}
+		}
+	}
+	// Back substitution.
+	x := make([]float64, n)
+	for i := n - 1; i >= 0; i-- {
+		x[i] = aug[i][n]
+		for j := i + 1; j < n; j++ {
+			x[i] -= aug[i][j] * x[j]
+		}
+		x[i] /= aug[i][i]
+	}
+	return NewNDArray([]int{n}, x), nil
+}
+
+// solveBLAS solves Ax = b using LU factorization with BLAS-accelerated
+// triangular solve for better cache performance on larger systems.
+func solveBLAS(a, b *NDArray) (*NDArray, error) {
+	n := a.shape[0]
+
+	// Copy A into a flat row-major LU buffer and build pivot array.
+	lu := make([]float64, n*n)
+	copy(lu, a.data)
+	piv := make([]int, n)
+	for i := range piv {
+		piv[i] = i
+	}
+
+	// LU factorization with partial pivoting (in-place).
+	for col := 0; col < n; col++ {
+		// Find pivot.
+		maxVal := math.Abs(lu[col*n+col])
+		maxRow := col
+		for row := col + 1; row < n; row++ {
+			if v := math.Abs(lu[row*n+col]); v > maxVal {
+				maxVal = v
+				maxRow = row
+			}
+		}
+		if maxVal < 1e-14 {
+			return nil, fmt.Errorf("numgo.Solve: singular matrix")
+		}
+		if maxRow != col {
+			// Swap rows in LU and record pivot.
+			for j := 0; j < n; j++ {
+				lu[col*n+j], lu[maxRow*n+j] = lu[maxRow*n+j], lu[col*n+j]
+			}
+			piv[col], piv[maxRow] = piv[maxRow], piv[col]
+		}
+		// Compute multipliers and update trailing submatrix.
+		pivot := lu[col*n+col]
+		for row := col + 1; row < n; row++ {
+			lu[row*n+col] /= pivot
+			factor := lu[row*n+col]
+			for j := col + 1; j < n; j++ {
+				lu[row*n+j] -= factor * lu[col*n+j]
+			}
+		}
+	}
+
+	// Apply permutation to b: pb = P * b.
+	x := make([]float64, n)
+	for i := 0; i < n; i++ {
+		x[i] = b.data[piv[i]]
+	}
+
+	// Solve L*y = pb using Dtrsv (unit diagonal lower triangular).
+	blas.Dtrsv('L', 'N', 'U', n, lu, n, x, 1)
+
+	// Solve U*x = y using Dtrsv (non-unit diagonal upper triangular).
+	blas.Dtrsv('U', 'N', 'N', n, lu, n, x, 1)
+
+	return NewNDArray([]int{n}, x), nil
 }
 
 // Inv computes the inverse of a square matrix via Gauss-Jordan elimination.
