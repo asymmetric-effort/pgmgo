@@ -12,7 +12,7 @@
   "author": "Asymmetric Effort, LLC",
   "license": "MIT",
   "dependencies": {
-    "@asymmetric-effort/specifyjs": "^0.2.140"
+    "@asymmetric-effort/specifyjs": "^0.2.163"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
