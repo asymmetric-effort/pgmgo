@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1e293b"/>
+    </linearGradient>
+    <linearGradient id="teal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5eead4"/>
+      <stop offset="100%" style="stop-color:#2dd4bf"/>
+    </linearGradient>
+    <linearGradient id="tealFade" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5eead4;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#2dd4bf;stop-opacity:0.1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background rounded rectangle -->
+  <rect width="512" height="512" rx="80" ry="80" fill="url(#bg)"/>
+
+  <!-- Subtle grid pattern (data/matrix feel) -->
+  <g opacity="0.06" stroke="#5eead4" stroke-width="1">
+    <line x1="80" y1="60" x2="80" y2="380"/>
+    <line x1="152" y1="60" x2="152" y2="380"/>
+    <line x1="224" y1="60" x2="224" y2="380"/>
+    <line x1="296" y1="60" x2="296" y2="380"/>
+    <line x1="368" y1="60" x2="368" y2="380"/>
+    <line x1="440" y1="60" x2="440" y2="380"/>
+    <line x1="60" y1="100" x2="460" y2="100"/>
+    <line x1="60" y1="170" x2="460" y2="170"/>
+    <line x1="60" y1="240" x2="460" y2="240"/>
+    <line x1="60" y1="310" x2="460" y2="310"/>
+  </g>
+
+  <!-- Neural network / graph structure -->
+  <!-- Layer 1 (top) - 2 nodes -->
+  <g>
+    <!-- Edges from layer 1 to layer 2 -->
+    <line x1="176" y1="115" x2="120" y2="195" stroke="#5eead4" stroke-width="2.5" opacity="0.5"/>
+    <line x1="176" y1="115" x2="216" y2="195" stroke="#5eead4" stroke-width="2.5" opacity="0.5"/>
+    <line x1="176" y1="115" x2="312" y2="195" stroke="#5eead4" stroke-width="2" opacity="0.25"/>
+    <line x1="336" y1="115" x2="216" y2="195" stroke="#5eead4" stroke-width="2" opacity="0.25"/>
+    <line x1="336" y1="115" x2="312" y2="195" stroke="#5eead4" stroke-width="2.5" opacity="0.5"/>
+    <line x1="336" y1="115" x2="400" y2="195" stroke="#5eead4" stroke-width="2.5" opacity="0.5"/>
+
+    <!-- Edges from layer 2 to layer 3 -->
+    <line x1="120" y1="215" x2="160" y2="295" stroke="#5eead4" stroke-width="2.5" opacity="0.5"/>
+    <line x1="120" y1="215" x2="260" y2="295" stroke="#5eead4" stroke-width="2" opacity="0.25"/>
+    <line x1="216" y1="215" x2="160" y2="295" stroke="#5eead4" stroke-width="2" opacity="0.25"/>
+    <line x1="216" y1="215" x2="260" y2="295" stroke="#5eead4" stroke-width="2.5" opacity="0.5"/>
+    <line x1="216" y1="215" x2="356" y2="295" stroke="#5eead4" stroke-width="2" opacity="0.25"/>
+    <line x1="312" y1="215" x2="260" y2="295" stroke="#5eead4" stroke-width="2" opacity="0.25"/>
+    <line x1="312" y1="215" x2="356" y2="295" stroke="#5eead4" stroke-width="2.5" opacity="0.5"/>
+    <line x1="400" y1="215" x2="356" y2="295" stroke="#5eead4" stroke-width="2.5" opacity="0.5"/>
+    <line x1="400" y1="215" x2="260" y2="295" stroke="#5eead4" stroke-width="2" opacity="0.25"/>
+
+    <!-- Layer 1 nodes -->
+    <circle cx="176" cy="108" r="22" fill="url(#bg)" stroke="url(#teal)" stroke-width="3"/>
+    <circle cx="176" cy="108" r="12" fill="url(#teal)" opacity="0.7"/>
+    <circle cx="336" cy="108" r="22" fill="url(#bg)" stroke="url(#teal)" stroke-width="3"/>
+    <circle cx="336" cy="108" r="12" fill="url(#teal)" opacity="0.7"/>
+
+    <!-- Layer 2 nodes -->
+    <circle cx="120" cy="205" r="20" fill="url(#bg)" stroke="url(#teal)" stroke-width="3"/>
+    <circle cx="120" cy="205" r="10" fill="url(#teal)" opacity="0.7"/>
+    <circle cx="216" cy="205" r="20" fill="url(#bg)" stroke="url(#teal)" stroke-width="3"/>
+    <circle cx="216" cy="205" r="10" fill="url(#teal)" opacity="0.7"/>
+    <circle cx="312" cy="205" r="20" fill="url(#bg)" stroke="url(#teal)" stroke-width="3"/>
+    <circle cx="312" cy="205" r="10" fill="url(#teal)" opacity="0.7"/>
+    <circle cx="400" cy="205" r="20" fill="url(#bg)" stroke="url(#teal)" stroke-width="3"/>
+    <circle cx="400" cy="205" r="10" fill="url(#teal)" opacity="0.7"/>
+
+    <!-- Layer 3 nodes -->
+    <circle cx="160" cy="302" r="22" fill="url(#bg)" stroke="url(#teal)" stroke-width="3"/>
+    <circle cx="160" cy="302" r="12" fill="url(#teal)" opacity="0.7"/>
+    <circle cx="260" cy="302" r="22" fill="url(#bg)" stroke="url(#teal)" stroke-width="3"/>
+    <circle cx="260" cy="302" r="12" fill="url(#teal)" opacity="0.7"/>
+    <circle cx="356" cy="302" r="22" fill="url(#bg)" stroke="url(#teal)" stroke-width="3"/>
+    <circle cx="356" cy="302" r="12" fill="url(#teal)" opacity="0.7"/>
+  </g>
+
+  <!-- Small decorative chart bars (bottom-left) -->
+  <g opacity="0.15">
+    <rect x="68" y="340" width="14" height="30" rx="2" fill="#5eead4"/>
+    <rect x="88" y="325" width="14" height="45" rx="2" fill="#5eead4"/>
+    <rect x="108" y="335" width="14" height="35" rx="2" fill="#5eead4"/>
+    <rect x="128" y="315" width="14" height="55" rx="2" fill="#5eead4"/>
+  </g>
+
+  <!-- Small decorative sine wave (bottom-right) -->
+  <path d="M370,350 Q390,325 410,350 Q430,375 450,350" fill="none" stroke="#5eead4" stroke-width="2.5" opacity="0.15"/>
+
+  <!-- Text: "datascience" -->
+  <text x="256" y="420" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="52" font-weight="700" fill="#f1f5f9" letter-spacing="-1">datascience</text>
+
+  <!-- Subtitle -->
+  <text x="256" y="456" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="400" fill="#94a3b8" letter-spacing="3">DATA SCIENCE IN GO</text>
+</svg>
